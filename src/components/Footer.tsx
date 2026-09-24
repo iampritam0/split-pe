@@ -26,35 +26,35 @@ export default function Footer() {
             </p>
 
             <div className="mt-6 flex items-center gap-3">
-              {/* <a
+              <a
                 href="https://twitter.com"
                 target="_blank"
                 rel="noreferrer"
                 aria-label="Twitter"
                 className="rounded-lg border border-slate-800 p-2.5 transition hover:border-slate-700 hover:bg-slate-900"
               >
-                <Twitter className="h-4 w-4" />
-              </a> */}
+                {/* <Twitter className="h-4 w-4" /> */}
+              </a>
 
-              {/* <a
+              <a
                 href="https://instagram.com"
                 target="_blank"
                 rel="noreferrer"
                 aria-label="Instagram"
                 className="rounded-lg border border-slate-800 p-2.5 transition hover:border-slate-700 hover:bg-slate-900"
               >
-                <Instagram className="h-4 w-4" />
-              </a> */}
+                {/* <Instagram className="h-4 w-4" /> */}
+              </a>
 
-              {/* <a
+              <a
                 href="https://linkedin.com"
                 target="_blank"
                 rel="noreferrer"
                 aria-label="LinkedIn"
                 className="rounded-lg border border-slate-800 p-2.5 transition hover:border-slate-700 hover:bg-slate-900"
               >
-                <Linkedin className="h-4 w-4" />
-              </a> */}
+                {/* <Linkedin className="h-4 w-4" /> */}
+              </a>
 
               <a
                 href="mailto:support@splitpe.com"
