@@ -1,8 +1,6 @@
-import {
-  Mail,
-  ArrowUpRight,
-} from "lucide-react";
+import { Mail, ArrowUpRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import Logo from "./Logo";
 
 export default function Footer() {
   return (
@@ -11,53 +9,25 @@ export default function Footer() {
         <div className="grid gap-12 py-14 sm:grid-cols-2 lg:grid-cols-4 lg:py-16">
           <div className="sm:col-span-2 lg:col-span-1">
             <Link to="/" className="inline-flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-splitpe-500 font-black text-white">
-                S
-              </div>
-
-              <span className="text-xl font-extrabold text-white">
-                Split<span className="text-splitpe-400">Pe</span>
-              </span>
+              <Logo
+                markSize={32}
+                textClassName="text-xl"
+                splitClassName="text-white"
+              />
             </Link>
 
-            <p className="mt-5 max-w-sm text-sm leading-7 text-slate-400">
+            <p className="mt-3 text-sm font-medium text-splitpe-400">
+              हिसाब भी, दोस्ती भी
+            </p>
+
+            <p className="mt-4 max-w-sm text-sm leading-7 text-slate-400">
               Split expenses, track shared spending, and settle up with less
               hassle. SplitPe makes managing money with friends simple.
             </p>
 
             <div className="mt-6 flex items-center gap-3">
               <a
-                href="https://twitter.com"
-                target="_blank"
-                rel="noreferrer"
-                aria-label="Twitter"
-                className="rounded-lg border border-slate-800 p-2.5 transition hover:border-slate-700 hover:bg-slate-900"
-              >
-                {/* <Twitter className="h-4 w-4" /> */}
-              </a>
-
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noreferrer"
-                aria-label="Instagram"
-                className="rounded-lg border border-slate-800 p-2.5 transition hover:border-slate-700 hover:bg-slate-900"
-              >
-                {/* <Instagram className="h-4 w-4" /> */}
-              </a>
-
-              <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noreferrer"
-                aria-label="LinkedIn"
-                className="rounded-lg border border-slate-800 p-2.5 transition hover:border-slate-700 hover:bg-slate-900"
-              >
-                {/* <Linkedin className="h-4 w-4" /> */}
-              </a>
-
-              <a
-                href="mailto:support@splitpe.com"
+                href="mailto:support@splitpe.app"
                 aria-label="Email"
                 className="rounded-lg border border-slate-800 p-2.5 transition hover:border-slate-700 hover:bg-slate-900"
               >
@@ -89,8 +59,8 @@ export default function Footer() {
               </li>
 
               <li>
-                <a href="/#testimonials" className="transition hover:text-white">
-                  Testimonials
+                <a href="/#about" className="transition hover:text-white">
+                  Privacy & Trust
                 </a>
               </li>
 
@@ -114,7 +84,7 @@ export default function Footer() {
 
               <li>
                 <a
-                  href="mailto:hello@splitpe.com"
+                  href="mailto:support@splitpe.app"
                   className="transition hover:text-white"
                 >
                   Contact
@@ -123,16 +93,7 @@ export default function Footer() {
 
               <li>
                 <a
-                  href="mailto:careers@splitpe.com"
-                  className="transition hover:text-white"
-                >
-                  Careers
-                </a>
-              </li>
-
-              <li>
-                <a
-                  href="mailto:support@splitpe.com"
+                  href="mailto:support@splitpe.app"
                   className="transition hover:text-white"
                 >
                   Support
@@ -180,12 +141,11 @@ export default function Footer() {
 
         <div className="flex flex-col gap-3 border-t border-slate-800 py-6 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
           <p>
-            © {new Date().getFullYear()} SplitPe. All rights reserved.
+            © {new Date().getFullYear()} SplitPe · Rao Technologies. All
+            rights reserved.
           </p>
 
-          <p>
-            Built to make shared expenses simpler.
-          </p>
+          <p>हिसाब भी, दोस्ती भी</p>
         </div>
       </div>
     </footer>

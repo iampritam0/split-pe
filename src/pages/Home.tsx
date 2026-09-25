@@ -1,92 +1,139 @@
 import {
   ArrowRight,
-  Bell,
-  Check,
+  Ban,
+  BarChart3,
   ChevronRight,
-  IndianRupee,
-  ReceiptText,
-  ShieldCheck,
-  Smartphone,
+  Infinity as InfinityIcon,
+  Lock,
+  PieChart,
+  PlusCircle,
+  Receipt,
+  Search,
   Sparkles,
+  Trash2,
+  UserPlus,
   Users,
+  UsersRound,
   Wallet,
-  Zap,
+  Check,
 } from "lucide-react";
 
 const features = [
   {
-    icon: Users,
-    title: "Group Tracking",
-    description:
-      "Create groups for trips, roommates, dinners, events, or everyday shared expenses and keep everything organized in one place.",
+    icon: InfinityIcon,
+    title: "Unlimited expenses",
+    description: "Add as many expenses as you like, no limits.",
   },
   {
-    icon: IndianRupee,
-    title: "Easy Expense Splitting",
+    icon: Wallet,
+    title: "Currency conversion",
     description:
-      "Add an expense, choose who paid, select the people involved, and let SplitPe calculate everyone's share automatically.",
+      "Pay in any currency — it converts to your default automatically.",
   },
   {
-    icon: Zap,
-    title: "Quick Settlements",
+    icon: Receipt,
+    title: "Receipt itemization",
     description:
-      "See exactly who owes whom and simplify your outstanding balances so settling up takes just a few taps.",
+      "Every item, assigned to the right person, with the Items split method.",
   },
   {
-    icon: Bell,
-    title: "Smart Notifications",
+    icon: BarChart3,
+    title: "Charts and graphs",
+    description: "Track spending trends over time, by category.",
+  },
+  {
+    icon: PieChart,
+    title: "Custom split ratios",
     description:
-      "Stay updated with expense additions, payment reminders, settlement activity, and important group updates.",
+      "Set a custom split with a person or group using the Shares method.",
+  },
+  {
+    icon: Search,
+    title: "Expense search",
+    description: "Find any expense without endless scrolling.",
+  },
+];
+
+const trust = [
+  {
+    icon: Lock,
+    title: "Your bank never touches us",
+    description:
+      "Settling up hands off to your own UPI app. We don't see, store, or process account or card numbers — ever.",
+  },
+  {
+    icon: Trash2,
+    title: "Delete everything, one tap",
+    description:
+      "Account deletion is permanent and instant from Settings — not a support ticket, not a 30-day wait.",
+  },
+  {
+    icon: UsersRound,
+    title: "Only your circle sees it",
+    description:
+      "An expense is visible to the friends and group members you added — no public feed, no strangers.",
+  },
+  {
+    icon: Ban,
+    title: "We don't sell data. Full stop.",
+    description:
+      "No data brokers, no \"trusted partners\" list to opt out of. Your expenses fund nothing but the app.",
   },
 ];
 
 const steps = [
   {
     number: "01",
-    icon: Users,
-    title: "Create a group",
+    icon: Receipt,
+    title: "Split expenses easily",
     description:
-      "Start a group for your trip, home, friends, colleagues, or any shared activity.",
+      "Share expenses with friends and groups without doing the math yourself.",
   },
   {
     number: "02",
-    icon: ReceiptText,
-    title: "Add expenses",
+    icon: BarChart3,
+    title: "Track balances in real time",
     description:
-      "Record bills and expenses as they happen. Split them fairly among the people involved.",
+      "See exactly who owes what across every group, updated instantly.",
   },
   {
     number: "03",
     icon: Wallet,
-    title: "Settle up",
+    title: "Settle up in one tap",
     description:
-      "Check balances, understand who owes whom, and settle your shared expenses with confidence.",
+      "Record payments and keep everyone's ledger clean and clear.",
   },
 ];
 
-const testimonials = [
+const quickActions = [
   {
-    quote:
-      "SplitPe made our Goa trip so much easier. We stopped maintaining messy spreadsheets and could instantly see everyone's expenses.",
-    name: "Rohan Mehta",
-    role: "Frequent Traveller",
-    initials: "RM",
+    label: "Add Expense",
+    icon: PlusCircle,
+    tone: "gradient" as const,
   },
   {
-    quote:
-      "Managing household expenses with roommates used to be a monthly headache. Now we add expenses as they happen and everything stays clear.",
-    name: "Ananya Sharma",
-    role: "Working Professional",
-    initials: "AS",
+    label: "Settle Up",
+    icon: Wallet,
+    tone: "green" as const,
   },
   {
-    quote:
-      "The biggest difference is how simple it feels. I don't need to calculate everyone's share manually anymore.",
-    name: "Karan Verma",
-    role: "Startup Founder",
-    initials: "KV",
+    label: "New Group",
+    icon: Users,
+    tone: "purple" as const,
+  },
+  {
+    label: "Add Friend",
+    icon: UserPlus,
+    tone: "blue" as const,
   },
 ];
+
+const toneClasses: Record<string, string> = {
+  gradient: "bg-brand-gradient text-white",
+  green: "bg-mint-100 text-mint-700",
+  purple: "bg-violet-100 text-violet-600",
+  blue: "bg-splitpe-100 text-splitpe-600",
+};
 
 export default function Home() {
   return (
@@ -94,33 +141,33 @@ export default function Home() {
       {/* Hero */}
       <section className="relative overflow-hidden bg-slate-50">
         <div className="absolute -left-40 top-20 h-72 w-72 rounded-full bg-splitpe-200/40 blur-3xl" />
-        <div className="absolute -right-40 bottom-0 h-96 w-96 rounded-full bg-splitpe-100/60 blur-3xl" />
+        <div className="absolute -right-40 bottom-0 h-96 w-96 rounded-full bg-mint-100/60 blur-3xl" />
 
         <div className="container-page relative">
           <div className="grid min-h-[calc(100vh-5rem)] items-center gap-14 py-16 lg:grid-cols-2 lg:gap-20 lg:py-20 xl:py-24">
             <div className="max-w-2xl">
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-splitpe-200 bg-white px-3 py-1.5 text-sm font-semibold text-splitpe-700 shadow-sm">
                 <Sparkles className="h-4 w-4" />
-                Shared expenses, made simple
+                हिसाब भी, दोस्ती भी
               </div>
 
               <h1 className="text-4xl font-black tracking-tight text-slate-950 sm:text-5xl md:text-6xl lg:text-6xl xl:text-7xl">
                 Split bills.
-                <span className="block text-splitpe-600">
+                <span className="block bg-brand-gradient bg-clip-text text-transparent">
                   Not friendships.
                 </span>
               </h1>
 
               <p className="mt-6 max-w-xl text-base leading-8 text-slate-600 sm:text-lg md:text-xl">
-                SplitPe makes sharing expenses with friends, family, roommates
-                and travel groups effortless. Track who paid, understand who
-                owes what, and settle up without the awkward calculations.
+                SplitPe helps you split bills, track shared expenses, and
+                settle up with friends and family — keeping your books and
+                your bonds equally clear.
               </p>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <a
                   href="#download"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-splitpe-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-splitpe-600/20 transition hover:bg-splitpe-700 focus:outline-none focus:ring-2 focus:ring-splitpe-500 focus:ring-offset-2 sm:px-7"
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-gradient px-6 py-3.5 text-sm font-bold text-black shadow-lg shadow-splitpe-600/20 transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-splitpe-500 focus:ring-offset-2 sm:px-7"
                 >
                   Get Started
                   <ArrowRight className="h-4 w-4" />
@@ -128,7 +175,7 @@ export default function Home() {
 
                 <a
                   href="#how-it-works"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-3.5 text-sm font-bold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 sm:px-7"
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-6 py-3.5 text-sm font-bold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 sm:px-7"
                 >
                   See how it works
                   <ChevronRight className="h-4 w-4" />
@@ -137,13 +184,13 @@ export default function Home() {
 
               <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-slate-500">
                 <div className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-splitpe-600" />
-                  Simple expense tracking
+                  <Check className="h-4 w-4 text-mint-600" />
+                  Every feature is free — no paywall
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-splitpe-600" />
-                  Clear group balances
+                  <Check className="h-4 w-4 text-mint-600" />
+                  Delete your account anytime
                 </div>
               </div>
             </div>
@@ -153,14 +200,29 @@ export default function Home() {
               <div className="absolute -inset-4 rounded-[2rem] bg-splitpe-200/50 blur-2xl" />
 
               <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-4 shadow-card sm:p-6">
-                <div className="rounded-2xl bg-slate-950 p-5 text-white sm:p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-slate-500">Good morning,</p>
+                    <p className="text-lg font-bold text-slate-950">
+                      Priya 👋
+                    </p>
+                  </div>
+
+                  <span className="inline-flex items-center rounded-full bg-mint-50 px-3 py-1 text-xs font-semibold text-mint-700">
+                    हिसाब भी, दोस्ती भी
+                  </span>
+                </div>
+
+                <div className="mt-5 rounded-2xl bg-slate-950 p-5 text-white sm:p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-slate-400">Group balance</p>
+                      <p className="text-sm text-slate-400">
+                        Overall balance
+                      </p>
                       <p className="mt-1 text-3xl font-bold">₹4,860</p>
                     </div>
 
-                    <div className="rounded-xl bg-splitpe-500/15 p-3">
+                    <div className="rounded-xl bg-white/10 p-3">
                       <Wallet className="h-6 w-6 text-splitpe-400" />
                     </div>
                   </div>
@@ -183,7 +245,29 @@ export default function Home() {
                   </div>
                 </div>
 
-                <div className="mt-4">
+                <div className="mt-5 grid grid-cols-4 gap-2">
+                  {quickActions.map((action) => {
+                    const Icon = action.icon;
+
+                    return (
+                      <div
+                        key={action.label}
+                        className="flex flex-col items-center gap-1.5"
+                      >
+                        <div
+                          className={`flex h-11 w-11 items-center justify-center rounded-full shadow-sm ${toneClasses[action.tone]}`}
+                        >
+                          <Icon className="h-5 w-5" />
+                        </div>
+                        <p className="text-center text-[11px] font-semibold text-slate-600">
+                          {action.label}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="mt-5">
                   <div className="mb-3 flex items-center justify-between">
                     <h3 className="font-bold text-slate-900">
                       Recent expenses
@@ -206,7 +290,7 @@ export default function Home() {
                       >
                         <div className="flex items-center gap-3">
                           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-splitpe-600 shadow-sm">
-                            <ReceiptText className="h-5 w-5" />
+                            <Receipt className="h-5 w-5" />
                           </div>
 
                           <div>
@@ -234,19 +318,21 @@ export default function Home() {
       <section id="features" className="section-padding bg-white">
         <div className="container-page">
           <div className="mx-auto max-w-2xl text-center">
-            <span className="section-label">Everything in one place</span>
+            <span className="section-label">
+              All free — no paywall
+            </span>
 
             <h2 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl lg:text-5xl">
               Shared expenses without the spreadsheet headache
             </h2>
 
             <p className="mt-5 text-base leading-7 text-slate-600 sm:text-lg">
-              SplitPe brings your shared expenses, balances and settlements
-              together in one simple experience.
+              Everything below is available to every SplitPe user, always —
+              nothing in the app is paywalled.
             </p>
           </div>
 
-          <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:mt-16 lg:grid-cols-4">
+          <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:mt-16 lg:grid-cols-3">
             {features.map((feature) => {
               const Icon = feature.icon;
 
@@ -255,7 +341,7 @@ export default function Home() {
                   key={feature.title}
                   className="group rounded-2xl border border-slate-200 bg-white p-6 transition duration-300 hover:-translate-y-1 hover:border-splitpe-200 hover:shadow-soft sm:p-7"
                 >
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-splitpe-50 text-splitpe-600 transition group-hover:bg-splitpe-600 group-hover:text-white">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-splitpe-50 text-splitpe-600 transition group-hover:bg-brand-gradient group-hover:text-white">
                     <Icon className="h-6 w-6" />
                   </div>
 
@@ -273,127 +359,47 @@ export default function Home() {
         </div>
       </section>
 
-      {/* About / trust */}
+      {/* Trust / privacy */}
       <section id="about" className="section-padding bg-slate-50">
         <div className="container-page">
-          <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
-            <div>
-              <span className="section-label">Built for real life</span>
+          <div className="mx-auto max-w-2xl text-center">
+            <span className="section-label">Why it's different here</span>
 
-              <h2 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl lg:text-5xl">
-                Money conversations don't have to be complicated.
-              </h2>
+            <h2 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl lg:text-5xl">
+              Privacy isn't a footnote at SplitPe — it's the product
+            </h2>
 
-              <p className="mt-6 text-base leading-8 text-slate-600 sm:text-lg">
-                Whether you're planning a weekend trip, sharing rent with
-                roommates, organizing a dinner, or managing recurring household
-                expenses, SplitPe helps everyone stay on the same page.
-              </p>
+            <p className="mt-5 text-base leading-7 text-slate-600 sm:text-lg">
+              Splitting bills means sharing money details with people. We
+              built SplitPe so that circle stays exactly as small as you draw
+              it, and nothing else.
+            </p>
+          </div>
 
-              <div className="mt-8 space-y-4">
-                {[
-                  "Know exactly where your money is going.",
-                  "Keep every group expense organized.",
-                  "Reduce awkward money follow-ups.",
-                  "Make settling up clear and transparent.",
-                  "Stay in control of your data, with the option to delete your account anytime.",
-                ].map((item) => (
-                  <div key={item} className="flex items-start gap-3">
-                    <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-splitpe-100">
-                      <Check className="h-4 w-4 text-splitpe-700" />
-                    </div>
+          <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:mt-16">
+            {trust.map((item) => {
+              const Icon = item.icon;
 
-                    <p className="text-sm font-medium text-slate-700 sm:text-base">
-                      {item}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="relative">
-              <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft sm:p-7">
-                <div className="flex items-center gap-3 border-b border-slate-100 pb-5">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-splitpe-600 text-white">
-                    <ShieldCheck className="h-5 w-5" />
+              return (
+                <div
+                  key={item.title}
+                  className="flex items-start gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+                >
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-splitpe-50 text-splitpe-600">
+                    <Icon className="h-5 w-5" />
                   </div>
 
                   <div>
-                    <p className="font-bold text-slate-900">
-                      Clear group finances
-                    </p>
-                    <p className="text-sm text-slate-500">
-                      Everyone knows what's happening
+                    <h3 className="font-bold text-slate-950">
+                      {item.title}
+                    </h3>
+                    <p className="mt-2 text-sm leading-7 text-slate-600">
+                      {item.description}
                     </p>
                   </div>
                 </div>
-
-                <div className="space-y-4 pt-5">
-                  <div className="rounded-2xl bg-slate-50 p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-200 text-sm font-bold text-slate-700">
-                          A
-                        </div>
-
-                        <div>
-                          <p className="text-sm font-semibold text-slate-900">
-                            Ananya
-                          </p>
-                          <p className="text-xs text-slate-500">
-                            paid ₹2,400
-                          </p>
-                        </div>
-                      </div>
-
-                      <span className="text-sm font-bold text-splitpe-600">
-                        +₹800
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="rounded-2xl bg-slate-50 p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-200 text-sm font-bold text-slate-700">
-                          R
-                        </div>
-
-                        <div>
-                          <p className="text-sm font-semibold text-slate-900">
-                            Rahul
-                          </p>
-                          <p className="text-xs text-slate-500">
-                            owes the group
-                          </p>
-                        </div>
-                      </div>
-
-                      <span className="text-sm font-bold text-slate-700">
-                        ₹800
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="rounded-2xl bg-splitpe-50 p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-splitpe-600 text-white">
-                        <Check className="h-5 w-5" />
-                      </div>
-
-                      <div>
-                        <p className="text-sm font-bold text-splitpe-800">
-                          Everything balances out
-                        </p>
-                        <p className="text-xs text-splitpe-700">
-                          No manual calculations required
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -448,67 +454,16 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section id="testimonials" className="section-padding bg-slate-50">
-        <div className="container-page">
-          <div className="mx-auto max-w-2xl text-center">
-            <span className="section-label">Loved by groups</span>
-
-            <h2 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
-              Less calculating. More enjoying.
-            </h2>
-
-            <p className="mt-5 text-base leading-7 text-slate-600">
-              A better way to handle shared money without unnecessary friction.
-            </p>
-          </div>
-
-          <div className="mt-12 grid gap-5 lg:grid-cols-3">
-            {testimonials.map((testimonial) => (
-              <article
-                key={testimonial.name}
-                className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7"
-              >
-                <div className="flex gap-1 text-splitpe-500">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <span key={star}>★</span>
-                  ))}
-                </div>
-
-                <blockquote className="mt-5 text-sm leading-7 text-slate-600 sm:text-base">
-                  “{testimonial.quote}”
-                </blockquote>
-
-                <div className="mt-6 flex items-center gap-3 border-t border-slate-100 pt-5">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-splitpe-100 text-sm font-bold text-splitpe-700">
-                    {testimonial.initials}
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-bold text-slate-900">
-                      {testimonial.name}
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      {testimonial.role}
-                    </p>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Download / CTA */}
       <section id="download" className="section-padding bg-white">
         <div className="container-page">
           <div className="relative overflow-hidden rounded-3xl bg-slate-950 px-6 py-12 sm:px-10 sm:py-16 lg:px-16 lg:py-20">
             <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-splitpe-500/20 blur-3xl" />
-            <div className="absolute -bottom-24 -left-20 h-72 w-72 rounded-full bg-splitpe-500/10 blur-3xl" />
+            <div className="absolute -bottom-24 -left-20 h-72 w-72 rounded-full bg-mint-500/10 blur-3xl" />
 
             <div className="relative mx-auto max-w-3xl text-center">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-splitpe-500 text-white">
-                <Smartphone className="h-7 w-7" />
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-gradient text-white">
+                <Wallet className="h-7 w-7" />
               </div>
 
               <h2 className="mt-6 text-3xl font-black tracking-tight text-white sm:text-4xl lg:text-5xl">
@@ -520,22 +475,18 @@ export default function Home() {
                 groups, track spending and settle up without the stress.
               </p>
 
-              <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+              <div className="mt-8 flex flex-col items-center gap-3">
                 <button
                   type="button"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-splitpe-500 px-6 py-3.5 text-sm font-bold text-white transition hover:bg-splitpe-400"
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-gradient px-6 py-3.5 text-sm font-bold text-white transition hover:opacity-90"
                 >
                   Get Started
                   <ArrowRight className="h-4 w-4" />
                 </button>
 
-                <button
-                  type="button"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-700 px-6 py-3.5 text-sm font-bold text-white transition hover:bg-slate-900"
-                >
-                  <Smartphone className="h-4 w-4" />
-                  Download App
-                </button>
+                <p className="text-xs font-medium text-slate-500">
+                  Coming soon to the Play Store & App Store
+                </p>
               </div>
             </div>
           </div>

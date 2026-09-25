@@ -21,12 +21,34 @@ export default function Terms() {
 
             <div>
               <h1 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl lg:text-5xl">
-                Terms & Conditions
+                Terms of Service
               </h1>
 
-              <p className="mt-3 text-sm text-slate-500">
-                Last updated: September 25, 2026
-              </p>
+              <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm text-slate-500">
+                <span>
+                  <strong className="font-semibold text-slate-700">
+                    App:
+                  </strong>{" "}
+                  SplitPe (com.raotechnologies.splitpe)
+                </span>
+                <span>
+                  <strong className="font-semibold text-slate-700">
+                    Last updated:
+                  </strong>{" "}
+                  19 September 2026
+                </span>
+                <span>
+                  <strong className="font-semibold text-slate-700">
+                    Contact:
+                  </strong>{" "}
+                  <a
+                    href="mailto:support@splitpe.app"
+                    className="font-semibold text-splitpe-600 hover:text-splitpe-700"
+                  >
+                    support@splitpe.app
+                  </a>
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -35,198 +57,113 @@ export default function Terms() {
       <article className="container-page max-w-4xl py-12 sm:py-16 lg:py-20">
         <div className="max-w-none">
           <p className="text-base leading-8 text-slate-600 sm:text-lg">
-            These Terms & Conditions govern your access to and use of SplitPe,
-            including our website, mobile applications, and related services.
-            By accessing or using SplitPe, you agree to comply with these
-            terms. If you do not agree with these terms, please do not use the
-            service.
+            By creating an account or using SplitPe, you agree to these
+            terms.
           </p>
 
           <section className="mt-10">
             <h2 className="text-2xl font-bold text-slate-950">
-              1. Eligibility and Account
+              1. What SplitPe Is
             </h2>
 
             <p className="mt-4 leading-8 text-slate-600">
-              You must meet the minimum legal age and other eligibility
-              requirements applicable in your jurisdiction to use SplitPe. When
-              creating an account, you agree to provide accurate and current
-              information and to keep your account information updated.
-            </p>
-
-            <p className="mt-4 leading-8 text-slate-600">
-              You are responsible for maintaining the confidentiality of your
-              account credentials and for activities performed through your
-              account.
+              SplitPe is a record-keeping tool for shared expenses among
+              people you know — trips, roommates, meals, and similar groups.
+              It calculates who owes what and helps you settle up.{" "}
+              <strong className="font-semibold text-slate-900">
+                SplitPe does not hold, transmit, or move money.
+              </strong>{" "}
+              When you tap "Settle Up," we hand off to a UPI app you already
+              have installed (Google Pay, PhonePe, etc.); that transaction
+              happens entirely inside that app, outside SplitPe's control.
             </p>
           </section>
 
           <section className="mt-10">
             <h2 className="text-2xl font-bold text-slate-950">
-              2. Use of the Service
+              2. Your Responsibilities
+            </h2>
+
+            <ul className="mt-4 space-y-3">
+              <li className="flex items-start gap-3 leading-7 text-slate-600">
+                <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-splitpe-500" />
+                You're responsible for the accuracy of expenses, amounts, and
+                splits you enter — SplitPe reflects what you tell it.
+              </li>
+              <li className="flex items-start gap-3 leading-7 text-slate-600">
+                <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-splitpe-500" />
+                Use SplitPe only with people you know and trust; anything you
+                enter into a shared group or expense is visible to everyone
+                in it.
+              </li>
+              <li className="flex items-start gap-3 leading-7 text-slate-600">
+                <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-splitpe-500" />
+                Don't use SplitPe for anything unlawful, fraudulent, or to
+                harass another person.
+              </li>
+            </ul>
+          </section>
+
+          <section className="mt-10">
+            <h2 className="text-2xl font-bold text-slate-950">
+              3. Ads and Free Features
             </h2>
 
             <p className="mt-4 leading-8 text-slate-600">
-              SplitPe is designed to help users organize, track, calculate,
-              and manage shared expenses. You agree to use the service only for
-              lawful purposes and in accordance with these Terms.
-            </p>
-
-            <p className="mt-4 leading-8 text-slate-600">
-              You must not misuse the service, attempt to gain unauthorized
-              access, interfere with system functionality, introduce malicious
-              software, impersonate another person, or use SplitPe for
-              fraudulent, unlawful, or abusive activity.
+              SplitPe is free and supported by ads (Google AdMob). To keep
+              expense-tracking sustainable, after 5 expenses added in a day,
+              the next one may ask you to watch a short rewarded ad before
+              continuing — watching it unlocks 5 more for that day. Every
+              core feature — unlimited groups, currency conversion, receipt
+              photos, charts, custom splits, and search — is free; nothing in
+              SplitPe is paywalled.
             </p>
           </section>
 
           <section className="mt-10">
             <h2 className="text-2xl font-bold text-slate-950">
-              3. Expenses and User-Provided Information
+              4. Account & Termination
             </h2>
 
             <p className="mt-4 leading-8 text-slate-600">
-              Users are responsible for the accuracy of expenses, participants,
-              amounts, descriptions, payment information, and other data they
-              enter into SplitPe.
-            </p>
-
-            <p className="mt-4 leading-8 text-slate-600">
-              SplitPe provides tools for calculation and organization but does
-              not independently verify every expense or financial relationship
-              between users. Any disagreement regarding an expense or payment
-              should be resolved between the relevant users.
-            </p>
-          </section>
-
-          <section className="mt-10">
-            <h2 className="text-2xl font-bold text-slate-950">
-              4. Payments and Third-Party Services
-            </h2>
-
-            <p className="mt-4 leading-8 text-slate-600">
-              Certain features may involve payment providers, banks, UPI
-              services, app stores, or other third-party platforms. Those
-              services may have their own terms, privacy policies, eligibility
-              requirements, and fees.
-            </p>
-
-            <p className="mt-4 leading-8 text-slate-600">
-              SplitPe is not responsible for failures, delays, restrictions,
-              outages, or actions caused by third-party payment or financial
-              service providers.
-            </p>
-          </section>
-
-          <section className="mt-10">
-            <h2 className="text-2xl font-bold text-slate-950">
-              5. Intellectual Property
-            </h2>
-
-            <p className="mt-4 leading-8 text-slate-600">
-              The SplitPe name, branding, software, interface, designs, logos,
-              content, graphics, and other materials provided by SplitPe are
-              protected by applicable intellectual property laws.
-            </p>
-
-            <p className="mt-4 leading-8 text-slate-600">
-              Except where expressly permitted, you may not copy, reproduce,
-              modify, distribute, reverse engineer, sell, license, or create
-              derivative works from SplitPe's proprietary materials.
-            </p>
-          </section>
-
-          <section className="mt-10">
-            <h2 className="text-2xl font-bold text-slate-950">
-              6. Service Availability
-            </h2>
-
-            <p className="mt-4 leading-8 text-slate-600">
-              We aim to keep SplitPe available and reliable, but we do not
-              guarantee uninterrupted, error-free, or continuously available
-              service. Maintenance, upgrades, technical issues, security
-              events, network failures, or circumstances beyond our reasonable
-              control may affect availability.
-            </p>
-          </section>
-
-          <section className="mt-10">
-            <h2 className="text-2xl font-bold text-slate-950">
-              7. Disclaimer and Limitation of Liability
-            </h2>
-
-            <p className="mt-4 leading-8 text-slate-600">
-              SplitPe is provided on an "as available" and "as is" basis to the
-              extent permitted by applicable law. We do not guarantee that the
-              service will always meet your requirements or operate without
-              interruptions or errors.
-            </p>
-
-            <p className="mt-4 leading-8 text-slate-600">
-              To the maximum extent permitted by applicable law, SplitPe and
-              its operators, employees, partners, and service providers will
-              not be liable for indirect, incidental, special, consequential,
-              or punitive losses arising from your use of the service.
-            </p>
-          </section>
-
-          <section className="mt-10">
-            <h2 className="text-2xl font-bold text-slate-950">
-              8. Suspension and Termination
-            </h2>
-
-            <p className="mt-4 leading-8 text-slate-600">
-              We may suspend or terminate accounts where we reasonably believe
-              there has been a violation of these Terms, fraudulent activity,
-              misuse of the service, security risk, or other conduct that may
-              harm users or the platform.
-            </p>
-
-            <p className="mt-4 leading-8 text-slate-600">
-              You may stop using SplitPe at any time. Certain provisions of
-              these Terms, including intellectual property, liability,
-              dispute-related provisions, and other provisions that naturally
-              survive termination, may continue to apply.
-            </p>
-
-            <p className="mt-4 leading-8 text-slate-600">
-              You may also request deletion of your account and associated
-              personal data at any time. Instructions are available on our{" "}
+              You need a verified email to use SplitPe. You can delete your
+              account at any time from Settings — see our{" "}
               <Link
                 to="/delete-account"
                 className="font-semibold text-splitpe-600 hover:text-splitpe-700"
               >
                 Delete Account
               </Link>{" "}
-              page. Deletion is permanent and, once processed, cannot be
-              undone.
+              page. We may suspend or remove accounts that violate these
+              terms or abuse the service (e.g., spam, fraud, attempts to
+              bypass security).
             </p>
           </section>
 
           <section className="mt-10">
             <h2 className="text-2xl font-bold text-slate-950">
-              9. Governing Law and Disputes
+              5. No Warranty, Limited Liability
             </h2>
 
             <p className="mt-4 leading-8 text-slate-600">
-              These Terms shall be governed by the applicable laws of India,
-              subject to applicable statutory protections and requirements.
-              Any dispute arising in connection with the service shall be
-              addressed through appropriate legal or dispute-resolution
-              mechanisms applicable to the parties.
+              SplitPe is provided "as is." We work to keep balances accurate
+              and the app available, but we're not liable for losses arising
+              from a failed UPI transaction, a mistaken entry, or a dispute
+              between you and someone in your group — those happen between
+              you and the other party, or between you and your payment
+              provider.
             </p>
           </section>
 
           <section className="mt-10">
             <h2 className="text-2xl font-bold text-slate-950">
-              10. Changes to These Terms
+              6. Changes & Governing Law
             </h2>
 
             <p className="mt-4 leading-8 text-slate-600">
-              We may modify these Terms from time to time to reflect changes
-              in our services, business operations, technology, or legal
-              requirements. Updated Terms will be published on this page with
-              a revised effective date.
+              We may update these terms as SplitPe evolves; continuing to use
+              the app after an update means you accept the current terms.
+              These terms are governed by the laws of India.
             </p>
           </section>
 
@@ -236,9 +173,14 @@ export default function Terms() {
             </h2>
 
             <p className="mt-3 leading-7 text-slate-700">
-              If you have questions about these Terms & Conditions, please
-              contact SplitPe through the support or contact channels provided
-              on our website.
+              Write to{" "}
+              <a
+                href="mailto:support@splitpe.app"
+                className="font-semibold text-splitpe-700 hover:text-splitpe-800"
+              >
+                support@splitpe.app
+              </a>{" "}
+              — we respond to every request.
             </p>
           </section>
         </div>

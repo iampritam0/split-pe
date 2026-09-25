@@ -82,7 +82,7 @@ split-pe/
 │
 ├── public/
 │   ├── 404.html
-│   └── favicon.svg
+│   └── favicon.png
 │
 ├── src/
 │   │
@@ -194,7 +194,7 @@ Create a `.env` file in the project root:
 
 ```env
 VITE_APP_NAME=SplitPe
-VITE_API_URL=https://api.splitpe.com
+VITE_API_URL=https://api.splitpe.app
 ```
 
 A sample environment file is provided as:
@@ -728,7 +728,7 @@ If SplitPe requires authentication, expenses APIs, user accounts, payment integr
 The frontend can communicate with the backend using:
 
 ```env
-VITE_API_URL=https://api.splitpe.com
+VITE_API_URL=https://api.splitpe.app
 ```
 
 ---

@@ -1,37 +1,35 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, Trash2, Mail, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Trash2, Mail, AlertTriangle, Zap } from "lucide-react";
 
 const steps = [
   {
     number: "01",
-    title: "Open the SplitPe app",
-    description: "Log in to your SplitPe account on your mobile device.",
+    title: "Open your Profile",
+    description:
+      "In the SplitPe app, tap the Profile tab, then go to Privacy & Security.",
   },
   {
     number: "02",
-    title: "Go to Settings",
-    description:
-      "Tap on your profile icon, then navigate to Account Settings.",
+    title: "Go to Danger Zone",
+    description: "Scroll down to Danger Zone and tap \"Delete Account\".",
   },
   {
     number: "03",
-    title: "Select Delete Account",
+    title: "Confirm deletion",
     description:
-      "Tap \"Delete Account\", confirm your decision, and follow the on-screen prompts to complete the request.",
+      "Confirm in the dialog. Your account is deleted immediately — no waiting period.",
   },
 ];
 
 const dataDeleted = [
-  "Your name, email address, and mobile number",
-  "Your profile photo and account preferences",
-  "Your group memberships and personal settings",
-  "Notification tokens and device information",
+  "Your profile — name, email, mobile number, and photo",
+  "Your login credentials",
+  "Your personal settings and preferences",
 ];
 
 const dataRetained = [
-  "Expense and settlement records shared with other group members, which may be retained within those groups",
-  "Transaction and payment records required for accounting, tax, fraud-prevention, or legal compliance purposes",
-  "Information we are legally required to retain for a limited period after deletion",
+  "Shared expenses stay visible to the other members of your groups, but your name on them will no longer resolve to an account",
+  "Information we're legally required to retain (e.g. for fraud prevention or accounting) for a limited period",
 ];
 
 export default function DeleteAccount() {
@@ -67,22 +65,28 @@ export default function DeleteAccount() {
 
       <article className="container-page max-w-4xl py-12 sm:py-16 lg:py-20">
         <div className="max-w-none">
-          <p className="text-base leading-8 text-slate-600 sm:text-lg">
-            You can request deletion of your SplitPe account and associated
-            personal data at any time. This page explains how to request
-            account deletion, what happens to your data, and how long the
-            process takes.
+          <div className="flex items-start gap-3 rounded-2xl border border-mint-100 bg-mint-50 p-5">
+            <Zap className="h-5 w-5 shrink-0 text-mint-700" />
+            <p className="text-sm leading-6 text-mint-800 sm:text-base">
+              <strong className="font-semibold">
+                Deletion is instant.
+              </strong>{" "}
+              Unlike most apps, deleting your SplitPe account isn't a support
+              ticket or a 30-day wait — it happens immediately, right from
+              Settings.
+            </p>
+          </div>
+
+          <p className="mt-8 text-base leading-8 text-slate-600 sm:text-lg">
+            You can permanently delete your SplitPe account and its
+            associated personal data at any time, directly from the app. This
+            page explains how, and exactly what happens to your data.
           </p>
 
           <section className="mt-10">
             <h2 className="text-2xl font-bold text-slate-950">
               How to Delete Your Account
             </h2>
-
-            <p className="mt-4 leading-8 text-slate-600">
-              You can request account deletion directly from within the
-              SplitPe app:
-            </p>
 
             <div className="mt-6 grid gap-5 sm:grid-cols-3">
               {steps.map((step) => (
@@ -106,18 +110,15 @@ export default function DeleteAccount() {
             </div>
 
             <p className="mt-6 leading-8 text-slate-600">
-              If you're unable to access the app, you can also request
-              deletion by emailing us at{" "}
+              Can't access the app? Email us at{" "}
               <a
-                href="mailto:support@splitpe.com?subject=Account%20Deletion%20Request"
+                href="mailto:support@splitpe.app?subject=Account%20Deletion%20Request"
                 className="font-semibold text-splitpe-600 hover:text-splitpe-700"
               >
-                support@splitpe.com
+                support@splitpe.app
               </a>{" "}
-              from your registered email address, with "Account Deletion
-              Request" in the subject line. Please include your registered
-              name, email address, and mobile number so we can verify and
-              process your request.
+              from your registered email address with "Account Deletion
+              Request" in the subject line, and we'll process it for you.
             </p>
           </section>
 
@@ -125,11 +126,6 @@ export default function DeleteAccount() {
             <h2 className="text-2xl font-bold text-slate-950">
               What Gets Deleted
             </h2>
-
-            <p className="mt-4 leading-8 text-slate-600">
-              Once your deletion request is verified and processed, the
-              following data is permanently removed from your account:
-            </p>
 
             <ul className="mt-4 space-y-3">
               {dataDeleted.map((item) => (
@@ -149,11 +145,6 @@ export default function DeleteAccount() {
               What May Be Retained
             </h2>
 
-            <p className="mt-4 leading-8 text-slate-600">
-              In some cases, certain information cannot be immediately
-              deleted:
-            </p>
-
             <ul className="mt-4 space-y-3">
               {dataRetained.map((item) => (
                 <li
@@ -167,19 +158,6 @@ export default function DeleteAccount() {
             </ul>
           </section>
 
-          <section className="mt-10">
-            <h2 className="text-2xl font-bold text-slate-950">
-              Processing Time
-            </h2>
-
-            <p className="mt-4 leading-8 text-slate-600">
-              Account deletion requests are typically processed within 7
-              business days of verification. You'll receive a confirmation
-              email once your account and associated personal data have been
-              deleted.
-            </p>
-          </section>
-
           <section className="mt-10 flex gap-4 rounded-2xl border border-amber-100 bg-amber-50 p-6">
             <AlertTriangle className="h-6 w-6 shrink-0 text-amber-600" />
 
@@ -189,10 +167,11 @@ export default function DeleteAccount() {
               </h2>
 
               <p className="mt-2 leading-7 text-slate-700">
-                Deleting your account is irreversible. You will lose access to
-                your groups, expense history, and balances. If you have
-                outstanding balances with other users, we recommend settling
-                up before requesting deletion.
+                Deleting your account permanently removes your profile,
+                login, and leaves every group you're in. Shared expenses stay
+                visible to other members, but your name on them will no
+                longer resolve. This cannot be undone — if you have
+                outstanding balances, settle up first.
               </p>
             </div>
           </section>
@@ -207,15 +186,14 @@ export default function DeleteAccount() {
                 </h2>
 
                 <p className="mt-3 leading-7 text-slate-700">
-                  If you have questions about account deletion or run into
-                  issues submitting a request, contact us at{" "}
+                  Questions about account deletion? Write to{" "}
                   <a
-                    href="mailto:support@splitpe.com"
+                    href="mailto:support@splitpe.app"
                     className="font-semibold text-splitpe-700 hover:text-splitpe-800"
                   >
-                    support@splitpe.com
+                    support@splitpe.app
                   </a>
-                  . For more details on how we handle your data, see our{" "}
+                  . For more on how we handle your data, see our{" "}
                   <Link
                     to="/privacy-policy"
                     className="font-semibold text-splitpe-700 hover:text-splitpe-800"

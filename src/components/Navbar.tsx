@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, ArrowRight } from "lucide-react";
+import Logo from "./Logo";
 
 const navLinks = [
   {
@@ -39,16 +40,9 @@ export default function Navbar() {
           <Link
             to="/"
             onClick={handleLogoClick}
-            className="flex items-center gap-2"
             aria-label="SplitPe home"
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-splitpe-600 text-lg font-black text-white shadow-sm">
-              S
-            </div>
-
-            <span className="text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl">
-              Split<span className="text-splitpe-600">Pe</span>
-            </span>
+            <Logo markSize={34} />
           </Link>
 
           <nav className="hidden items-center gap-8 lg:flex">
@@ -73,7 +67,7 @@ export default function Navbar() {
 
             <button
               type="button"
-              className="inline-flex items-center gap-2 rounded-xl bg-splitpe-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-splitpe-700 focus:outline-none focus:ring-2 focus:ring-splitpe-500 focus:ring-offset-2"
+              className="inline-flex items-center gap-2 rounded-full bg-brand-gradient px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-splitpe-500 focus:ring-offset-2"
             >
               Get Started
               <ArrowRight className="h-4 w-4" />
@@ -119,7 +113,7 @@ export default function Navbar() {
 
                 <button
                   type="button"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-splitpe-600 px-4 py-3 text-sm font-semibold text-white"
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-gradient px-4 py-3 text-sm font-semibold text-white"
                 >
                   Get Started
                   <ArrowRight className="h-4 w-4" />
