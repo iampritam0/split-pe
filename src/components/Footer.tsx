@@ -164,6 +164,16 @@ export default function Footer() {
                   <ArrowUpRight className="h-3.5 w-3.5" />
                 </Link>
               </li>
+
+              <li>
+                <Link
+                  to="/delete-account"
+                  className="inline-flex items-center gap-1 transition hover:text-white"
+                >
+                  Delete Account
+                  <ArrowUpRight className="h-3.5 w-3.5" />
+                </Link>
+              </li>
             </ul>
           </div>
         </div>

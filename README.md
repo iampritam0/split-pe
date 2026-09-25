@@ -93,7 +93,8 @@ split-pe/
 │   ├── pages/
 │   │   ├── Home.tsx
 │   │   ├── PrivacyPolicy.tsx
-│   │   └── Terms.tsx
+│   │   ├── Terms.tsx
+│   │   └── DeleteAccount.tsx
 │   │
 │   ├── App.tsx
 │   ├── index.css
@@ -123,6 +124,7 @@ The website currently contains the following routes:
 | `/`                     | SplitPe homepage   |
 | `/privacy-policy`       | Privacy Policy     |
 | `/terms-and-conditions` | Terms & Conditions |
+| `/delete-account`       | Delete Account     |
 
 For GitHub Pages, these are served under:
 
@@ -516,6 +518,7 @@ Current pages:
 Home.tsx
 PrivacyPolicy.tsx
 Terms.tsx
+DeleteAccount.tsx
 ```
 
 ---
@@ -534,6 +537,7 @@ Current routes:
 <Route path="/" element={<Home />} />
 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
 <Route path="/terms-and-conditions" element={<Terms />} />
+<Route path="/delete-account" element={<DeleteAccount />} />
 ```
 
 ---

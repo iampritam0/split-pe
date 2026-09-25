@@ -157,6 +157,19 @@ export default function PrivacyPolicy() {
               details provided on our website. We may need to verify your
               identity before processing certain requests.
             </p>
+
+            <p className="mt-4 leading-8 text-slate-600">
+              You can request deletion of your account and associated
+              personal data at any time through the app or by visiting our{" "}
+              <Link
+                to="/delete-account"
+                className="font-semibold text-splitpe-600 hover:text-splitpe-700"
+              >
+                Delete Account
+              </Link>{" "}
+              page. Some information may be retained where required for
+              legal, accounting, or fraud-prevention purposes.
+            </p>
           </section>
 
           <section className="mt-10">

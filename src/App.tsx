@@ -5,6 +5,7 @@ import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Terms from "./pages/Terms";
+import DeleteAccount from "./pages/DeleteAccount";
 
 function RedirectHandler() {
   const navigate = useNavigate();
@@ -33,6 +34,7 @@ function Layout() {
           <Route path="/" element={<Home />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-and-conditions" element={<Terms />} />
+          <Route path="/delete-account" element={<DeleteAccount />} />
         </Routes>
       </main>
 

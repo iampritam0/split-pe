@@ -296,6 +296,7 @@ export default function Home() {
                   "Keep every group expense organized.",
                   "Reduce awkward money follow-ups.",
                   "Make settling up clear and transparent.",
+                  "Stay in control of your data, with the option to delete your account anytime.",
                 ].map((item) => (
                   <div key={item} className="flex items-start gap-3">
                     <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-splitpe-100">

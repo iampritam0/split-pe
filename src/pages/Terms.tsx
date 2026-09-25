@@ -188,6 +188,19 @@ export default function Terms() {
               dispute-related provisions, and other provisions that naturally
               survive termination, may continue to apply.
             </p>
+
+            <p className="mt-4 leading-8 text-slate-600">
+              You may also request deletion of your account and associated
+              personal data at any time. Instructions are available on our{" "}
+              <Link
+                to="/delete-account"
+                className="font-semibold text-splitpe-600 hover:text-splitpe-700"
+              >
+                Delete Account
+              </Link>{" "}
+              page. Deletion is permanent and, once processed, cannot be
+              undone.
+            </p>
           </section>
 
           <section className="mt-10">
