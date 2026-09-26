@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>SplitPe</title>
+
+    <script>
+      const path = window.location.pathname;
+      const search = window.location.search;
+      const hash = window.location.hash;
+
+      const repo = "/split-pe";
+
+      if (path.startsWith(repo)) {
+        const route = path.substring(repo.length);
+
+        const redirect =
+          window.location.origin +
+          repo +
+          "/?redirect=" +
+          encodeURIComponent(route + search + hash);
+
+        window.location.replace(redirect);
+      }
+    </script>
+  </head>
+
+  <body>
+    <p>Redirecting to SplitPe...</p>
+  </body>
+</html>
