@@ -6,6 +6,12 @@ export default {
   ],
   theme: {
     extend: {
+      // Same type system as the landing page (public/landing.html)
+      fontFamily: {
+        heading: ["Outfit", "Inter", "sans-serif"],
+        hindi: ['"Baloo 2"', "sans-serif"],
+        nav: ["Manrope", "Inter", "sans-serif"],
+      },
       colors: {
         // Primary brand blue — matches the SplitPe app's theme.colors.primary (#2563EB).
         splitpe: {

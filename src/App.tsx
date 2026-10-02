@@ -8,6 +8,7 @@ import {
 import { useEffect } from "react";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import SiteBackground from "./components/SiteBackground";
 import Home from "./pages/Home";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Terms from "./pages/Terms";
@@ -34,7 +35,8 @@ function Layout() {
   const isLanding = pathname === "/";
 
   return (
-    <div className="flex min-h-screen flex-col bg-white text-slate-900">
+    <div className="flex min-h-screen flex-col text-slate-900">
+      {!isLanding && <SiteBackground />}
       {!isLanding && <Navbar />}
 
       <main className="flex-1">

@@ -36,6 +36,136 @@ a {
   color: #104d36;
 }
 
+/* ---------- Landing-page look, shared by Privacy / Terms / Delete Account ---------- */
+
+.site-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at 50% 0%,
+    #ffffff 0%,
+    #e4eeff 45%,
+    #bcd3fb 100%
+  );
+}
+
+.site-bubble {
+  position: absolute;
+  bottom: -50px;
+  border-radius: 50%;
+  aspect-ratio: 1;
+  background: radial-gradient(
+    circle at 30% 28%,
+    rgba(255, 255, 255, 0.95) 0 14%,
+    rgba(37, 99, 235, 0.08) 40%,
+    rgba(37, 99, 235, 0.28) 100%
+  );
+  border: 1px solid rgba(37, 99, 235, 0.35);
+  animation: site-bubble-rise linear infinite;
+}
+
+@keyframes site-bubble-rise {
+  0% {
+    transform: translateY(0) translateX(0);
+    opacity: 0;
+  }
+  10%,
+  90% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateY(-110vh) translateX(30px);
+    opacity: 0;
+  }
+}
+
+.grad-text {
+  background: linear-gradient(
+    110deg,
+    #1d4ed8 0%,
+    #2563eb 25%,
+    #0ea5a4 50%,
+    #10b981 70%,
+    #2563eb 100%
+  );
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: grad-shift 6s ease-in-out infinite alternate;
+}
+
+@keyframes grad-shift {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: 100% 50%;
+  }
+}
+
+.glass-card {
+  border: 1px solid #ffffff;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.62);
+  box-shadow: 0 14px 34px -12px rgba(30, 64, 175, 0.22);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* Highlighted box with the brand gradient border (same as the landing notifications) */
+.callout {
+  border: 2px solid transparent;
+  border-radius: 22px;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.92))
+      padding-box,
+    linear-gradient(135deg, #2563eb, #10b981) border-box;
+  box-shadow:
+    0 0 0 4px rgba(37, 99, 235, 0.08),
+    0 18px 34px -14px rgba(37, 99, 235, 0.35);
+}
+
+.legal h2 {
+  font-family: Outfit, Inter, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.rise {
+  animation: rise 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ping-dot {
+  75%,
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-bubble,
+  .grad-text,
+  .rise {
+    animation: none;
+  }
+}
+
 @layer components {
   .container-page {
     @apply mx-auto w-full max-w-8xl px-5 sm:px-6 lg:px-8 xl:px-10;

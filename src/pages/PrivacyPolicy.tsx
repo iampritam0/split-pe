@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, ShieldCheck, Lock, Trash2, UsersRound, Ban } from "lucide-react";
+import PageHero from "../components/PageHero";
+import { ShieldCheck, Lock, Trash2, UsersRound, Ban } from "lucide-react";
 
 const usps = [
   {
@@ -30,60 +31,22 @@ const usps = [
 
 export default function PrivacyPolicy() {
   return (
-    <div className="bg-white">
-      <section className="border-b border-slate-100 bg-slate-50">
-        <div className="container-page py-14 sm:py-16 lg:py-20">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-splitpe-600 transition hover:text-splitpe-700"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to SplitPe
-          </Link>
+    <div>
+      <PageHero
+        icon={ShieldCheck}
+        tag="आपका डेटा, आपका हक़"
+        title="Privacy"
+        highlight="Policy."
+        meta={[
+          { label: "App", value: "SplitPe (com.raotechnologies.splitpe)" },
+          { label: "Last updated", value: "19 September 2026" },
+          { label: "Contact", value: <a href="mailto:support@splitpe.app" className="font-semibold text-splitpe-600 hover:text-splitpe-700">support@splitpe.app</a> },
+        ]}
+      />
 
-          <div className="mt-8 flex items-start gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-splitpe-100 text-splitpe-700">
-              <ShieldCheck className="h-6 w-6" />
-            </div>
-
-            <div>
-              <h1 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl lg:text-5xl">
-                Privacy Policy
-              </h1>
-
-              <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm text-slate-500">
-                <span>
-                  <strong className="font-semibold text-slate-700">
-                    App:
-                  </strong>{" "}
-                  SplitPe (com.raotechnologies.splitpe)
-                </span>
-                <span>
-                  <strong className="font-semibold text-slate-700">
-                    Last updated:
-                  </strong>{" "}
-                  19 September 2026
-                </span>
-                <span>
-                  <strong className="font-semibold text-slate-700">
-                    Contact:
-                  </strong>{" "}
-                  <a
-                    href="mailto:support@splitpe.app"
-                    className="font-semibold text-splitpe-600 hover:text-splitpe-700"
-                  >
-                    support@splitpe.app
-                  </a>
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <article className="container-page max-w-4xl py-12 sm:py-16 lg:py-20">
-        <div className="max-w-none">
-          <section className="rounded-2xl border border-splitpe-100 bg-gradient-to-br from-splitpe-50 to-white p-6 sm:p-8">
+      <article className="container-page max-w-5xl pb-16 sm:pb-20">
+        <div className="legal glass-card rise p-6 sm:p-10 lg:p-12" style={{ animationDelay: "0.3s" }}>
+          <section className="callout p-6 sm:p-8">
             <span className="section-label">Why it's different here</span>
 
             <h2 className="text-xl font-bold text-slate-950 sm:text-2xl">
@@ -103,9 +66,9 @@ export default function PrivacyPolicy() {
                 return (
                   <div
                     key={usp.title}
-                    className="rounded-xl border border-slate-200 bg-white p-4"
+                    className="rounded-[20px] border border-white bg-white/85 p-4 shadow-[0_10px_24px_-12px_rgba(30,64,175,0.25)] transition duration-300 hover:-translate-y-1"
                   >
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-splitpe-50 text-splitpe-600">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#eaf2ff] to-[#e3f8ef] text-splitpe-600">
                       <Icon className="h-4 w-4" />
                     </div>
                     <h3 className="mt-3 text-sm font-bold text-slate-950">
@@ -237,7 +200,7 @@ export default function PrivacyPolicy() {
 
             <ul className="mt-4 space-y-3">
               <li className="flex items-start gap-3 leading-7 text-slate-600">
-                <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-splitpe-500" />
+                <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gradient-to-br from-splitpe-600 to-mint-500" />
                 <span>
                   <strong className="font-semibold text-slate-900">
                     Bank or card numbers.
@@ -248,7 +211,7 @@ export default function PrivacyPolicy() {
                 </span>
               </li>
               <li className="flex items-start gap-3 leading-7 text-slate-600">
-                <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-splitpe-500" />
+                <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gradient-to-br from-splitpe-600 to-mint-500" />
                 <span>
                   <strong className="font-semibold text-slate-900">
                     Your full contact list.
@@ -274,7 +237,7 @@ export default function PrivacyPolicy() {
 
             <ul className="mt-4 space-y-3">
               <li className="flex items-start gap-3 leading-7 text-slate-600">
-                <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-splitpe-500" />
+                <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gradient-to-br from-splitpe-600 to-mint-500" />
                 <span>
                   <strong className="font-semibold text-slate-900">
                     Google Firebase
@@ -285,7 +248,7 @@ export default function PrivacyPolicy() {
                 </span>
               </li>
               <li className="flex items-start gap-3 leading-7 text-slate-600">
-                <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-splitpe-500" />
+                <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gradient-to-br from-splitpe-600 to-mint-500" />
                 <span>
                   <strong className="font-semibold text-slate-900">
                     Google AdMob
@@ -295,7 +258,7 @@ export default function PrivacyPolicy() {
                 </span>
               </li>
               <li className="flex items-start gap-3 leading-7 text-slate-600">
-                <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-splitpe-500" />
+                <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gradient-to-br from-splitpe-600 to-mint-500" />
                 We do not sell your personal data to anyone, for any reason.
               </li>
             </ul>
@@ -308,17 +271,17 @@ export default function PrivacyPolicy() {
 
             <ul className="mt-4 space-y-3">
               <li className="flex items-start gap-3 leading-7 text-slate-600">
-                <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-splitpe-500" />
+                <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gradient-to-br from-splitpe-600 to-mint-500" />
                 All traffic between the app and our servers is encrypted in
                 transit (TLS).
               </li>
               <li className="flex items-start gap-3 leading-7 text-slate-600">
-                <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-splitpe-500" />
+                <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gradient-to-br from-splitpe-600 to-mint-500" />
                 Your session token is stored in your device's encrypted
                 secure storage, not in plain text.
               </li>
               <li className="flex items-start gap-3 leading-7 text-slate-600">
-                <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-splitpe-500" />
+                <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gradient-to-br from-splitpe-600 to-mint-500" />
                 Firestore security rules restrict every read and write to the
                 account that owns it, or to people you've explicitly shared a
                 group/friend/expense with.
@@ -333,7 +296,7 @@ export default function PrivacyPolicy() {
 
             <ul className="mt-4 space-y-3">
               <li className="flex items-start gap-3 leading-7 text-slate-600">
-                <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-splitpe-500" />
+                <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gradient-to-br from-splitpe-600 to-mint-500" />
                 <span>
                   <strong className="font-semibold text-slate-900">
                     Delete your account
@@ -351,7 +314,7 @@ export default function PrivacyPolicy() {
                 </span>
               </li>
               <li className="flex items-start gap-3 leading-7 text-slate-600">
-                <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-splitpe-500" />
+                <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gradient-to-br from-splitpe-600 to-mint-500" />
                 <span>
                   <strong className="font-semibold text-slate-900">
                     Hide amounts
@@ -361,7 +324,7 @@ export default function PrivacyPolicy() {
                 </span>
               </li>
               <li className="flex items-start gap-3 leading-7 text-slate-600">
-                <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-splitpe-500" />
+                <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gradient-to-br from-splitpe-600 to-mint-500" />
                 <span>
                   <strong className="font-semibold text-slate-900">
                     Revoke contacts access
@@ -401,7 +364,7 @@ export default function PrivacyPolicy() {
             </p>
           </section>
 
-          <section className="mt-10 rounded-2xl border border-splitpe-100 bg-splitpe-50 p-6">
+          <section className="mt-10 callout p-6">
             <h2 className="text-xl font-bold text-slate-950">Contact Us</h2>
 
             <p className="mt-3 leading-7 text-slate-700">

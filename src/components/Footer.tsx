@@ -1,151 +1,98 @@
-import { Mail, ArrowUpRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import Logo from "./Logo";
+import { ArrowUpRight, Mail } from "lucide-react";
+import { PlayIcon, SiteLogo } from "./Navbar";
+import { PLAY_STORE_URL, SUPPORT_EMAIL } from "../constants";
+
+type FooterLink = { label: string; to: string } | { label: string; href: string };
+
+const columns: { title: string; links: FooterLink[] }[] = [
+  {
+    title: "Product",
+    links: [
+      { label: "Home", to: "/" },
+      { label: "Upcoming features", to: "/#upcoming" },
+      { label: "Get the app", href: PLAY_STORE_URL },
+    ],
+  },
+  {
+    title: "Legal",
+    links: [
+      { label: "Privacy Policy", to: "/privacy-policy" },
+      { label: "Terms & Conditions", to: "/terms-and-conditions" },
+      { label: "Delete Account", to: "/delete-account" },
+    ],
+  },
+  {
+    title: "Contact",
+    links: [{ label: SUPPORT_EMAIL, href: `mailto:${SUPPORT_EMAIL}` }],
+  },
+];
 
 export default function Footer() {
   return (
-    <footer className="border-t border-slate-200 bg-slate-950 text-slate-300">
-      <div className="container-page">
-        <div className="grid gap-12 py-14 sm:grid-cols-2 lg:grid-cols-4 lg:py-16">
-          <div className="sm:col-span-2 lg:col-span-1">
-            <Link to="/" className="inline-flex items-center gap-2">
-              <Logo
-                markSize={32}
-                textClassName="text-xl"
-                splitClassName="text-white"
-              />
-            </Link>
-
-            <p className="mt-3 text-sm font-medium text-splitpe-400">
-              हिसाब भी, दोस्ती भी
+    <footer className="px-4 pb-6 sm:px-[4%]">
+      <div className="glass-card mx-auto max-w-[90rem] px-6 sm:px-10">
+        <div className="grid gap-10 py-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr] lg:py-12">
+          <div>
+            <SiteLogo />
+            <p className="mt-4 max-w-sm text-sm leading-7 text-slate-600">
+              Split expenses, track shared spending and settle up over UPI —
+              without the awkward reminders.
             </p>
+            <a
+              href={PLAY_STORE_URL}
+              target="_blank"
+              rel="noopener"
+              className="mt-5 inline-flex items-center gap-3 rounded-[14px] border border-zinc-700 bg-black px-5 py-2.5 text-white shadow-[0_14px_30px_rgba(0,0,0,0.2)] transition hover:-translate-y-0.5"
+            >
+              <PlayIcon className="h-7 w-7" />
+              <span className="flex flex-col text-left leading-tight">
+                <small className="text-[0.62rem] tracking-wider">GET IT ON</small>
+                <b className="font-nav text-[1.2rem] font-bold">Google Play</b>
+              </span>
+            </a>
+          </div>
 
-            <p className="mt-4 max-w-sm text-sm leading-7 text-slate-400">
-              Split expenses, track shared spending, and settle up with less
-              hassle. SplitPe makes managing money with friends simple.
-            </p>
-
-            <div className="mt-6 flex items-center gap-3">
-              <a
-                href="mailto:support@splitpe.app"
-                aria-label="Email"
-                className="rounded-lg border border-slate-800 p-2.5 transition hover:border-slate-700 hover:bg-slate-900"
-              >
-                <Mail className="h-4 w-4" />
-              </a>
+          {columns.map((col) => (
+            <div key={col.title}>
+              <h3 className="font-heading text-sm font-extrabold uppercase tracking-[0.12em] text-[#0b1530]">
+                {col.title}
+              </h3>
+              <ul className="mt-4 space-y-3 text-sm">
+                {col.links.map((link) => (
+                  <li key={link.label}>
+                    {"to" in link ? (
+                      <Link
+                        to={link.to}
+                        className="inline-flex items-center gap-1 font-medium text-slate-600 transition hover:text-splitpe-600"
+                      >
+                        {link.label}
+                        <ArrowUpRight className="h-3.5 w-3.5 opacity-60" />
+                      </Link>
+                    ) : (
+                      <a
+                        href={link.href}
+                        target={link.href.startsWith("http") ? "_blank" : undefined}
+                        rel="noopener"
+                        className="inline-flex items-center gap-1.5 font-medium text-slate-600 transition hover:text-splitpe-600"
+                      >
+                        {link.href.startsWith("mailto") && <Mail className="h-3.5 w-3.5" />}
+                        {link.label}
+                      </a>
+                    )}
+                  </li>
+                ))}
+              </ul>
             </div>
-          </div>
-
-          <div>
-            <h3 className="text-sm font-semibold text-white">Product</h3>
-
-            <ul className="mt-5 space-y-3 text-sm">
-              <li>
-                <a
-                  href="/#features"
-                  className="transition hover:text-white"
-                >
-                  Features
-                </a>
-              </li>
-
-              <li>
-                <a
-                  href="/#how-it-works"
-                  className="transition hover:text-white"
-                >
-                  How It Works
-                </a>
-              </li>
-
-              <li>
-                <a href="/#about" className="transition hover:text-white">
-                  Privacy & Trust
-                </a>
-              </li>
-
-              <li>
-                <a href="/#download" className="transition hover:text-white">
-                  Get Started
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="text-sm font-semibold text-white">Company</h3>
-
-            <ul className="mt-5 space-y-3 text-sm">
-              <li>
-                <a href="/#about" className="transition hover:text-white">
-                  About SplitPe
-                </a>
-              </li>
-
-              <li>
-                <a
-                  href="mailto:support@splitpe.app"
-                  className="transition hover:text-white"
-                >
-                  Contact
-                </a>
-              </li>
-
-              <li>
-                <a
-                  href="mailto:support@splitpe.app"
-                  className="transition hover:text-white"
-                >
-                  Support
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="text-sm font-semibold text-white">Legal</h3>
-
-            <ul className="mt-5 space-y-3 text-sm">
-              <li>
-                <Link
-                  to="/privacy-policy"
-                  className="inline-flex items-center gap-1 transition hover:text-white"
-                >
-                  Privacy Policy
-                  <ArrowUpRight className="h-3.5 w-3.5" />
-                </Link>
-              </li>
-
-              <li>
-                <Link
-                  to="/terms-and-conditions"
-                  className="inline-flex items-center gap-1 transition hover:text-white"
-                >
-                  Terms & Conditions
-                  <ArrowUpRight className="h-3.5 w-3.5" />
-                </Link>
-              </li>
-
-              <li>
-                <Link
-                  to="/delete-account"
-                  className="inline-flex items-center gap-1 transition hover:text-white"
-                >
-                  Delete Account
-                  <ArrowUpRight className="h-3.5 w-3.5" />
-                </Link>
-              </li>
-            </ul>
-          </div>
+          ))}
         </div>
 
-        <div className="flex flex-col gap-3 border-t border-slate-800 py-6 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2 border-t border-slate-900/[0.06] py-5 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
           <p>
-            © {new Date().getFullYear()} SplitPe · Rao Technologies. All
-            rights reserved.
+            © {new Date().getFullYear()} SplitPe · Rao Technologies. All rights
+            reserved.
           </p>
-
-          <p>हिसाब भी, दोस्ती भी</p>
+          <p className="font-hindi font-bold text-[#15803d]">हिसाब भी, दोस्ती भी</p>
         </div>
       </div>
     </footer>

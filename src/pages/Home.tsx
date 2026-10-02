@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
 // The animated landing page lives as a standalone file in public/landing.html.
 // It ships its own global styles (no-scroll body, custom fonts, etc.), so it is
@@ -16,9 +17,12 @@ export default function Home() {
     };
   }, []);
 
+  // Forward the hash (e.g. /#upcoming) so deep links open the right panel.
+  const { hash } = useLocation();
+
   return (
     <iframe
-      src={LANDING_SRC}
+      src={LANDING_SRC + hash}
       title="SplitPe — split bills, keep friends"
       className="fixed inset-0 h-[100dvh] w-full border-0"
     />

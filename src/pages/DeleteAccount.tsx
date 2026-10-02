@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, Trash2, Mail, AlertTriangle, Zap } from "lucide-react";
+import PageHero from "../components/PageHero";
+import { Trash2, Mail, AlertTriangle, Zap } from "lucide-react";
 
 const steps = [
   {
@@ -34,38 +35,18 @@ const dataRetained = [
 
 export default function DeleteAccount() {
   return (
-    <div className="bg-white">
-      <section className="border-b border-slate-100 bg-slate-50">
-        <div className="container-page py-14 sm:py-16 lg:py-20">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-splitpe-600 transition hover:text-splitpe-700"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to SplitPe
-          </Link>
+    <div>
+      <PageHero
+        icon={Trash2}
+        tag="एक टैप में डिलीट"
+        title="Delete your"
+        highlight="account."
+        meta={[{ label: "Last updated", value: "September 25, 2026" }]}
+      />
 
-          <div className="mt-8 flex items-start gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-splitpe-100 text-splitpe-700">
-              <Trash2 className="h-6 w-6" />
-            </div>
-
-            <div>
-              <h1 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl lg:text-5xl">
-                Delete Your Account
-              </h1>
-
-              <p className="mt-3 text-sm text-slate-500">
-                Last updated: September 25, 2026
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <article className="container-page max-w-4xl py-12 sm:py-16 lg:py-20">
-        <div className="max-w-none">
-          <div className="flex items-start gap-3 rounded-2xl border border-mint-100 bg-mint-50 p-5">
+      <article className="container-page max-w-5xl pb-16 sm:pb-20">
+        <div className="legal glass-card rise p-6 sm:p-10 lg:p-12" style={{ animationDelay: "0.3s" }}>
+          <div className="flex items-start gap-3 rounded-[22px] border border-mint-200 bg-mint-50/90 p-5">
             <Zap className="h-5 w-5 shrink-0 text-mint-700" />
             <p className="text-sm leading-6 text-mint-800 sm:text-base">
               <strong className="font-semibold">
@@ -92,7 +73,7 @@ export default function DeleteAccount() {
               {steps.map((step) => (
                 <div
                   key={step.number}
-                  className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+                  className="rounded-[22px] border border-white bg-white/80 p-6 shadow-[0_14px_34px_-14px_rgba(30,64,175,0.25)] transition duration-300 hover:-translate-y-1"
                 >
                   <span className="text-xs font-bold tracking-widest text-splitpe-600">
                     STEP {step.number}
@@ -133,7 +114,7 @@ export default function DeleteAccount() {
                   key={item}
                   className="flex items-start gap-3 text-sm leading-7 text-slate-600 sm:text-base"
                 >
-                  <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-splitpe-500" />
+                  <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gradient-to-br from-splitpe-600 to-mint-500" />
                   {item}
                 </li>
               ))}
@@ -151,14 +132,14 @@ export default function DeleteAccount() {
                   key={item}
                   className="flex items-start gap-3 text-sm leading-7 text-slate-600 sm:text-base"
                 >
-                  <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-splitpe-500" />
+                  <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gradient-to-br from-splitpe-600 to-mint-500" />
                   {item}
                 </li>
               ))}
             </ul>
           </section>
 
-          <section className="mt-10 flex gap-4 rounded-2xl border border-amber-100 bg-amber-50 p-6">
+          <section className="mt-10 flex gap-4 rounded-[22px] border border-amber-200 bg-amber-50/90 p-6">
             <AlertTriangle className="h-6 w-6 shrink-0 text-amber-600" />
 
             <div>
@@ -176,7 +157,7 @@ export default function DeleteAccount() {
             </div>
           </section>
 
-          <section className="mt-10 rounded-2xl border border-splitpe-100 bg-splitpe-50 p-6">
+          <section className="mt-10 callout p-6">
             <div className="flex items-start gap-3">
               <Mail className="mt-0.5 h-5 w-5 shrink-0 text-splitpe-700" />
 
