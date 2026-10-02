@@ -1,4 +1,10 @@
-import { BrowserRouter, Route, Routes, useNavigate } from "react-router-dom";
+import {
+  BrowserRouter,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import { useEffect } from "react";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -23,9 +29,13 @@ function RedirectHandler() {
 }
 
 function Layout() {
+  const { pathname } = useLocation();
+  // The home route is the full-screen landing page, which has its own header.
+  const isLanding = pathname === "/";
+
   return (
     <div className="flex min-h-screen flex-col bg-white text-slate-900">
-      <Navbar />
+      {!isLanding && <Navbar />}
 
       <main className="flex-1">
         <RedirectHandler />
@@ -38,7 +48,7 @@ function Layout() {
         </Routes>
       </main>
 
-      <Footer />
+      {!isLanding && <Footer />}
     </div>
   );
 }
