@@ -68,6 +68,48 @@ export default function useLandingAnimations(rootRef: RefObject<HTMLDivElement |
         return { rx: 0, ry: 0, angle: Math.random() * 360, baseX: 0, baseY: 0, op: parseFloat(getComputedStyle(b).opacity) };
       });
 
+      // The floating layers sit in an "orbit" box hugging the phone, and each
+      // token is kept inside it, so nothing drifts over the headline or cards.
+      const orbit = { w: 0, h: 0 };
+      const home = berries.map(() => ({ cx: 0, cy: 0, r: 0 }));
+      const layoutOrbit = () => {
+        const phoneLeft = heroCenter.offsetLeft + phoneStage.offsetLeft;
+        const phoneRight = phoneLeft + phoneStage.offsetWidth;
+        let left = phoneLeft - 24;
+        let right = phoneRight + 24;
+        if (!isCompact()) {
+          // Side by side: only the free strip between the copy and the cards,
+          // even where the phone itself tucks under the copy on narrower screens
+          const heroLeft = $(".hero-left");
+          const copyRight = heroLeft.offsetLeft + heroLeft.offsetWidth;
+          const cardsLeft = Math.min(...$$(".product-carousel, .side-title").map((el) => el.offsetLeft));
+          left = Math.max(phoneLeft - 60, copyRight + 8);
+          right = Math.min(phoneRight + 60, cardsLeft - 8);
+        }
+        const padY = 16;
+        const box = {
+          left: left + "px",
+          top: heroCenter.offsetTop + phoneStage.offsetTop - padY + "px",
+          width: Math.max(0, right - left) + "px",
+          height: phoneStage.offsetHeight + padY * 2 + "px",
+          right: "auto",
+          bottom: "auto",
+        };
+        [berriesFG, berriesBG, leavesBG].forEach((el) => Object.assign(el.style, box));
+        orbit.w = berriesFG.clientWidth;
+        orbit.h = berriesFG.clientHeight;
+        // The logo marks need some room around the phone; drop them when it's tight
+        leavesBG.style.display = orbit.w < 320 ? "none" : "";
+        berries.forEach((b, i) => {
+          // The visible token is the middle ~38% of its slot; 12px spare for parallax
+          home[i] = { cx: b.offsetLeft + b.offsetWidth / 2, cy: b.offsetTop + b.offsetHeight / 2, r: b.offsetWidth * 0.19 + 12 };
+        });
+      };
+      const clampTo = (v: number, centre: number, r: number, size: number) =>
+        size < r * 2 ? size / 2 - centre : Math.min(Math.max(v, r - centre), size - r - centre);
+      const clampX = (i: number, x: number) => clampTo(x, home[i].cx, home[i].r, orbit.w);
+      const clampY = (i: number, y: number) => clampTo(y, home[i].cy, home[i].r, orbit.h);
+
       // Fit the 300×640 phone into whatever space the stage has
       const fitPhone = () => {
         const host = phoneStage.parentElement!;
@@ -75,9 +117,13 @@ export default function useLandingAnimations(rootRef: RefObject<HTMLDivElement |
         phoneStage.style.setProperty("--ps", s.toFixed(3));
         phoneStage.style.width = 300 * s + "px";
         phoneStage.style.height = 640 * s + "px";
+        layoutOrbit();
       };
       fitPhone();
-      listen("resize", fitPhone);
+      // Also re-fit when the copy above the phone reflows (fonts loading, etc.)
+      const ro = new ResizeObserver(fitPhone);
+      ro.observe(root.querySelector(".hero-content")!);
+      cleanups.push(() => ro.disconnect());
 
       // ---------- Phone boot: splash (logo) screen -> Home dashboard ----------
       let bootTl: gsap.core.Timeline | null = null;
@@ -163,8 +209,8 @@ export default function useLandingAnimations(rootRef: RefObject<HTMLDivElement |
           const parent = (berry.offsetParent as HTMLElement).getBoundingClientRect();
           const centerX = phoneCx - (parent.left + berry.offsetLeft + berry.offsetWidth / 2);
           const centerY = phoneCy - (parent.top + berry.offsetTop + berry.offsetHeight / 2);
-          const nextX = (Math.random() - 0.5) * 200;
-          const nextY = (Math.random() - 0.5) * 200;
+          const nextX = clampX(i, (Math.random() - 0.5) * 80);
+          const nextY = clampY(i, (Math.random() - 0.5) * 80);
 
           gsap.set(berry, { rotation: s.angle, x: s.baseX, y: s.baseY });
           gsap
@@ -264,9 +310,9 @@ export default function useLandingAnimations(rootRef: RefObject<HTMLDivElement |
         if (window.scrollY > window.innerHeight * 1.2) return;
 
         phone.style.transform = `rotateY(${smooth.x * 40 + switchSpin + introSpin.val}deg) rotateX(${-smooth.y * 20}deg)`;
-        berriesFG.style.transform = `translate(${smooth.x * 60}px, ${smooth.y * 60}px)`;
-        berriesBG.style.transform = `translate(${smooth.x * -30}px, ${smooth.y * -30}px)`;
-        leavesBG.style.transform = `translate(${smooth.x * -15}px, ${smooth.y * -15}px)`;
+        berriesFG.style.transform = `translate(${smooth.x * 20}px, ${smooth.y * 20}px)`;
+        berriesBG.style.transform = `translate(${smooth.x * -12}px, ${smooth.y * -12}px)`;
+        leavesBG.style.transform = `translate(${smooth.x * -8}px, ${smooth.y * -8}px)`;
 
         if (!isSwitching) {
           berries.forEach((berry, i) => {
@@ -280,8 +326,8 @@ export default function useLandingAnimations(rootRef: RefObject<HTMLDivElement |
             let speed = 1;
             if (dist < 400 && dist > 0) {
               const force = (400 - dist) / 400;
-              tx = (dx / dist) * force * -80;
-              ty = (dy / dist) * force * -80;
+              tx = (dx / dist) * force * -50;
+              ty = (dy / dist) * force * -50;
               speed = 1 + force * 5;
             }
             s.rx += (tx - s.rx) * 0.1;
@@ -292,7 +338,9 @@ export default function useLandingAnimations(rootRef: RefObject<HTMLDivElement |
             const phase = (time + i * 0.7) * ((Math.PI * 2) / dur);
             const floatY = Math.sin(phase) * 15;
             const floatAngle = Math.cos(phase) * 6;
-            berry.style.transform = `translate(${s.rx + s.baseX}px, ${s.ry + s.baseY + floatY}px) rotate(${s.angle + floatAngle}deg)`;
+            const x = clampX(i, s.rx + s.baseX);
+            const y = clampY(i, s.ry + s.baseY + floatY);
+            berry.style.transform = `translate(${x}px, ${y}px) rotate(${s.angle + floatAngle}deg)`;
             const tok = berry.firstElementChild as HTMLElement | null;
             if (tok) tok.style.rotate = `${-s.angle}deg`;
           });
@@ -301,7 +349,7 @@ export default function useLandingAnimations(rootRef: RefObject<HTMLDivElement |
         leaves.forEach((leaf, i) => {
           const dur = 10 + i * 2;
           const phase = (time + i * 1.2) * ((Math.PI * 2) / dur);
-          leaf.style.transform = `translate(${Math.cos(phase * 0.5) * 15}px, ${Math.sin(phase) * 20}px) rotate(${Math.sin(phase * 0.3) * 15}deg)`;
+          leaf.style.transform = `translate(${Math.cos(phase * 0.5) * 6}px, ${Math.sin(phase) * 20}px) rotate(${Math.sin(phase * 0.3) * 15}deg)`;
         });
       };
       raf = requestAnimationFrame(frame);

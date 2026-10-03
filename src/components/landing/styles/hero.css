@@ -20,10 +20,12 @@
     transition: transform 0.1s ease-out;
 }
 .leaf { position: absolute; width: 48px; height: auto; pointer-events: none; filter: drop-shadow(0 8px 16px rgba(30,64,175,0.18)); }
-.l1 { top: 8%;  left: 15%; }
-.l2 { top: 40%; left: 80%; width: 110px; opacity: 0.35; filter: blur(2px); }
-.l3 { top: 70%; left: 74%; width: 62px; opacity: 0.8; }
-.l4 { top: 84%; left: 22%; width: 96px; opacity: 0.25; filter: blur(3px); }
+/* Leaves and tokens live in an "orbit" box hugging the phone (sized in
+   useLandingAnimations), so they never drift over the headline or cards. */
+.l1 { top: 4%;  left: 6%; }
+.l2 { top: 40%; left: 78%; width: 64px; opacity: 0.35; filter: blur(2px); }
+.l3 { top: 76%; left: 82%; width: 44px; opacity: 0.8; }
+.l4 { top: 84%; left: 6%; width: 60px; opacity: 0.25; filter: blur(3px); }
 
 /* Left column */
 .hero-left {
@@ -117,15 +119,16 @@
 }
 .tile svg { width: 48%; height: 48%; stroke-width: 2.2; }
 
-.b1 { top: 25%; left: 30%; width: 220px; height: 220px; }
-.b2 { top: 60%; left: 42%; width: 100px; height: 100px; }
-.b3 { top: 30%; left: 62%; width: 250px; height: 250px; }
-.b4 { top: 15%; left: 48%; width: 140px; height: 140px; }
-.b5 { top: 75%; left: 20%; width: 120px; height: 120px; }
-.b6 { top: 45%; left: 75%; width: 180px; height: 180px; }
-.b7 { top: 15%; left: 40%; width: 80px; height: 80px; opacity: 0.7; }
-.b8 { top: 50%; left: 55%; width: 70px; height: 70px; opacity: 0.6; }
-.b9 { top: 80%; left: 35%; width: 75px; height: 75px; opacity: 0.7; }
+/* Positions are the token centre, as % of the orbit box */
+.b1 { top: 22%; left: 8%;  width: 170px; height: 170px; margin: -85px; }
+.b2 { top: 62%; left: 92%; width: 100px; height: 100px; margin: -50px; }
+.b3 { top: 28%; left: 90%; width: 190px; height: 190px; margin: -95px; }
+.b4 { top: 4%;  left: 50%; width: 140px; height: 140px; margin: -70px; }
+.b5 { top: 78%; left: 10%; width: 120px; height: 120px; margin: -60px; }
+.b6 { top: 88%; left: 85%; width: 150px; height: 150px; margin: -75px; }
+.b7 { top: 50%; left: 18%; width: 80px; height: 80px; margin: -40px; opacity: 0.7; }
+.b8 { top: 50%; left: 78%; width: 70px; height: 70px; margin: -35px; opacity: 0.6; }
+.b9 { top: 96%; left: 45%; width: 75px; height: 75px; margin: -37.5px; opacity: 0.7; }
 
 /* ---------- Right column ---------- */
 .hero-right {
@@ -187,7 +190,7 @@
 .side-title { align-self: flex-end; text-align: right; }
 
 /* ---------- Headline line masks ---------- */
-.line { display: block; overflow: hidden; padding: 0 0.06em 0.08em; margin: 0 -0.06em -0.08em; }
+.line { display: block; overflow: hidden; padding: 0 0.14em 0.24em; margin: 0 -0.14em -0.24em; }
 .line > span { display: inline-block; will-change: transform; }
 
 /* ---------- Floating toasts around the phone ---------- */
@@ -216,10 +219,16 @@
 
 /* ---------- Rolling headline: "Split bills" <-> "Keep friendship" ---------- */
 .main-title { font-size: clamp(3.6rem, 6.9vw, 8.6rem); }
-.main-title .line { height: 1.26em; padding: 0.12em 0.06em 0; margin: -0.12em -0.06em -0.2em; }
+.main-title .line { height: 1.26em; padding: 0.12em 0.14em 0; margin: -0.12em -0.14em -0.2em; }
 /* `.main-title .roll` outranks `.line > span { display: inline-block }` so the flex gap applies */
 .main-title .roll { display: inline-flex; flex-direction: column; gap: 0.5em; vertical-align: top; }
 .roll > span { display: block; height: 0.94em; line-height: 0.86; padding-bottom: 0.08em; }
+/* background-clip: text only paints inside the box, so give the gradient words
+   room for descenders (the "p") and the last letter's overhang (the "s"),
+   then take that room back with negative margins so the layout doesn't move */
+.main-title .grad-text, .side-title .grad-text { padding-right: 0.12em; margin-right: -0.12em; }
+.side-title .grad-text { padding-bottom: 0.2em; margin-bottom: -0.2em; }
+.roll > span.grad-text { height: 1.14em; padding-bottom: 0.28em; margin-bottom: -0.2em; }
 
 /* ---------- Responsive ---------- */
 @media (max-width: 1200px) {
@@ -232,10 +241,8 @@
     .hero { overflow-x: clip; }
     .description br { display: none; }
     .berries-container { z-index: 0; } /* tokens pass behind the phone, never over its screen/logo */
-    .leaf.l1 { display: none; }
     .tile { inset: 36%; }
     .coin { inset: 41%; }
-    .leaf.l1 { opacity: 0.35; left: 6%; }
     .hero { height: auto; padding: 5.6rem 16px 3rem; }
     .hero-content { flex-direction: column; align-items: center; height: auto; gap: 1.6rem; }
     .hero-left { gap: 1.1rem; }
@@ -251,7 +258,6 @@
     .roll > span { text-align: center; }
     .side-title { align-self: center; text-align: center; }
     .product-carousel { align-items: center; padding-top: 4rem; }
-    .leaf.l2, .leaf.l3 { left: 70%; }
     .pill-row, .cta-group { justify-content: center; }
     .cta-note { justify-content: center; }
     .float-toast { transform: scale(0.9); }
