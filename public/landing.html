@@ -937,9 +937,9 @@ body.modal-open { overflow: hidden !important; }
                 </a>
                 <span class="tag-pill"><svg class="i"><use href="#i-check"/></svg>हिसाब भी, दोस्ती भी</span>
             </div>
-            <h1 class="main-title" aria-label="Split bills. Keep friendship.">
+            <h1 class="main-title" aria-label="Split bills, keep friendship">
                 <span class="line"><span class="roll" aria-hidden="true"><span>Split</span><span>Keep</span></span></span>
-                <span class="line"><span class="roll" aria-hidden="true"><span class="grad-text">bills.</span><span class="grad-text">friendship.</span></span></span>
+                <span class="line"><span class="roll" aria-hidden="true"><span class="grad-text">bills</span><span class="grad-text">friendship</span></span></span>
             </h1>
             <p class="description">
                 Trips, flatmates, late-night chai — add it once, <br>
@@ -1595,7 +1595,7 @@ function intro() {
         .add(() => { if (location.hash === '#upcoming') openUpcoming(); });
 }
 
-// "Split bills." rolls to "Keep friendship." and back, forever
+// "Split bills" rolls to "Keep friendship" and back, forever
 function startRoller() {
     const rolls = document.querySelectorAll('.main-title .roll');
     const step = (i, el) => -(el.children[1].offsetTop - el.children[0].offsetTop);
