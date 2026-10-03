@@ -29,9 +29,20 @@ function RedirectHandler() {
   return null;
 }
 
+// A new page starts at the top (links to /#section scroll themselves).
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    if (!window.location.hash) window.scrollTo({ top: 0, behavior: "instant" });
+  }, [pathname]);
+
+  return null;
+}
+
 function Layout() {
   const { pathname } = useLocation();
-  // The home route is the full-screen landing page, which has its own header.
+  // The home route is the landing page, which brings its own header, backdrop and footer.
   const isLanding = pathname === "/";
 
   return (
@@ -41,6 +52,7 @@ function Layout() {
 
       <main className="flex-1">
         <RedirectHandler />
+        <ScrollToTop />
 
         <Routes>
           <Route path="/" element={<Home />} />

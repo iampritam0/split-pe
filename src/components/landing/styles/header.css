@@ -1,0 +1,92 @@
+/* ---------- Header ---------- */
+.header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1.6rem 4%;
+    position: fixed; top: 0; width: 100%; z-index: 120;
+    transition: padding 0.35s ease, background 0.35s ease, box-shadow 0.35s ease;
+}
+/* Once the visitor scrolls past the hero top, the header gets a frosted bar */
+.header.scrolled {
+    padding-top: 0.9rem; padding-bottom: 0.9rem;
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    box-shadow: 0 10px 30px -18px rgba(30, 64, 175, 0.35);
+}
+.logo {
+    display: flex; align-items: center; gap: 0.55rem; text-decoration: none; color: var(--text-color);
+}
+.logo img { width: 30px; height: auto; }
+.logo-word { display: flex; flex-direction: column; line-height: 1; }
+.logo-word b { font-family: var(--font-heading); font-weight: 900; font-size: 1.55rem; letter-spacing: -0.03em; }
+.logo-word small { font-family: var(--font-hindi); font-weight: 700; font-size: 0.68rem; margin-top: 1px; padding-left: 1.6rem; }
+
+.nav {
+    display: flex; gap: 0.35rem; padding: 0.4rem; border-radius: 100px;
+}
+.nav.glass {
+    position: relative;
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 8px 32px rgba(30, 64, 175, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+}
+.nav-item {
+    font-family: 'Manrope', sans-serif; color: var(--muted-color); text-decoration: none;
+    font-size: 0.85rem; font-weight: 700; padding: 0.5rem 1.2rem; border-radius: 100px;
+    transition: all 0.3s ease;
+}
+.nav-item:hover, .nav-item.active { background: var(--brand-gradient); color: #fff; }
+.nav-new {
+    display: inline-block; margin-left: 0.4rem; padding: 0.12rem 0.42rem; border-radius: 100px;
+    background: #dcfce7; color: #15803d; font-size: 0.58rem; font-weight: 800; letter-spacing: 0.06em; vertical-align: 2px;
+}
+
+/* Compact Google Play badge used in the header */
+.play-badge.header-play { padding: 0.45rem 1.05rem 0.45rem 0.8rem; border-radius: 12px; gap: 0.55rem; box-shadow: 0 10px 22px rgba(0,0,0,0.22); }
+.header-play svg { width: 24px; height: 24px; }
+.header-play small { font-size: 0.52rem; }
+.header-play b { font-size: 1.02rem; }
+
+/* ---------- Mobile / tablet menu ---------- */
+.menu-btn {
+    display: none; width: 44px; height: 44px; border-radius: 50%; flex: none; cursor: pointer;
+    background: rgba(255,255,255,0.75); border: 1px solid #fff; box-shadow: 0 6px 16px rgba(30,64,175,0.1);
+    flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+}
+.menu-btn span { display: block; width: 18px; height: 2px; border-radius: 2px; background: var(--text-color); transition: transform 0.35s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.2s; }
+.menu-btn.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+.menu-btn.open span:nth-child(2) { opacity: 0; }
+.menu-btn.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+.menu-scrim { position: fixed; inset: 0; z-index: 118; background: rgba(11, 21, 48, 0.25); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
+.mobile-menu {
+    position: fixed; top: 80px; left: 12px; right: 12px; z-index: 119;
+    background: rgba(255,255,255,0.94); border: 1px solid #fff; border-radius: 26px; padding: 10px;
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 30px 60px -15px rgba(30, 64, 175, 0.35);
+    display: flex; flex-direction: column; gap: 10px; transform-origin: top right;
+}
+.mobile-menu nav { display: flex; flex-direction: column; }
+.mm-link {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 15px 16px; border-radius: 16px; text-decoration: none;
+    font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 1.02rem; color: var(--text-color);
+}
+.mm-link + .mm-link { border-top: 1px solid rgba(15, 23, 42, 0.06); }
+.mm-link > span { display: flex; align-items: center; }
+.mm-link svg { width: 18px; height: 18px; color: #94a3b8; }
+.mm-link:hover { background: #eef4ff; }
+.mm-play { align-self: stretch; justify-content: center; margin: 4px 6px 6px; }
+
+@media (max-width: 1200px) {
+    .nav-item { padding: 0.5rem 0.8rem; }
+}
+
+@media (max-width: 900px) {
+    .header, .header.scrolled { padding: 1rem 16px; background: rgba(255,255,255,0.88); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+    .nav { display: none; }
+    .menu-btn { display: flex; }
+    .play-badge.header-play { margin-left: auto; margin-right: 10px; padding: 0.4rem 0.8rem 0.4rem 0.65rem; }
+    .header-play svg { width: 20px; height: 20px; }
+    .header-play b { font-size: 0.92rem; }
+    .header-play small { font-size: 0.48rem; }
+}

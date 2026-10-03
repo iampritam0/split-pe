@@ -8,13 +8,14 @@ type NavItem =
   | { label: string; to: string; badge?: string; end?: boolean }
   | { label: string; href: string; badge?: string };
 
-// Mirrors the header of the landing page (public/landing.html).
+// Mirrors the header of the landing page (components/landing/LandingHeader).
+// Legal pages (Privacy, Terms, Delete account) live in the footer.
 const navItems: NavItem[] = [
   { label: "Home", to: "/", end: true },
+  { label: "Features", to: "/#features" },
+  { label: "How it works", to: "/#how-it-works" },
   { label: "Upcoming", to: "/#upcoming", badge: "NEW" },
-  { label: "Privacy", to: "/privacy-policy" },
-  { label: "Terms", to: "/terms-and-conditions" },
-  { label: "Delete account", to: "/delete-account" },
+  { label: "FAQ", to: "/#faq" },
   { label: "Support", href: "mailto:support@splitpe.app" },
 ];
 

@@ -9,8 +9,10 @@ const columns: { title: string; links: FooterLink[] }[] = [
   {
     title: "Product",
     links: [
-      { label: "Home", to: "/" },
+      { label: "Features", to: "/#features" },
+      { label: "How it works", to: "/#how-it-works" },
       { label: "Upcoming features", to: "/#upcoming" },
+      { label: "FAQ", to: "/#faq" },
       { label: "Get the app", href: PLAY_STORE_URL },
     ],
   },

@@ -6,7 +6,7 @@ export default {
   ],
   theme: {
     extend: {
-      // Same type system as the landing page (public/landing.html)
+      // Same type system as the landing page (src/components/landing)
       fontFamily: {
         heading: ["Outfit", "Inter", "sans-serif"],
         hindi: ['"Baloo 2"', "sans-serif"],
