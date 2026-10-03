@@ -102,10 +102,14 @@ export default function Navbar() {
             href={PLAY_STORE_URL}
             target="_blank"
             rel="noopener"
-            className="inline-flex items-center gap-2 rounded-full bg-[#0b1530] px-4 py-3 text-[0.85rem] font-semibold text-white transition hover:bg-slate-800 sm:px-6"
+            aria-label="Get SplitPe on Google Play"
+            className="inline-flex items-center gap-2 rounded-xl border border-zinc-700 bg-black py-1.5 pl-2.5 pr-3.5 text-white shadow-[0_10px_22px_rgba(0,0,0,0.22)] transition hover:-translate-y-0.5 sm:gap-2.5 sm:pl-3 sm:pr-4"
           >
-            <PlayIcon />
-            Download<span className="hidden xl:inline">&nbsp;on Android</span>
+            <PlayIcon className="h-5 w-5 sm:h-6 sm:w-6" />
+            <span className="flex flex-col text-left leading-tight">
+              <small className="text-[0.48rem] tracking-wider sm:text-[0.52rem]">GET IT ON</small>
+              <b className="font-nav text-[0.92rem] font-bold sm:text-[1.02rem]">Google Play</b>
+            </span>
           </a>
 
           <button

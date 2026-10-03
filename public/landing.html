@@ -119,6 +119,11 @@ body.green-theme {
 }
 .contact-btn:hover { background: #1e293b; }
 .contact-btn svg { width: 16px; height: 16px; }
+/* Compact Google Play badge used in the header */
+.play-badge.header-play { padding: 0.45rem 1.05rem 0.45rem 0.8rem; border-radius: 12px; gap: 0.55rem; box-shadow: 0 10px 22px rgba(0,0,0,0.22); }
+.header-play svg { width: 24px; height: 24px; }
+.header-play small { font-size: 0.52rem; }
+.header-play b { font-size: 1.02rem; }
 
 /* ---------- Hero ---------- */
 .hero {
@@ -380,30 +385,31 @@ body.green-theme {
     transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .token {
-    position: absolute; inset: 31%; border-radius: 50%;
+    position: absolute; inset: 31%;
     display: grid; place-items: center; line-height: 1;
 }
-.token::before { content: ''; position: absolute; inset: 9%; border-radius: 50%; }
+/* Rupee coin — one gold "rupee" colour, smaller than the category tiles */
 .coin {
-    background: radial-gradient(circle at 32% 26%, #fffbe6 0%, #fde68a 18%, #fbbf24 45%, #d97706 80%, #92400e 100%);
-    box-shadow: inset -3cqw -4cqw 7cqw rgba(120, 53, 15, 0.45), inset 2cqw 2cqw 4cqw rgba(255,255,255,0.5), 0 8cqw 14cqw -2cqw rgba(15, 23, 42, 0.3);
-    color: #92400e; font-family: var(--font-heading); font-weight: 800; font-size: 30cqw;
-    text-shadow: 0 0.8cqw 0 rgba(255, 247, 214, 0.8);
+    inset: 37%; border-radius: 50%;
+    background: radial-gradient(circle at 32% 26%, #fff8db 0%, #fde68a 20%, #f5b82e 48%, #d4900f 78%, #8a5a06 100%);
+    box-shadow: inset -2.5cqw -3cqw 5cqw rgba(120, 72, 6, 0.45), inset 2cqw 2cqw 3cqw rgba(255,255,255,0.55), 0 7cqw 12cqw -2cqw rgba(15, 23, 42, 0.3);
+    color: #8a5a06; font-family: 'Baloo 2', 'Noto Sans', sans-serif; font-weight: 800; font-size: 18cqw;
+    text-shadow: 0 0.7cqw 0 rgba(255, 248, 219, 0.85);
 }
-.coin::before { border: 1.6cqw solid rgba(146, 64, 14, 0.28); }
-.coin.brand {
-    background: radial-gradient(circle at 32% 26%, #e0ecff 0%, #60a5fa 22%, #2563eb 50%, #0d9488 85%, #065f46 100%);
-    color: #fff; text-shadow: 0 1cqw 2cqw rgba(0,0,0,0.25);
-    box-shadow: inset -3cqw -4cqw 7cqw rgba(2, 44, 34, 0.45), inset 2cqw 2cqw 4cqw rgba(255,255,255,0.4), 0 8cqw 14cqw -2cqw rgba(15, 23, 42, 0.3);
+.coin::before {
+    content: ''; position: absolute; inset: 10%; border-radius: 50%;
+    border: 1.2cqw solid rgba(138, 90, 6, 0.3);
 }
-.coin.brand::before { border-color: rgba(255,255,255,0.35); }
-.chip {
-    background: radial-gradient(circle at 32% 26%, #ffffff 0%, #f8fafc 40%, #dbeafe 85%, #bfdbfe 100%);
-    box-shadow: inset -3cqw -4cqw 7cqw rgba(30, 64, 175, 0.18), 0 8cqw 14cqw -2cqw rgba(15, 23, 42, 0.25);
-    font-size: 30cqw;
+.coin span { margin-top: 1.5cqw; }
+/* Category tile — same style as the expense icons inside the SplitPe app */
+.tile {
+    border-radius: 30%;
+    background: linear-gradient(150deg, #ffffff 0%, var(--tbg) 75%);
+    color: var(--tfg);
+    border: 1cqw solid rgba(255, 255, 255, 0.95);
+    box-shadow: inset 0 -2.5cqw 5cqw rgba(15, 23, 42, 0.07), 0 8cqw 14cqw -2cqw rgba(15, 23, 42, 0.28);
 }
-.chip.mint { background: radial-gradient(circle at 32% 26%, #ffffff 0%, #f0fdf4 40%, #bbf7d0 85%, #86efac 100%); }
-.chip::before { border: 1cqw solid rgba(255,255,255,0.9); }
+.tile svg { width: 48%; height: 48%; stroke-width: 2.2; }
 
 .b1 { top: 25%; left: 30%; width: 220px; height: 220px; }
 .b2 { top: 60%; left: 42%; width: 100px; height: 100px; }
@@ -545,6 +551,7 @@ body.loading { overflow: hidden !important; }
     transform-origin: center;
 }
 .float-toast .ft-ic { width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; font-size: 23px; flex: none; }
+.float-toast .ft-ic svg { width: 24px; height: 24px; stroke-width: 2.2; }
 .float-toast b { display: block; font-size: 15.5px; font-weight: 800; }
 .float-toast small { font-size: 12.5px; color: #334155; font-weight: 500; }
 .t1 { top: 14%; right: 88%; } .t1 .ft-ic { background: #dcfce7; }
@@ -703,12 +710,17 @@ body.modal-open { overflow: hidden !important; }
     .description br { display: none; }
     .berries-container { z-index: 0; } /* tokens pass behind the phone, never over its screen/logo */
     .leaf.l1 { display: none; }
-    .token { inset: 36%; }
+    .tile { inset: 36%; }
+    .coin { inset: 41%; }
     .leaf.l1 { opacity: 0.35; left: 6%; }
     .header { padding: 1rem 16px; background: rgba(255,255,255,0.88); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
     .nav { display: none; }
     .menu-btn { display: flex; }
     .contact-btn { padding: 0.7rem 1.1rem; margin-left: auto; margin-right: 10px; }
+    .play-badge.header-play { margin-left: auto; margin-right: 10px; padding: 0.4rem 0.8rem 0.4rem 0.65rem; }
+    .header-play svg { width: 20px; height: 20px; }
+    .header-play b { font-size: 0.92rem; }
+    .header-play small { font-size: 0.48rem; }
     .hero { height: auto; padding: 5.6rem 16px 3rem; }
     .hero-content { flex-direction: column; align-items: center; height: auto; gap: 1.6rem; }
     .hero-left { gap: 1.1rem; }
@@ -753,6 +765,12 @@ body.modal-open { overflow: hidden !important; }
     <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/></symbol>
     <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m8.5 12 2.5 2.5 5-5"/></symbol>
     <symbol id="i-chev" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+    <symbol id="i-plane" viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></symbol>
+    <symbol id="i-cart" viewBox="0 0 24 24"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></symbol>
+    <symbol id="i-film" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 3v18"/><path d="M3 7.5h4"/><path d="M3 12h18"/><path d="M3 16.5h4"/><path d="M17 3v18"/><path d="M17 7.5h4"/><path d="M17 16.5h4"/></symbol>
+    <symbol id="i-car" viewBox="0 0 24 24"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></symbol>
+    <symbol id="i-zap" viewBox="0 0 24 24"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></symbol>
+    <symbol id="i-coffee" viewBox="0 0 24 24"><path d="M10 2v2"/><path d="M14 2v2"/><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"/><path d="M6 2v2"/></symbol>
     <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
     <symbol id="i-play" viewBox="0 0 24 24">
         <path fill="#00c3ff" d="M3.6 2.1 13.3 12l-9.7 9.9c-.4-.3-.6-.8-.6-1.3V3.4c0-.5.2-1 .6-1.3Z"/>
@@ -790,8 +808,9 @@ body.modal-open { overflow: hidden !important; }
         <a href="./delete-account" target="_top" class="nav-item">Delete account</a>
         <a href="mailto:support@splitpe.app" target="_top" class="nav-item">Support</a>
     </nav>
-    <a class="contact-btn magnetic" href="https://play.google.com/store/apps/details?id=com.raotechnologies.splitpe" target="_blank" rel="noopener">
-        <svg><use href="#i-play"/></svg>Download<span class="cb-long">&nbsp;on Android</span>
+    <a class="play-badge header-play magnetic" href="https://play.google.com/store/apps/details?id=com.raotechnologies.splitpe" target="_blank" rel="noopener" aria-label="Get SplitPe on Google Play">
+        <svg><use href="#i-play"/></svg>
+        <span><small>GET IT ON</small><b>Google Play</b></span>
     </a>
     <button class="menu-btn" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
         <span></span><span></span><span></span>
@@ -932,10 +951,6 @@ body.modal-open { overflow: hidden !important; }
                     <svg><use href="#i-play"/></svg>
                     <span><small>GET IT ON</small><b>Google Play</b></span>
                 </a>
-                <a class="primary-btn magnetic" href="./privacy-policy" target="_top">
-                    Privacy promise
-                    <span class="plus-icon">+</span>
-                </a>
                 <span class="cta-note"><svg><use href="#i-android"/></svg>Free to download on Android</span>
             </div>
             <div class="award-badge">
@@ -956,10 +971,10 @@ body.modal-open { overflow: hidden !important; }
         <div class="hero-center">
             <div class="phone-stage" id="phone-stage">
                 <div class="phone-shadow"></div>
-                <div class="float-toast t1"><span class="ft-ic">✅</span><div><b data-t>Aman paid you ₹500</b><small data-s>Settled via UPI · just now</small></div></div>
-                <div class="float-toast t2"><span class="ft-ic">✈️</span><div><b data-t>Goa Trip</b><small data-s>₹18,400 · split 4 ways</small></div></div>
+                <div class="float-toast t1"><span class="ft-ic" style="color:#16a34a;background:#cdf5df"><svg class="i"><use href="#i-swap"/></svg></span><div><b data-t>Aman paid you ₹500</b><small data-s>Settled via UPI · just now</small></div></div>
+                <div class="float-toast t2"><span class="ft-ic" style="color:#2563eb;background:#d6e4ff"><svg class="i"><use href="#i-plane"/></svg></span><div><b data-t>Goa Trip</b><small data-s>₹18,400 · split 4 ways</small></div></div>
                 <div class="phone-scale">
-                    <div class="phone" id="phone" data-screen="dash">
+                    <div class="phone" id="phone" data-screen="splash">
                         <div class="face front">
                             <div class="screen">
                                 <div class="island"></div>
@@ -1113,12 +1128,32 @@ let switchSpin = 0;
 const introSpin = { val: 0 };
 
 // "Hisaab" = rupee coins, "Dosti" = shared-moment chips
-const DOSTI_EMOJI = ['🍕', '✈️', '🏠', '☕', '🎬', '🛒', '🎉', '🚕', '🤝'];
+// What floats out of the phone: gold ₹ coins and the expense categories you
+// actually add in SplitPe, drawn like the app's own coloured icon tiles.
+const CATEGORIES = {
+    food:    { icon: 'i-food',    fg: '#ea8a0b', bg: '#ffe9c7' },
+    travel:  { icon: 'i-plane',   fg: '#2563eb', bg: '#d6e4ff' },
+    rent:    { icon: 'i-home',    fg: '#6d28d9', bg: '#e6ddff' },
+    grocery: { icon: 'i-cart',    fg: '#16a34a', bg: '#cdf5df' },
+    movie:   { icon: 'i-film',    fg: '#e11d48', bg: '#ffd9e0' },
+    cab:     { icon: 'i-car',     fg: '#0d9488', bg: '#c9f4ee' },
+    bills:   { icon: 'i-zap',     fg: '#ca8a04', bg: '#fdf0b5' },
+    chai:    { icon: 'i-coffee',  fg: '#9a5b13', bg: '#f6e3cf' },
+    group:   { icon: 'i-users',   fg: '#2563eb', bg: '#d6e4ff' },
+    settle:  { icon: 'i-swap',    fg: '#16a34a', bg: '#cdf5df' },
+    expense: { icon: 'i-receipt', fg: '#6d28d9', bg: '#e6ddff' },
+};
+const TOKEN_SETS = {
+    hisaab: ['coin', 'food', 'travel', 'coin', 'rent', 'expense', 'coin', 'grocery', 'settle'],
+    dosti:  ['group', 'movie', 'coin', 'cab', 'chai', 'settle', 'bills', 'coin', 'food'],
+};
+function tileHTML(key) {
+    const c = CATEGORIES[key];
+    return `<div class="token tile" style="--tfg:${c.fg};--tbg:${c.bg}"><svg class="i"><use href="#${c.icon}"/></svg></div>`;
+}
 function tokenHTML(flavor, i) {
-    if (flavor === 'dosti') {
-        return `<div class="token chip${i % 2 ? ' mint' : ''}">${DOSTI_EMOJI[i % DOSTI_EMOJI.length]}</div>`;
-    }
-    return `<div class="token coin${i % 3 === 2 ? ' brand' : ''}">₹</div>`;
+    const key = TOKEN_SETS[flavor][i % 9];
+    return key === 'coin' ? '<div class="token coin"><span>₹</span></div>' : tileHTML(key);
 }
 allBerries.forEach((b, i) => { b.innerHTML = tokenHTML('hisaab', i); });
 
@@ -1201,7 +1236,7 @@ function switchFlavor(flavor) {
         },
         onComplete: () => {
             body.classList.toggle('green-theme', flavor === 'dosti');
-            phone.dataset.screen = flavor === 'dosti' ? 'splash' : 'dash';
+            showSplash();
 
             gsap.to(spinObj, {
                 val: 720,
@@ -1215,6 +1250,7 @@ function switchFlavor(flavor) {
                 onComplete: () => {
                     switchSpin = 0;
                     phoneStage.style.filter = 'none';
+                    bootPhone(0.9);
                 }
             });
         }
@@ -1363,6 +1399,8 @@ function animate() {
             const floatAngle = Math.cos(phase) * 6;
 
             berry.style.transform = `translate(${rx + baseX}px, ${ry + baseY + floatY}px) rotate(${angle + floatAngle}deg)`;
+            const tok = berry.firstElementChild;
+            if (tok) tok.style.rotate = `${-angle}deg`;
         });
     }
 
@@ -1399,6 +1437,24 @@ function createBubble() {
 setInterval(createBubble, 400);
 
 // ---------- Dashboard numbers count up ----------
+// ---------- Phone boot: splash (logo) screen -> Home dashboard ----------
+let bootTl = null;
+function showSplash() {
+    if (bootTl) bootTl.kill();
+    gsap.set('.view-splash .s-body > *, .view-splash .s-foot, .view-dash > *', { clearProps: 'opacity,transform' });
+    // A push notification belongs to the Home screen — never leave one over the splash
+    gsap.to('.p-notif', { yPercent: 25, scale: 0.85, opacity: 0, duration: 0.25, overwrite: true });
+    phone.dataset.screen = 'splash';
+}
+function bootPhone(delay = 1.6) {
+    showSplash();
+    bootTl = gsap.timeline({ delay })
+        .to('.view-splash .s-body > *, .view-splash .s-foot', { y: -16, opacity: 0, stagger: 0.05, duration: 0.35, ease: 'power2.in' })
+        .add(() => { phone.dataset.screen = 'dash'; })
+        .fromTo('.view-dash > *', { y: 24, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.05, duration: 0.55, ease: 'power3.out' })
+        .add(countUp, '<0.15');
+}
+
 function countUp() {
     document.querySelectorAll('[data-count]').forEach(el => {
         const end = Number(el.dataset.count);
@@ -1420,14 +1476,14 @@ const NOTIFS = [
 ];
 const TOASTS = {
     t1: [
-        ['✅', 'Aman paid you ₹500', 'Settled via UPI · just now', '#dcfce7'],
-        ['🍕', 'Pizza night', '₹1,240 · split 4 ways', '#ffedd5'],
-        ['🤝', 'All settled with Neha', 'No dues left · दोस्ती intact', '#dcfce7'],
+        ['settle', 'Aman paid you ₹500', 'Settled via UPI · just now'],
+        ['food', 'Pizza night', '₹1,240 · split 4 ways'],
+        ['group', 'All settled with Neha', 'No dues left · दोस्ती intact'],
     ],
     t2: [
-        ['✈️', 'Goa Trip', '₹18,400 · split 4 ways', '#dbe8ff'],
-        ['🏠', 'Flat 302 · Rent', '₹9,000 each · auto-split', '#ebe5ff'],
-        ['☕', 'Office chai', 'You owe ₹80', '#fef3c7'],
+        ['travel', 'Goa Trip', '₹18,400 · split 4 ways'],
+        ['rent', 'Flat 302 · Rent', '₹9,000 each · auto-split'],
+        ['chai', 'Office chai', 'You owe ₹80'],
     ],
 };
 
@@ -1437,7 +1493,7 @@ function startLoops() {
     let n = 0;
     gsap.set(notif, { yPercent: 25, scale: 0.85, opacity: 0 });
     const showNotif = () => {
-        if (document.hidden) return;
+        if (document.hidden || phone.dataset.screen !== 'dash') return;
         const [t, s] = NOTIFS[n++ % NOTIFS.length];
         notif.querySelector('[data-n-t]').textContent = t;
         notif.querySelector('[data-n-s]').textContent = s;
@@ -1460,10 +1516,12 @@ function startLoops() {
                 .to(el, { rotationX: 90, opacity: 0, duration: 0.35, ease: 'power2.in' })
                 .add(() => {
                     i++;
-                    const [ic, t, s, bg] = TOASTS[k][i % TOASTS[k].length];
+                    const [cat, t, s] = TOASTS[k][i % TOASTS[k].length];
+                    const c = CATEGORIES[cat];
                     const icon = el.querySelector('.ft-ic');
-                    icon.textContent = ic;
-                    icon.style.background = bg;
+                    icon.innerHTML = `<svg class="i"><use href="#${c.icon}"/></svg>`;
+                    icon.style.color = c.fg;
+                    icon.style.background = c.bg;
                     el.querySelector('[data-t]').textContent = t;
                     el.querySelector('[data-s]').textContent = s;
                 })
@@ -1531,7 +1589,7 @@ function intro() {
         .from('.token', { scale: 0, duration: 0.9, stagger: 0.06, ease: 'back.out(2.2)' }, 'copy+=0.6')
         .from('.leaf', { opacity: 0, duration: 1.2, stagger: 0.1 }, 'copy+=0.4')
         .from('.float-toast', { scale: 0.5, opacity: 0, duration: 0.8, stagger: 0.25, ease: 'back.out(1.8)' }, 'copy+=1.1')
-        .add(() => { countUp(); startLoops(); armAutoplay(); }, 'copy+=0.9')
+        .add(() => { bootPhone(compact ? 0.4 : 1.2); startLoops(); armAutoplay(); }, 'copy+=0.9')
         .add(() => gsap.set(ENTRANCE, { clearProps: 'opacity,transform' }))
         .add(startRoller)
         .add(() => { if (location.hash === '#upcoming') openUpcoming(); });
@@ -1605,6 +1663,7 @@ const ENTRANCE = '.header > *, .line > span, .pill-row > *, .description, .cta-g
 
 if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
     finishLoading();
+    phone.dataset.screen = 'dash';
     startLoops();
     if (location.hash === '#upcoming') openUpcoming();
 } else {
