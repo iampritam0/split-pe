@@ -15,7 +15,7 @@ export default function DownloadCta() {
             <PlayBadge magnetic />
             <div className="cta-trust">
               <span><Icon name="lock" />No bank data</span>
-              <span><Icon name="swap" />Any UPI app</span>
+              <span><Icon name="swap" />UPI or cash, your call</span>
               <span><Icon name="check" />Free to use</span>
             </div>
           </div>

@@ -11,7 +11,7 @@ const FAQS: { q: string; a: ReactNode }[] = [
   },
   {
     q: "Does SplitPe hold or move my money?",
-    a: "No. SplitPe only keeps the हिसाब. When you tap Settle Up, it opens the UPI app you already use (Google Pay, PhonePe, Paytm…) and the payment happens there.",
+    a: "No. SplitPe does not make or process any payment. It only keeps the हिसाब — you pay your friend outside the app, by UPI or cash, and then mark it settled in SplitPe.",
   },
   {
     q: "Is my bank data safe?",
@@ -23,8 +23,8 @@ const FAQS: { q: string; a: ReactNode }[] = [
     ),
   },
   {
-    q: "Which UPI apps can I settle with?",
-    a: "Any UPI app on your phone — Google Pay, PhonePe, Paytm, BHIM or your bank's app. SplitPe hands off the exact amount and you confirm the payment there.",
+    q: "How do I settle up?",
+    a: "Pay your friend the way you normally do — any UPI app or cash. Then tap Settle Up in SplitPe, enter the amount and note whether it was paid by UPI or cash. The balance updates for everyone in the group.",
   },
   {
     q: "Is there an iOS app?",

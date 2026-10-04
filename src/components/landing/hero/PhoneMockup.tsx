@@ -151,7 +151,7 @@ export default function PhoneMockup() {
           </span>
           <div>
             <b data-t="">Aman paid you ₹500</b>
-            <small data-s="">Settled via UPI · just now</small>
+            <small data-s="">Marked settled · UPI · just now</small>
           </div>
         </div>
         <div className="float-toast t2">

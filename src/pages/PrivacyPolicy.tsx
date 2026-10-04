@@ -7,7 +7,7 @@ const usps = [
     icon: Lock,
     title: "Your bank never touches us",
     description:
-      "Settling up hands off to your own UPI app. We don't see, store, or process account or card numbers — ever.",
+      "SplitPe never makes or processes payments — settling up is just a record (UPI or cash). We don't see, store, or process account or card numbers — ever.",
   },
   {
     icon: Trash2,
@@ -205,9 +205,10 @@ export default function PrivacyPolicy() {
                   <strong className="font-semibold text-slate-900">
                     Bank or card numbers.
                   </strong>{" "}
-                  When you settle up, SplitPe hands off to the UPI app of
-                  your choice (Google Pay, PhonePe, Paytm, etc.) — payment
-                  details never pass through or get stored by SplitPe.
+                  SplitPe does not make or process payments. When you settle
+                  up, you only record the amount and whether it was paid by
+                  UPI or cash — no bank, card, or payment details are asked
+                  for or stored.
                 </span>
               </li>
               <li className="flex items-start gap-3 leading-7 text-slate-600">
@@ -343,8 +344,8 @@ export default function PrivacyPolicy() {
             </h2>
 
             <p className="mt-4 leading-8 text-slate-600">
-              SplitPe involves splitting real money and linking UPI payments,
-              so it's intended for users{" "}
+              SplitPe involves keeping track of real money owed between
+              people, so it's intended for users{" "}
               <strong className="font-semibold text-slate-900">
                 18 and older
               </strong>

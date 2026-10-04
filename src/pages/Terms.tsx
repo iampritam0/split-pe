@@ -32,13 +32,14 @@ export default function Terms() {
             <p className="mt-4 leading-8 text-slate-600">
               SplitPe is a record-keeping tool for shared expenses among
               people you know — trips, roommates, meals, and similar groups.
-              It calculates who owes what and helps you settle up.{" "}
+              It calculates who owes what and lets you record settle-ups.{" "}
               <strong className="font-semibold text-slate-900">
-                SplitPe does not hold, transmit, or move money.
+                SplitPe does not make, process, hold, or move any payment.
               </strong>{" "}
-              When you tap "Settle Up," we hand off to a UPI app you already
-              have installed (Google Pay, PhonePe, etc.); that transaction
-              happens entirely inside that app, outside SplitPe's control.
+              You pay each other outside the app — by UPI, cash, or any other
+              way — and then mark the payment as settled in SplitPe, noting
+              whether it was paid by UPI or cash. That note is only a record;
+              SplitPe does not verify that a payment actually happened.
             </p>
           </section>
 
@@ -111,7 +112,7 @@ export default function Terms() {
             <p className="mt-4 leading-8 text-slate-600">
               SplitPe is provided "as is." We work to keep balances accurate
               and the app available, but we're not liable for losses arising
-              from a failed UPI transaction, a mistaken entry, or a dispute
+              from a payment made outside SplitPe, a mistaken entry, or a dispute
               between you and someone in your group — those happen between
               you and the other party, or between you and your payment
               provider.

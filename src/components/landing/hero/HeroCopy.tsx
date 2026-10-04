@@ -32,7 +32,7 @@ export default function HeroCopy() {
       </h1>
       <p className="description">
         Trips, flatmates, late-night chai — add it once, <br />
-        split it fairly and settle up over UPI. <br />
+        split it fairly and keep track of who has paid. <br />
         <b>Clear balances. Zero awkward reminders.</b>
       </p>
       <div className="cta-group">

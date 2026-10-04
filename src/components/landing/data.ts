@@ -39,14 +39,14 @@ export const TOKEN_SETS: Record<"hisaab" | "dosti", string[]> = {
 
 export const NOTIFS: [string, string][] = [
   ['Rahul added "Chai"', "You owe ₹80 · Office chai"],
-  ["Neha settled up", "Received ₹1,200 via UPI ✓"],
+  ["Neha settled up", "Marked ₹1,200 as paid · UPI ✓"],
   ["Goa Trip", 'Aman added "Scooty rent" · ₹1,600'],
   ["Reminder", "Flat 302 rent split is due tomorrow"],
 ];
 
 export const TOASTS: Record<"t1" | "t2", [string, string, string][]> = {
   t1: [
-    ["settle", "Aman paid you ₹500", "Settled via UPI · just now"],
+    ["settle", "Aman paid you ₹500", "Marked settled · UPI · just now"],
     ["food", "Pizza night", "₹1,240 · split 4 ways"],
     ["group", "All settled with Neha", "No dues left · दोस्ती intact"],
   ],
@@ -70,8 +70,8 @@ export const FEATURES: { icon: IconName; title: string; text: string }[] = [
   },
   {
     icon: "swap",
-    title: "Settle up over UPI",
-    text: "Tap Settle Up and pay in Google Pay, PhonePe, Paytm or any UPI app you already use. Balances update for everyone.",
+    title: "Record every settle-up",
+    text: "Paid back by UPI or in cash? Mark it settled in SplitPe and note how it was paid. Balances update for everyone.",
   },
   {
     icon: "camera",
@@ -105,7 +105,7 @@ export const STEPS: { title: string; text: string; chip: string; icon: IconName 
   },
   {
     title: "Settle up",
-    text: "One tap opens your UPI app with the exact amount. Once paid, the balance clears — हिसाब done, दोस्ती intact.",
+    text: "Pay your friend however you like — UPI or cash — then mark it settled in SplitPe. The balance clears — हिसाब done, दोस्ती intact.",
     chip: "Aman paid you ₹500",
     icon: "swap",
   },

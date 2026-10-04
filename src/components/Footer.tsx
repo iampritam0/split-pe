@@ -38,8 +38,8 @@ export default function Footer() {
           <div>
             <SiteLogo />
             <p className="mt-4 max-w-sm text-sm leading-7 text-slate-600">
-              Split expenses, track shared spending and settle up over UPI —
-              without the awkward reminders.
+              Split expenses, track shared spending and record who has paid
+              back — without the awkward reminders.
             </p>
             <a
               href={PLAY_STORE_URL}
