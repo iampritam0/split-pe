@@ -27,7 +27,7 @@ const FAQS: { q: string; a: ReactNode }[] = [
     a: "Any UPI app on your phone — Google Pay, PhonePe, Paytm, BHIM or your bank's app. SplitPe hands off the exact amount and you confirm the payment there.",
   },
   {
-    q: "Is there an iPhone app?",
+    q: "Is there an iOS app?",
     a: "Not yet — SplitPe is on Android today and the iOS app is on our upcoming list, synced with your Android groups.",
   },
   {

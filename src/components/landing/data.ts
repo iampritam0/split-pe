@@ -5,7 +5,7 @@ export type IconName =
   | "bell" | "users" | "receipt" | "down" | "up" | "plus" | "swap" | "userplus"
   | "home" | "doc" | "user" | "food" | "shield" | "check" | "chev" | "plane"
   | "cart" | "film" | "car" | "zap" | "coffee" | "x" | "play" | "android"
-  | "chart" | "camera" | "globe" | "lock" | "search";
+  | "chart" | "camera" | "globe" | "lock" | "search" | "apple";
 
 // In-page sections, used by the header menu and the footer.
 export const NAV_LINKS = [
@@ -122,7 +122,8 @@ export const USE_CASES: { cat: string; title: string; text: string }[] = [
   { cat: "bills", title: "Bills", text: "Electricity, OTT, recharge" },
 ];
 
-export const UPCOMING: { tag: string; emoji: string; title: string; text: string }[] = [
+// `icon` (a sprite symbol) is shown instead of `emoji` when set.
+export const UPCOMING: { tag: string; emoji: string; icon?: IconName; title: string; text: string }[] = [
   { tag: "AI", emoji: "📸", title: "Scan & Split", text: "Snap a restaurant bill — items, tax and tip are read automatically. Just tap who had what." },
   { tag: "Voice", emoji: "🎙️", title: "Bol ke add karo", text: "Say “Chai 240, teen log” in Hindi or English and the expense is added and split instantly." },
   { tag: "Reminders", emoji: "💬", title: "WhatsApp nudges", text: "Send a friendly, auto-written reminder with a one-tap UPI link. No more awkward texts." },
@@ -130,5 +131,5 @@ export const UPCOMING: { tag: string; emoji: string; title: string; text: string
   { tag: "Planning", emoji: "🎯", title: "Trip budgets", text: "Set a budget for the Goa trip, watch spend per head live and get alerts before you overshoot." },
   { tag: "Payments", emoji: "📲", title: "Auto-detect UPI spends", text: "With your permission, spot UPI payments you made and turn them into expenses in one tap." },
   { tag: "Language", emoji: "🗣️", title: "हिंदी & regional", text: "Use SplitPe fully in हिंदी, मराठी, தமிழ், বাংলা and more — हिसाब in your own language." },
-  { tag: "Platform", emoji: "🍎", title: "SplitPe for iPhone", text: "Same हिसाब, same दोस्ती — the iOS app, synced with your Android groups and friends." },
+  { tag: "Platform", emoji: "", icon: "apple", title: "SplitPe for iOS", text: "Same हिसाब, same दोस्ती — the iPhone app, synced with your Android groups and friends." },
 ];

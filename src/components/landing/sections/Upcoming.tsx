@@ -1,4 +1,5 @@
 import { SUPPORT_EMAIL } from "../../../constants";
+import Icon from "../Icon";
 import { UPCOMING } from "../data";
 import SectionHead from "./SectionHead";
 
@@ -14,7 +15,7 @@ export default function Upcoming() {
           {UPCOMING.map((u) => (
             <article key={u.title} className="l-card glass-tile reveal">
               <span className="up-tag">{u.tag}</span>
-              <span className="l-ic">{u.emoji}</span>
+              <span className={`l-ic ${u.icon ? `l-ic-${u.icon}` : ""}`}>{u.icon ? <Icon name={u.icon} className="" /> : u.emoji}</span>
               <h3>{u.title}</h3>
               <p>{u.text}</p>
               <span className="up-soon">
