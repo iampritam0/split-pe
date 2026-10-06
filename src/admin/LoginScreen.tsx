@@ -107,9 +107,9 @@ export default function LoginScreen({ notice }: { notice?: string }) {
   };
 
   const fieldClass =
-    "w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-splitpe-500 focus:bg-white focus:ring-4 focus:ring-splitpe-500/15";
+    "w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-lg text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-splitpe-500 focus:bg-white focus:ring-4 focus:ring-splitpe-500/15";
   const buttonClass =
-    "mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-brand-gradient py-3.5 text-base font-bold text-white shadow-lg shadow-blue-600/25 transition hover:brightness-110 disabled:opacity-40";
+    "mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-brand-gradient py-4 text-lg font-bold text-white shadow-lg shadow-blue-600/25 transition hover:brightness-110 disabled:opacity-40";
 
   return (
     <div className="landing admin-dark">
@@ -149,10 +149,10 @@ export default function LoginScreen({ notice }: { notice?: string }) {
             {notice && <p className="mt-5 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">{notice}</p>}
 
             {step === "phone" ? (
-              <form className="mt-6" onSubmit={(e) => { e.preventDefault(); if (digits.length === 10) requestOtp(); }}>
-                <label className="mb-2 block text-sm font-semibold text-slate-700">Mobile number</label>
+              <form className="mt-8" onSubmit={(e) => { e.preventDefault(); if (digits.length === 10) requestOtp(); }}>
+                <label className="mb-2 block text-base font-semibold text-slate-700">Mobile number</label>
                 <div className="flex items-center gap-2">
-                  <span className="rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-base font-semibold text-slate-700">+91</span>
+                  <span className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-lg font-semibold text-slate-700">+91</span>
                   <input
                     className={fieldClass}
                     inputMode="numeric"
@@ -168,10 +168,10 @@ export default function LoginScreen({ notice }: { notice?: string }) {
                 </button>
               </form>
             ) : (
-              <form className="mt-6" onSubmit={(e) => { e.preventDefault(); if (code.trim()) verify(); }}>
-                <label className="mb-2 block text-sm font-semibold text-slate-700">Enter the OTP sent to +91 {digits}</label>
+              <form className="mt-8" onSubmit={(e) => { e.preventDefault(); if (code.trim()) verify(); }}>
+                <label className="mb-2 block text-base font-semibold text-slate-700">Enter the OTP sent to +91 {digits}</label>
                 <input
-                  className={`${fieldClass} text-center text-xl tracking-[0.5em]`}
+                  className={`${fieldClass} text-center text-2xl tracking-[0.5em]`}
                   inputMode="numeric"
                   autoFocus
                   maxLength={6}
@@ -190,7 +190,7 @@ export default function LoginScreen({ notice }: { notice?: string }) {
 
             {error && <p className="mt-4 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}
 
-            <p className="mt-6 border-t border-slate-100 pt-4 text-center text-xs text-slate-400">
+            <p className="mt-8 border-t border-slate-100 pt-5 text-center text-sm text-slate-400">
               Authorised SplitPe team members only
             </p>
           </div>

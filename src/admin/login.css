@@ -42,7 +42,7 @@
 
 .adm-main {
     position: relative; z-index: 10;
-    display: grid; grid-template-columns: 1.25fr 1fr; align-items: center;
+    display: grid; grid-template-columns: 1.1fr 1fr; align-items: center;
     gap: 2rem; padding: 0 4% 2rem; min-height: calc(100vh - 92px);
 }
 
@@ -72,13 +72,13 @@
 /* Right: the login card */
 .adm-card-wrap { display: flex; flex-direction: column; align-items: center; }
 .adm-card {
-    width: 100%; max-width: 400px; padding: 2.2rem;
-    border-radius: 28px; color: #0b1530; background: #ffffff;
+    width: 100%; max-width: 480px; padding: 2.8rem 2.6rem;
+    border-radius: 32px; color: #0b1530; background: #ffffff;
     box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.6), 0 0 0 6px rgba(255, 255, 255, 0.08);
 }
-.adm-card .adm-card-logo { width: 56px; height: 56px; filter: drop-shadow(0 10px 22px rgba(37, 99, 235, 0.45)); }
-.adm-card h2 { font-family: var(--font-heading); font-weight: 800; font-size: 1.65rem; letter-spacing: -0.02em; margin-top: 1rem; }
-.adm-card .sub { color: #64748b; font-size: 0.92rem; margin-top: 0.2rem; }
+.adm-card .adm-card-logo { width: 68px; height: 68px; filter: drop-shadow(0 10px 22px rgba(37, 99, 235, 0.45)); }
+.adm-card h2 { font-family: var(--font-heading); font-weight: 800; font-size: 2.1rem; letter-spacing: -0.02em; margin-top: 1rem; }
+.adm-card .sub { color: #64748b; font-size: 1.05rem; margin-top: 0.2rem; }
 
 @keyframes adm-float {
     0%, 100% { transform: translateY(0) rotate(var(--rot, 0deg)); }
