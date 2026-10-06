@@ -10,7 +10,7 @@ import IconSprite from "../components/landing/IconSprite";
 import PhoneMockup from "../components/landing/hero/PhoneMockup";
 import "../components/landing/styles/index.css";
 import "./login.css";
-import PullingStudent from "./PullingStudent";
+import MagicStudent from "./MagicStudent";
 import { auth, functions } from "./firebase";
 
 const sendOtpCallable = httpsCallable<{ phone: string }, { resendAfter: number }>(functions, "sendOtp");
@@ -73,6 +73,13 @@ export default function LoginScreen({ notice }: { notice?: string }) {
   const [step, setStep] = useState<"phone" | "code">("phone");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  // The card's build-in animation is for first paint only — after that,
+  // switching to the OTP step must show the new form immediately.
+  const [introDone, setIntroDone] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setIntroDone(true), 4800);
+    return () => clearTimeout(t);
+  }, []);
 
   // The landing animation normally flips the phone from its splash to the
   // dashboard — here it just starts on the dashboard.
@@ -142,16 +149,10 @@ export default function LoginScreen({ notice }: { notice?: string }) {
             {MOBILE_TOKENS.map((t, i) => <Token key={i} {...t} />)}
           </div>
 
-          {/* A student walks in from the right, dragging the card on a rope. */}
-          <div className="adm-pull relative z-10">
-          <div className="adm-bubble">Aa gaya! Login karo 👋</div>
-          <PullingStudent />
-          <svg className="adm-rope" viewBox="0 0 58 56" preserveAspectRatio="none" aria-hidden="true">
-            <path d="M0 42 Q 30 58 58 6" fill="none" stroke="#d99a3d" strokeWidth="4" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
-            <path d="M0 42 Q 30 58 58 6" fill="none" stroke="#fde68a" strokeWidth="1.5" strokeLinecap="round" strokeDasharray="3 4" vectorEffect="non-scaling-stroke" />
-          </svg>
+          {/* A student walks in with a bag, sets it down — ta-da — the card builds itself. */}
+          <div className={`adm-show relative z-10 ${introDone ? "" : "adm-intro"}`}>
+          <MagicStudent />
           <div className="adm-card">
-            <span className="adm-handle" aria-hidden="true"></span>
             <img src={logo} alt="SplitPe" className="adm-card-logo" />
             <h2>Welcome back</h2>
             <p className="sub">Sign in to the SplitPe admin console</p>
@@ -206,7 +207,7 @@ export default function LoginScreen({ notice }: { notice?: string }) {
           </div>
           </div>
 
-          <a href="/" className="relative z-10 mt-6 text-sm text-slate-500 hover:text-slate-300">← Back to splitpe.xyz</a>
+          <a href="/" className="adm-back-link relative z-10 mt-6 text-sm text-slate-500 hover:text-slate-300">← Back to splitpe.xyz</a>
         </section>
       </main>
     </div>
