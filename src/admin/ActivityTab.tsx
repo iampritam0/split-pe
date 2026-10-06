@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { collection, limit, onSnapshot, orderBy, query } from "firebase/firestore";
 import type { Timestamp } from "firebase/firestore";
-import { Construction, Image, Settings } from "lucide-react";
+import { Construction, Image, Settings, UserCog } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { db } from "./firebase";
 import type { LogKind } from "./adminLog";
@@ -12,6 +12,7 @@ const ICONS: Record<LogKind, { icon: LucideIcon; cls: string }> = {
   settings: { icon: Settings, cls: "bg-splitpe-50 text-splitpe-600" },
   banner: { icon: Image, cls: "bg-mint-50 text-mint-600" },
   maintenance: { icon: Construction, cls: "bg-amber-50 text-amber-600" },
+  user: { icon: UserCog, cls: "bg-red-50 text-red-600" },
 };
 
 /** The last 50 admin-panel changes (adminLog), newest first, live. */

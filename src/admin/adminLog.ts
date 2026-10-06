@@ -1,7 +1,8 @@
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "./firebase";
 
-export type LogKind = "settings" | "banner" | "maintenance";
+// "user" entries are written server-side by the admin account callables.
+export type LogKind = "settings" | "banner" | "maintenance" | "user";
 
 /**
  * Appends an entry to adminLog (append-only in firestore.rules) — shown on
