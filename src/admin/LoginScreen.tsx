@@ -10,6 +10,7 @@ import IconSprite from "../components/landing/IconSprite";
 import PhoneMockup from "../components/landing/hero/PhoneMockup";
 import "../components/landing/styles/index.css";
 import "./login.css";
+import PullingStudent from "./PullingStudent";
 import { auth, functions } from "./firebase";
 
 const sendOtpCallable = httpsCallable<{ phone: string }, { resendAfter: number }>(functions, "sendOtp");
@@ -141,7 +142,16 @@ export default function LoginScreen({ notice }: { notice?: string }) {
             {MOBILE_TOKENS.map((t, i) => <Token key={i} {...t} />)}
           </div>
 
-          <div className="adm-card relative z-10">
+          {/* A student walks in from the right, dragging the card on a rope. */}
+          <div className="adm-pull relative z-10">
+          <div className="adm-bubble">Aa gaya! Login karo 👋</div>
+          <PullingStudent />
+          <svg className="adm-rope" viewBox="0 0 58 56" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M0 42 Q 30 58 58 6" fill="none" stroke="#d99a3d" strokeWidth="4" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+            <path d="M0 42 Q 30 58 58 6" fill="none" stroke="#fde68a" strokeWidth="1.5" strokeLinecap="round" strokeDasharray="3 4" vectorEffect="non-scaling-stroke" />
+          </svg>
+          <div className="adm-card">
+            <span className="adm-handle" aria-hidden="true"></span>
             <img src={logo} alt="SplitPe" className="adm-card-logo" />
             <h2>Welcome back</h2>
             <p className="sub">Sign in to the SplitPe admin console</p>
@@ -193,6 +203,7 @@ export default function LoginScreen({ notice }: { notice?: string }) {
             <p className="mt-6 border-t border-slate-700/60 pt-4 text-center text-xs text-slate-500">
               Authorised SplitPe team members only
             </p>
+          </div>
           </div>
 
           <a href="/" className="relative z-10 mt-6 text-sm text-slate-500 hover:text-slate-300">← Back to splitpe.xyz</a>

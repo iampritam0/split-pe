@@ -84,6 +84,90 @@
 .adm-card h2 { font-family: var(--font-heading); font-weight: 800; font-size: 1.65rem; letter-spacing: -0.02em; margin-top: 1rem; }
 .adm-card .sub { color: #94a3b8; font-size: 0.92rem; margin-top: 0.2rem; }
 
+/* ---------- The student who drags the card in from the right ----------
+   .adm-pull = [student][rope] + card, sliding in together. The student is
+   absolutely placed in the left padding (--sw), so the card keeps its width. */
+.adm-pull {
+    --sw: 175px;          /* room for student + rope */
+    --st-w: 130px;        /* student width (viewBox 120×190) */
+    --hand-x: 109px;      /* hand position inside that box */
+    --rope-b: 118px;      /* rope box bottom / height */
+    --rope-h: 64px;
+    --handle-b: 172px;    /* card hook, from the card's bottom */
+    position: relative; width: 100%; max-width: calc(400px + var(--sw));
+    padding-left: var(--sw);
+    animation: adm-drag-in 2.6s cubic-bezier(0.22, 0.7, 0.3, 1) 0.3s both;
+}
+.adm-pull .adm-card { position: relative; animation: adm-card-sway 2.9s ease-out both; transform-origin: 0% 100%; }
+.adm-student {
+    position: absolute; left: 0; bottom: 0; width: var(--st-w); height: auto; overflow: visible; z-index: 2;
+}
+.adm-rope {
+    position: absolute; left: var(--hand-x); bottom: var(--rope-b);
+    width: calc(var(--sw) - var(--hand-x) + 6px); height: var(--rope-h); overflow: visible; z-index: 1;
+}
+.adm-rope path { animation: adm-rope-taut 2.9s ease-out both; }
+.adm-handle {
+    position: absolute; left: -9px; bottom: calc(var(--handle-b) - 7px); width: 16px; height: 16px;
+    border-radius: 50%; border: 3.5px solid #fbbf24; background: #0b1220; z-index: 3;
+    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.15);
+}
+
+/* Student parts — SVG transforms in viewBox units */
+.adm-student .st-body, .adm-student .st-leg, .adm-student .st-arm { transform-box: view-box; }
+.adm-student .st-body { transform-origin: 60px 180px; animation: adm-lean 2.9s ease-out both, adm-bob-step 0.45s ease-in-out 0.3s 6; }
+.adm-student .st-leg { transform-origin: 58px 116px; }
+.adm-student .st-leg-a { animation: adm-step 0.9s ease-in-out 0.3s 3; }
+.adm-student .st-leg-b { animation: adm-step 0.9s ease-in-out 0.75s 3 reverse; }
+.adm-student .st-arm { transform-origin: 48px 74px; animation: adm-arm-swing 0.9s ease-in-out 0.3s 3; }
+.adm-student .st-eye { transform-box: fill-box; transform-origin: center; animation: adm-blink 4s 3.4s infinite; }
+.adm-student .st-shadow { transform-box: fill-box; transform-origin: center; animation: adm-shadow 0.45s ease-in-out 0.3s 6; }
+
+/* "Aa gaya!" bubble once the card is in place */
+.adm-bubble {
+    position: absolute; left: -6px; bottom: calc(var(--st-w) * 1.58 + 10px); z-index: 4;
+    background: #fff; color: #0b1530; font-weight: 800; font-size: 0.85rem; white-space: nowrap;
+    padding: 0.5rem 0.8rem; border-radius: 14px 14px 14px 4px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+    transform-origin: 10% 100%; animation: adm-pop 0.5s cubic-bezier(0.3, 1.6, 0.5, 1) 3s both;
+}
+
+@keyframes adm-drag-in {
+    from { transform: translateX(110vw); }
+    to { transform: translateX(0); }
+}
+/* the card trails a little behind the pull, then settles with a bump */
+@keyframes adm-card-sway {
+    0%, 70% { transform: rotate(-2.5deg) translateX(6px); }
+    84% { transform: rotate(1.2deg) translateX(-4px); }
+    100% { transform: none; }
+}
+@keyframes adm-rope-taut {
+    0%, 82% { d: path("M0 42 Q 30 46 58 6"); }
+    100% { d: path("M0 42 Q 30 58 58 6"); }
+}
+/* leaning into the pull, then standing up once the card has arrived */
+@keyframes adm-lean {
+    0%, 82% { transform: rotate(-11deg); }
+    92% { transform: rotate(3deg); }
+    100% { transform: rotate(0deg); }
+}
+@keyframes adm-bob-step { 50% { translate: 0 -3px; } }
+@keyframes adm-step {
+    0%, 100% { transform: rotate(24deg); }
+    50% { transform: rotate(-24deg); }
+}
+@keyframes adm-arm-swing {
+    0%, 100% { transform: rotate(-28deg); }
+    50% { transform: rotate(22deg); }
+}
+@keyframes adm-shadow { 50% { transform: scaleX(0.85); } }
+@keyframes adm-blink { 0%, 94%, 100% { transform: scaleY(1); } 97% { transform: scaleY(0.1); } }
+@keyframes adm-pop {
+    from { opacity: 0; transform: scale(0.3) translateY(10px); }
+    to { opacity: 1; transform: none; }
+}
+
 @keyframes adm-float {
     0%, 100% { transform: translateY(0) rotate(var(--rot, 0deg)); }
     50% { transform: translateY(-14px) rotate(calc(var(--rot, 0deg) + 6deg)); }
@@ -95,6 +179,10 @@
     /* Card centred in the space under the header */
     .adm-main { grid-template-columns: 1fr; min-height: calc(100vh - 92px); padding-bottom: 3rem; }
     .adm-stage { display: none; }
+    .adm-pull { --sw: 92px; --st-w: 70px; --hand-x: 59px; --rope-b: 62px; --rope-h: 40px; --handle-b: 100px; }
+    .adm-bubble { font-size: 0.72rem; white-space: normal; width: 84px; left: 0; padding: 0.4rem 0.55rem; }
+    .adm-main { padding-left: 12px; padding-right: 12px; }
+    .adm-card { padding: 1.5rem 1.15rem; }
     .adm-mobile-tokens { display: block; }
 }
 @media (min-width: 1024px) {
@@ -107,4 +195,5 @@
 @media (prefers-reduced-motion: reduce) {
     .adm-tokens .berry, .adm-mobile-tokens .berry, .adm-stage .t1, .adm-stage .t2 { animation: none; }
     .adm-stage .p-notif { animation: none; opacity: 1; }
+    .adm-pull, .adm-pull .adm-card, .adm-rope path, .adm-student *, .adm-bubble { animation: none !important; }
 }
