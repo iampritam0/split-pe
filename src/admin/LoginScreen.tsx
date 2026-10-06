@@ -1,11 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import type { CSSProperties } from "react";
 import { signInWithCustomToken } from "firebase/auth";
 import { httpsCallable } from "firebase/functions";
-import { ArrowLeftRight, Bell, Camera, Loader2, Receipt, ShieldCheck, Users } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import logo from "../assets/logo-s.png";
-import { FEATURES, NOTIFS } from "../components/landing/data";
-import type { IconName } from "../components/landing/data";
+import { CATEGORIES } from "../components/landing/data";
+import Icon from "../components/landing/Icon";
+import IconSprite from "../components/landing/IconSprite";
+import PhoneMockup from "../components/landing/hero/PhoneMockup";
+import "../components/landing/styles/index.css";
+import "./login.css";
 import { auth, functions } from "./firebase";
 
 const sendOtpCallable = httpsCallable<{ phone: string }, { resendAfter: number }>(functions, "sendOtp");
@@ -14,32 +18,53 @@ const verifyOtpCallable = httpsCallable<{ phone: string; code: string }, { token
 const errorMessage = (err: unknown) =>
   (err as { message?: string })?.message || "Something went wrong. Please try again.";
 
-// The landing page's own feature icons, drawn with lucide here.
-const FEATURE_ICONS: Partial<Record<IconName, LucideIcon>> = {
-  users: Users,
-  receipt: Receipt,
-  swap: ArrowLeftRight,
-  camera: Camera,
-};
+// ₹ coins and the app's own category tiles around the phone — same pieces
+// the landing hero animates, here just floating in place. Positions are the
+// token centre as % of the stage; `far` ones sit blurred behind the phone.
+type TokenSpec = { kind: string; top: number; left: number; size: number; dur: number; delay: number; rot: number; far?: boolean };
+const STAGE_TOKENS: TokenSpec[] = [
+  { kind: "coin", top: 6, left: 32, size: 160, dur: 7, delay: 0, rot: -12 },
+  { kind: "food", top: 12, left: 72, size: 130, dur: 8, delay: 0.6, rot: 10 },
+  { kind: "travel", top: 44, left: 88, size: 150, dur: 6.5, delay: 0.2, rot: -8 },
+  { kind: "coin", top: 88, left: 68, size: 130, dur: 7.5, delay: 1.1, rot: 14 },
+  { kind: "grocery", top: 56, left: 12, size: 130, dur: 8.5, delay: 0.4, rot: 8 },
+  { kind: "rent", top: 84, left: 22, size: 110, dur: 9, delay: 1.4, rot: -6 },
+  { kind: "settle", top: 72, left: 92, size: 90, dur: 9, delay: 0.9, rot: 6, far: true },
+  { kind: "chai", top: 2, left: 54, size: 90, dur: 9.5, delay: 1.8, rot: 6, far: true },
+];
+const MOBILE_TOKENS: TokenSpec[] = [
+  { kind: "coin", top: 15, left: 88, size: 110, dur: 7, delay: 0, rot: -10 },
+  { kind: "food", top: 86, left: 14, size: 120, dur: 8, delay: 0.5, rot: 10 },
+  { kind: "travel", top: 92, left: 74, size: 110, dur: 7.5, delay: 0.9, rot: -8 },
+  { kind: "coin", top: 80, left: 92, size: 80, dur: 8.5, delay: 0.3, rot: 12 },
+  { kind: "grocery", top: 20, left: 6, size: 80, dur: 9, delay: 1.2, rot: 6, far: true },
+];
 
-const Wordmark = ({ size = "lg" }: { size?: "lg" | "sm" }) => (
-  <div className="flex items-center gap-3">
-    <img src={logo} alt="SplitPe" className={size === "lg" ? "h-12 w-12" : "h-10 w-10"} />
-    <div className="leading-tight">
-      <p className={`font-heading font-extrabold text-white ${size === "lg" ? "text-2xl" : "text-xl"}`}>
-        Split<span className="bg-brand-gradient bg-clip-text text-transparent">Pe</span>
-      </p>
-      <p className="font-hindi text-sm text-slate-400">हिसाब भी, दोस्ती भी</p>
+function Token({ kind, top, left, size, dur, delay, rot, far }: TokenSpec) {
+  const style = {
+    top: `${top}%`, left: `${left}%`, width: size, height: size, margin: -size / 2,
+    "--dur": `${dur}s`, "--delay": `${delay}s`, "--rot": `${rot}deg`,
+  } as CSSProperties;
+  const cat = CATEGORIES[kind];
+  return (
+    <div className={`berry ${far ? "far" : ""}`} style={style}>
+      {kind === "coin" || !cat ? (
+        <div className="token coin"><span>₹</span></div>
+      ) : (
+        <div className="token tile" style={{ "--tfg": cat.fg, "--tbg": cat.bg } as CSSProperties}>
+          <Icon name={cat.icon} />
+        </div>
+      )}
     </div>
-  </div>
-);
+  );
+}
 
 /**
- * Admin sign-in — a dark take on the public home page (same logo, tagline,
- * features and sample notifications from components/landing/data) beside
- * the login card. Same phone + OTP sign-in as the mobile app (sendOtp /
- * verifyOtp Cloud Functions); AdminApp then checks the `admin` claim and
- * signs anyone without it straight back out.
+ * Admin sign-in — the public home page's hero (3D phone showing the app
+ * dashboard, ₹ coins, category tiles, toasts, logo) re-themed dark, with the
+ * login card beside it. Same phone + OTP sign-in as the mobile app
+ * (sendOtp / verifyOtp Cloud Functions); AdminApp then checks the `admin`
+ * claim and signs anyone without it straight back out.
  */
 export default function LoginScreen({ notice }: { notice?: string }) {
   const [phone, setPhone] = useState("");
@@ -47,6 +72,12 @@ export default function LoginScreen({ notice }: { notice?: string }) {
   const [step, setStep] = useState<"phone" | "code">("phone");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+
+  // The landing animation normally flips the phone from its splash to the
+  // dashboard — here it just starts on the dashboard.
+  useEffect(() => {
+    document.getElementById("phone")?.setAttribute("data-screen", "dash");
+  }, []);
 
   const digits = phone.replace(/\D/g, "").slice(-10);
 
@@ -75,130 +106,98 @@ export default function LoginScreen({ notice }: { notice?: string }) {
     }
   };
 
-  const inputClass =
-    "w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-white placeholder:text-slate-500 outline-none focus:border-splitpe-400";
+  const fieldClass =
+    "w-full rounded-2xl border border-slate-600/60 bg-slate-900/70 px-4 py-3 text-base text-white placeholder:text-slate-500 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-500/15";
+  const buttonClass =
+    "mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-brand-gradient py-3.5 text-base font-bold text-white shadow-lg shadow-blue-900/40 transition hover:brightness-110 disabled:opacity-40";
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-slate-950 text-white">
-      {/* Brand glows, same blue → green as the site. */}
-      <div className="pointer-events-none absolute -left-32 -top-32 h-96 w-96 rounded-full bg-splitpe-600/30 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-40 right-0 h-[28rem] w-[28rem] rounded-full bg-mint-500/20 blur-3xl" />
+    <div className="landing admin-dark">
+      <IconSprite />
 
-      <div className="relative mx-auto grid min-h-screen max-w-7xl items-center gap-12 px-6 py-10 lg:grid-cols-[1.2fr_1fr] lg:px-12">
-        {/* Home-page overview — hidden on small screens to keep login first. */}
-        <section className="hidden lg:block">
-          <Wordmark />
-          <h1 className="mt-10 font-heading text-5xl font-extrabold leading-tight">
-            Split <span className="bg-brand-gradient bg-clip-text text-transparent">bills</span>,
-            <br />
-            keep <span className="bg-brand-gradient bg-clip-text text-transparent">friendship</span>.
-          </h1>
-          <p className="mt-4 max-w-lg text-lg text-slate-400">
-            Trips, flatmates, late-night chai — add it once, split it fairly and keep track of who has paid.
-          </p>
+      <header className="adm-top">
+        <a className="logo" href="/" aria-label="SplitPe home">
+          <img src={logo} alt="" />
+          <span className="logo-word">
+            <b>Split<span className="grad-text">Pe</span></b>
+            <small>हिसाब भी, दोस्ती भी</small>
+          </span>
+        </a>
+        <span className="adm-badge"><i></i>Admin Console</span>
+      </header>
 
-          <div className="mt-10 grid max-w-xl grid-cols-2 gap-3">
-            {FEATURES.slice(0, 4).map(({ icon, title }) => {
-              const Icon = FEATURE_ICONS[icon] || Receipt;
-              return (
-                <div key={title} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-gradient">
-                    <Icon size={18} />
-                  </div>
-                  <p className="text-sm font-semibold text-slate-200">{title}</p>
-                </div>
-              );
-            })}
+      <main className="adm-main">
+        {/* Home-page hero, dark */}
+        <section className="adm-stage" aria-hidden="true">
+          <div className="adm-tokens">
+            {STAGE_TOKENS.map((t, i) => <Token key={i} {...t} />)}
           </div>
-
-          <div className="mt-8 max-w-sm space-y-2">
-            {NOTIFS.slice(0, 2).map(([title, sub]) => (
-              <div key={title} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-splitpe-600/20 text-splitpe-300">
-                  <Bell size={15} />
-                </div>
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-slate-100">{title}</p>
-                  <p className="truncate text-xs text-slate-400">{sub}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+          <PhoneMockup />
         </section>
 
-        {/* Login card */}
-        <section className="mx-auto w-full max-w-sm">
-          <div className="mb-8 flex justify-center lg:hidden">
-            <Wordmark size="sm" />
+        {/* Login */}
+        <section className="adm-card-wrap">
+          <div className="adm-mobile-tokens" aria-hidden="true">
+            {MOBILE_TOKENS.map((t, i) => <Token key={i} {...t} />)}
           </div>
 
-          <div className="rounded-3xl border border-white/10 bg-white/[0.06] p-8 shadow-2xl backdrop-blur-xl">
-            <div className="mb-6 flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-gradient">
-                <ShieldCheck size={22} />
-              </div>
-              <div>
-                <h2 className="font-heading text-xl font-bold">Admin sign in</h2>
-                <p className="text-sm text-slate-400">Authorised team members only</p>
-              </div>
-            </div>
+          <div className="adm-card relative z-10">
+            <img src={logo} alt="SplitPe" className="adm-card-logo" />
+            <h2>Welcome back</h2>
+            <p className="sub">Sign in to the SplitPe admin console</p>
 
-            {notice && <p className="mb-4 rounded-lg bg-amber-400/10 px-3 py-2 text-sm text-amber-300">{notice}</p>}
+            {notice && <p className="mt-5 rounded-xl border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-sm text-amber-300">{notice}</p>}
 
             {step === "phone" ? (
-              <form onSubmit={(e) => { e.preventDefault(); if (digits.length === 10) requestOtp(); }}>
-                <label className="mb-1 block text-sm font-medium text-slate-300">Mobile number</label>
-                <div className="flex items-center rounded-xl border border-white/10 bg-white/5 focus-within:border-splitpe-400">
-                  <span className="pl-3 text-sm text-slate-400">+91</span>
+              <form className="mt-6" onSubmit={(e) => { e.preventDefault(); if (digits.length === 10) requestOtp(); }}>
+                <label className="mb-2 block text-sm font-semibold text-slate-300">Mobile number</label>
+                <div className="flex items-center gap-2">
+                  <span className="rounded-2xl border border-slate-600/60 bg-slate-900/70 px-3.5 py-3 text-base font-semibold text-slate-300">+91</span>
                   <input
-                    className="w-full rounded-xl bg-transparent px-2 py-2.5 text-white placeholder:text-slate-500 outline-none"
+                    className={fieldClass}
                     inputMode="numeric"
                     autoFocus
-                    placeholder="10-digit number"
+                    maxLength={14}
+                    placeholder="98765 43210"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                   />
                 </div>
-                <button
-                  type="submit"
-                  disabled={digits.length !== 10 || busy}
-                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-brand-gradient py-2.5 font-semibold text-white disabled:opacity-40"
-                >
-                  {busy && <Loader2 size={16} className="animate-spin" />} Send OTP
+                <button type="submit" disabled={digits.length !== 10 || busy} className={buttonClass}>
+                  {busy && <Loader2 size={18} className="animate-spin" />} Send OTP
                 </button>
               </form>
             ) : (
-              <form onSubmit={(e) => { e.preventDefault(); if (code.trim()) verify(); }}>
-                <label className="mb-1 block text-sm font-medium text-slate-300">OTP sent to +91 {digits}</label>
+              <form className="mt-6" onSubmit={(e) => { e.preventDefault(); if (code.trim()) verify(); }}>
+                <label className="mb-2 block text-sm font-semibold text-slate-300">Enter the OTP sent to +91 {digits}</label>
                 <input
-                  className={`${inputClass} tracking-widest`}
+                  className={`${fieldClass} text-center text-xl tracking-[0.5em]`}
                   inputMode="numeric"
                   autoFocus
-                  placeholder="Enter OTP"
+                  maxLength={6}
+                  placeholder="••••••"
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
                 />
-                <button
-                  type="submit"
-                  disabled={!code.trim() || busy}
-                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-brand-gradient py-2.5 font-semibold text-white disabled:opacity-40"
-                >
-                  {busy && <Loader2 size={16} className="animate-spin" />} Verify &amp; sign in
+                <button type="submit" disabled={!code.trim() || busy} className={buttonClass}>
+                  {busy && <Loader2 size={18} className="animate-spin" />} Verify &amp; sign in
                 </button>
-                <button type="button" className="mt-3 w-full text-sm text-slate-400 hover:text-slate-200" onClick={() => { setStep("phone"); setCode(""); setError(""); }}>
-                  Change number
+                <button type="button" className="mt-4 w-full text-sm font-medium text-slate-400 hover:text-white" onClick={() => { setStep("phone"); setCode(""); setError(""); }}>
+                  ← Change number
                 </button>
               </form>
             )}
 
-            {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
+            {error && <p className="mt-4 rounded-xl bg-red-500/10 px-3 py-2 text-sm text-red-300">{error}</p>}
+
+            <p className="mt-6 border-t border-slate-700/60 pt-4 text-center text-xs text-slate-500">
+              Authorised SplitPe team members only
+            </p>
           </div>
 
-          <p className="mt-6 text-center text-xs text-slate-500">
-            <a href="/" className="hover:text-slate-300">← Back to splitpe.xyz</a>
-          </p>
+          <a href="/" className="relative z-10 mt-6 text-sm text-slate-500 hover:text-slate-300">← Back to splitpe.xyz</a>
         </section>
-      </div>
+      </main>
     </div>
   );
 }
