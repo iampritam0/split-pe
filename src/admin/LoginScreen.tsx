@@ -10,7 +10,6 @@ import IconSprite from "../components/landing/IconSprite";
 import PhoneMockup from "../components/landing/hero/PhoneMockup";
 import "../components/landing/styles/index.css";
 import "./login.css";
-import MagicStudent from "./MagicStudent";
 import { auth, functions } from "./firebase";
 
 const sendOtpCallable = httpsCallable<{ phone: string }, { resendAfter: number }>(functions, "sendOtp");
@@ -63,7 +62,7 @@ function Token({ kind, top, left, size, dur, delay, rot, far }: TokenSpec) {
 /**
  * Admin sign-in — the public home page's hero (3D phone showing the app
  * dashboard, ₹ coins, category tiles, toasts, logo) re-themed dark, with the
- * login card beside it. Same phone + OTP sign-in as the mobile app
+ * white login card beside it. Same phone + OTP sign-in as the mobile app
  * (sendOtp / verifyOtp Cloud Functions); AdminApp then checks the `admin`
  * claim and signs anyone without it straight back out.
  */
@@ -73,13 +72,6 @@ export default function LoginScreen({ notice }: { notice?: string }) {
   const [step, setStep] = useState<"phone" | "code">("phone");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  // The card's build-in animation is for first paint only — after that,
-  // switching to the OTP step must show the new form immediately.
-  const [introDone, setIntroDone] = useState(false);
-  useEffect(() => {
-    const t = setTimeout(() => setIntroDone(true), 4800);
-    return () => clearTimeout(t);
-  }, []);
 
   // The landing animation normally flips the phone from its splash to the
   // dashboard — here it just starts on the dashboard.
@@ -115,9 +107,9 @@ export default function LoginScreen({ notice }: { notice?: string }) {
   };
 
   const fieldClass =
-    "w-full rounded-2xl border border-slate-600/60 bg-slate-900/70 px-4 py-3 text-base text-white placeholder:text-slate-500 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-500/15";
+    "w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-splitpe-500 focus:bg-white focus:ring-4 focus:ring-splitpe-500/15";
   const buttonClass =
-    "mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-brand-gradient py-3.5 text-base font-bold text-white shadow-lg shadow-blue-900/40 transition hover:brightness-110 disabled:opacity-40";
+    "mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-brand-gradient py-3.5 text-base font-bold text-white shadow-lg shadow-blue-600/25 transition hover:brightness-110 disabled:opacity-40";
 
   return (
     <div className="landing admin-dark">
@@ -149,21 +141,18 @@ export default function LoginScreen({ notice }: { notice?: string }) {
             {MOBILE_TOKENS.map((t, i) => <Token key={i} {...t} />)}
           </div>
 
-          {/* A student walks in with a bag, sets it down — ta-da — the card builds itself. */}
-          <div className={`adm-show relative z-10 ${introDone ? "" : "adm-intro"}`}>
-          <MagicStudent />
-          <div className="adm-card">
+          <div className="adm-card relative z-10">
             <img src={logo} alt="SplitPe" className="adm-card-logo" />
             <h2>Welcome back</h2>
             <p className="sub">Sign in to the SplitPe admin console</p>
 
-            {notice && <p className="mt-5 rounded-xl border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-sm text-amber-300">{notice}</p>}
+            {notice && <p className="mt-5 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">{notice}</p>}
 
             {step === "phone" ? (
               <form className="mt-6" onSubmit={(e) => { e.preventDefault(); if (digits.length === 10) requestOtp(); }}>
-                <label className="mb-2 block text-sm font-semibold text-slate-300">Mobile number</label>
+                <label className="mb-2 block text-sm font-semibold text-slate-700">Mobile number</label>
                 <div className="flex items-center gap-2">
-                  <span className="rounded-2xl border border-slate-600/60 bg-slate-900/70 px-3.5 py-3 text-base font-semibold text-slate-300">+91</span>
+                  <span className="rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-base font-semibold text-slate-700">+91</span>
                   <input
                     className={fieldClass}
                     inputMode="numeric"
@@ -180,7 +169,7 @@ export default function LoginScreen({ notice }: { notice?: string }) {
               </form>
             ) : (
               <form className="mt-6" onSubmit={(e) => { e.preventDefault(); if (code.trim()) verify(); }}>
-                <label className="mb-2 block text-sm font-semibold text-slate-300">Enter the OTP sent to +91 {digits}</label>
+                <label className="mb-2 block text-sm font-semibold text-slate-700">Enter the OTP sent to +91 {digits}</label>
                 <input
                   className={`${fieldClass} text-center text-xl tracking-[0.5em]`}
                   inputMode="numeric"
@@ -193,21 +182,20 @@ export default function LoginScreen({ notice }: { notice?: string }) {
                 <button type="submit" disabled={!code.trim() || busy} className={buttonClass}>
                   {busy && <Loader2 size={18} className="animate-spin" />} Verify &amp; sign in
                 </button>
-                <button type="button" className="mt-4 w-full text-sm font-medium text-slate-400 hover:text-white" onClick={() => { setStep("phone"); setCode(""); setError(""); }}>
+                <button type="button" className="mt-4 w-full text-sm font-medium text-slate-500 hover:text-slate-900" onClick={() => { setStep("phone"); setCode(""); setError(""); }}>
                   ← Change number
                 </button>
               </form>
             )}
 
-            {error && <p className="mt-4 rounded-xl bg-red-500/10 px-3 py-2 text-sm text-red-300">{error}</p>}
+            {error && <p className="mt-4 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}
 
-            <p className="mt-6 border-t border-slate-700/60 pt-4 text-center text-xs text-slate-500">
+            <p className="mt-6 border-t border-slate-100 pt-4 text-center text-xs text-slate-400">
               Authorised SplitPe team members only
             </p>
           </div>
-          </div>
 
-          <a href="/" className="adm-back-link relative z-10 mt-6 text-sm text-slate-500 hover:text-slate-300">← Back to splitpe.xyz</a>
+          <a href="/" className="relative z-10 mt-6 text-sm text-slate-400 hover:text-white">← Back to splitpe.xyz</a>
         </section>
       </main>
     </div>
