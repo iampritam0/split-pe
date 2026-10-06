@@ -3,6 +3,7 @@ import { onAuthStateChanged, signOut } from "firebase/auth";
 import type { User } from "firebase/auth";
 import { Image, LayoutDashboard, Loader2, LogOut, Settings } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import logo from "../assets/logo-s.png";
 import { auth } from "./firebase";
 import LoginScreen from "./LoginScreen";
 import OverviewTab from "./OverviewTab";
@@ -66,8 +67,8 @@ export default function AdminApp() {
 
   if (state === "loading") {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
-        <Loader2 className="animate-spin text-splitpe-600" />
+      <div className="flex min-h-screen items-center justify-center bg-slate-950">
+        <Loader2 className="animate-spin text-splitpe-400" />
       </div>
     );
   }
@@ -76,9 +77,12 @@ export default function AdminApp() {
   return (
     <div className="min-h-screen bg-slate-50">
       <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col border-r border-slate-200 bg-white p-5 lg:flex">
-        <div className="mb-8">
-          <p className="font-heading text-xl font-bold text-ink">SplitPe Admin</p>
-          <p className="truncate text-sm text-ink-soft">{user?.phoneNumber}</p>
+        <div className="mb-8 flex items-center gap-3">
+          <img src={logo} alt="" className="h-10 w-10" />
+          <div className="min-w-0">
+            <p className="font-heading text-xl font-bold text-ink">SplitPe Admin</p>
+            <p className="truncate text-sm text-ink-soft">{user?.phoneNumber}</p>
+          </div>
         </div>
         <nav className="flex-1 space-y-1">
           {TABS.map(({ key, label, icon: Icon }) => (
@@ -99,7 +103,10 @@ export default function AdminApp() {
       {/* Phone/tablet: tabs across the top instead of the sidebar. */}
       <header className="sticky top-0 z-40 border-b border-slate-200 bg-white lg:hidden">
         <div className="flex items-center justify-between px-4 py-3">
-          <p className="font-heading text-lg font-bold text-ink">SplitPe Admin</p>
+          <div className="flex items-center gap-2">
+            <img src={logo} alt="" className="h-8 w-8" />
+            <p className="font-heading text-lg font-bold text-ink">SplitPe Admin</p>
+          </div>
           <button onClick={() => signOut(auth)} className="text-ink-soft" aria-label="Sign out"><LogOut size={18} /></button>
         </div>
         <nav className="flex gap-1 overflow-x-auto px-2 pb-2">
