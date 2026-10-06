@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { Bell, Construction, Gauge, Loader2, Megaphone, Smartphone } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { db } from "./firebase";
+import { logAdminAction } from "./adminLog";
 import { DEFAULT_SETTINGS, mergeSettings } from "./remoteConfig";
 import type { RemoteSettings, VersionGate } from "./remoteConfig";
 
@@ -54,11 +55,15 @@ export default function SettingsTab() {
   const [version, setVersion] = useState<VersionGate>({ minVersion: "", message: "", updateUrl: "" });
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<{ ok: boolean; text: string } | null>(null);
+  // Maintenance state as last saved — turning it on/off gets its own log entry.
+  const savedMaintenance = useRef<boolean | null>(null);
 
   useEffect(() => {
     Promise.all([getDoc(doc(db, "appConfig", "settings")), getDoc(doc(db, "appConfig", "version"))])
       .then(([s, v]) => {
-        setSettings(mergeSettings(s.exists() ? s.data() : undefined));
+        const merged = mergeSettings(s.exists() ? s.data() : undefined);
+        setSettings(merged);
+        savedMaintenance.current = merged.maintenance.enabled;
         if (v.exists()) setVersion({ minVersion: "", message: "", updateUrl: "", ...(v.data() as Partial<VersionGate>) });
       })
       .catch((err) => {
@@ -88,6 +93,22 @@ export default function SettingsTab() {
         updateUrl: version.updateUrl.trim(),
       });
       setStatus({ ok: true, text: "Saved. Users get the new settings the next time they open the app." });
+      if (savedMaintenance.current !== settings.maintenance.enabled) {
+        logAdminAction("maintenance", `Maintenance mode turned ${settings.maintenance.enabled ? "ON" : "OFF"}`, settings.maintenance.message);
+        savedMaintenance.current = settings.maintenance.enabled;
+      }
+      const pad = (n: number) => String(n).padStart(2, "0");
+      logAdminAction(
+        "settings",
+        "Saved app settings",
+        [
+          `Ads ${settings.ads.enabled ? `on (every ${settings.ads.listEvery})` : "off"}`,
+          `${settings.limits.dailyFreeExpenses} free expenses/day`,
+          `${settings.limits.personalGroupsPerUnlock} groups/ad`,
+          `Reminder ${settings.dailyReminder.enabled ? `${pad(settings.dailyReminder.hour)}:${pad(settings.dailyReminder.minute)}` : "off"}`,
+          `Min version ${version.minVersion.trim() || "off"}`,
+        ].join(" · ")
+      );
     } catch (err) {
       setStatus({ ok: false, text: `Save failed: ${(err as Error).message}` });
     } finally {

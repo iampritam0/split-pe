@@ -14,6 +14,8 @@ import {
 import { deleteObject, getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { ImagePlus, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
 import { db, storage } from "./firebase";
+import { logAdminAction } from "./adminLog";
+import logo from "../assets/logo-s.png";
 
 /**
  * banners/{id} — what the app shows as a one-time popup on open (each banner
@@ -137,6 +139,7 @@ export default function BannersTab() {
       };
       if (draft.id) await updateDoc(doc(db, "banners", draft.id), data);
       else await addDoc(collection(db, "banners"), { ...data, createdAt: serverTimestamp() });
+      logAdminAction("banner", `${draft.id ? "Edited" : "Created"} banner “${data.title}”`, `${fmt(data.startAt)} → ${fmt(data.endAt)}${data.active ? "" : " · off"}`);
       setDraft(null);
     } catch (err) {
       setError(`Save failed: ${(err as Error).message}`);
@@ -145,12 +148,16 @@ export default function BannersTab() {
     }
   };
 
-  const toggleActive = (b: Banner) => updateDoc(doc(db, "banners", b.id), { active: !b.active, updatedAt: serverTimestamp() }).catch((err) => setError(err.message));
+  const toggleActive = (b: Banner) =>
+    updateDoc(doc(db, "banners", b.id), { active: !b.active, updatedAt: serverTimestamp() })
+      .then(() => logAdminAction("banner", `Turned ${b.active ? "off" : "on"} banner “${b.title}”`))
+      .catch((err) => setError(err.message));
 
   const remove = async (b: Banner) => {
     if (!window.confirm(`Delete "${b.title}"? This can't be undone.`)) return;
     try {
       await deleteDoc(doc(db, "banners", b.id));
+      logAdminAction("banner", `Deleted banner “${b.title}”`);
       if (b.imagePath) deleteObject(ref(storage, b.imagePath)).catch(() => {});
     } catch (err) {
       setError((err as Error).message);
@@ -210,12 +217,14 @@ export default function BannersTab() {
 
       {draft && (
         <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-900/40 p-4">
-          <div className="my-8 w-full max-w-lg rounded-2xl bg-white p-6 shadow-card">
+          <div className="my-8 w-full max-w-3xl rounded-2xl bg-white p-6 shadow-card">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="font-heading text-xl font-bold text-ink">{draft.id ? "Edit banner" : "New banner"}</h3>
               <button onClick={() => setDraft(null)} aria-label="Close"><X size={20} /></button>
             </div>
 
+            <div className="grid gap-6 md:grid-cols-[1fr_250px]">
+            <div>
             <label className="mb-4 flex h-40 cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-slate-200 bg-slate-50">
               {preview ? <img src={preview} alt="" className="h-full w-full object-cover" /> : (
                 <span className="flex flex-col items-center gap-1 text-sm text-ink-soft"><ImagePlus size={24} /> Banner image (optional, under 2 MB)</span>
@@ -254,6 +263,9 @@ export default function BannersTab() {
                 <input type="checkbox" checked={draft.active} onChange={(e) => setDraft({ ...draft, active: e.target.checked })} /> Active
               </label>
             </div>
+            </div>
+            <BannerPreview draft={draft} imageUrl={preview || null} />
+            </div>
 
             {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
 
@@ -266,6 +278,41 @@ export default function BannersTab() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+/**
+ * How the banner will look in the app — the same layout as the app's
+ * AnnouncementBanner popup (SplitPe repo, src/components/AnnouncementBanner.js):
+ * a dimmed Home screen behind, a white card with the 16:9 image, title,
+ * message and button.
+ */
+function BannerPreview({ draft, imageUrl }: { draft: Draft; imageUrl: string | null }) {
+  const hasCta = draft.ctaTarget !== "none" && !!draft.ctaLabel.trim();
+  return (
+    <div>
+      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-soft">Preview in app</p>
+      <div className="relative mx-auto h-[460px] w-[230px] overflow-hidden rounded-[2rem] border-[6px] border-slate-900 bg-slate-100 shadow-card">
+        {/* faint Home screen behind the popup */}
+        <div className="space-y-2 p-3 opacity-60">
+          <div className="flex items-center gap-1.5"><img src={logo} alt="" className="h-4 w-4" /><span className="text-[10px] font-bold">SplitPe</span></div>
+          <div className="h-16 rounded-xl bg-brand-gradient" />
+          <div className="grid grid-cols-2 gap-1.5">{[0, 1, 2, 3].map((i) => <div key={i} className="h-10 rounded-lg bg-white" />)}</div>
+          {[0, 1, 2].map((i) => <div key={i} className="h-8 rounded-lg bg-white" />)}
+        </div>
+        <div className="absolute inset-0 flex items-center justify-center bg-slate-900/50 p-3">
+          <div className="w-full overflow-hidden rounded-2xl bg-white text-center shadow-xl">
+            {imageUrl ? <img src={imageUrl} alt="" className="aspect-video w-full object-cover" /> : null}
+            <div className="p-3">
+              <p className="text-sm font-bold leading-tight text-ink">{draft.title.trim() || "Banner title"}</p>
+              {draft.message.trim() && <p className="mt-1 text-[11px] leading-snug text-ink-soft">{draft.message.trim()}</p>}
+              <div className="mt-2.5 rounded-lg bg-splitpe-600 py-1.5 text-[11px] font-semibold text-white">{hasCta ? `${draft.ctaLabel.trim()} →` : "Got it"}</div>
+              {hasCta && <p className="mt-1.5 text-[10px] font-medium text-ink-soft">Maybe later</p>}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -142,8 +142,16 @@ export default function LoginScreen({ notice }: { notice?: string }) {
           </div>
 
           <div className="adm-card relative z-10">
-            <img src={logo} alt="SplitPe" className="adm-card-logo" />
-            <h2>Welcome back</h2>
+            <div className="flex items-center gap-3">
+              <img src={logo} alt="" className="adm-card-logo" />
+              <div className="leading-tight">
+                <p className="font-heading text-3xl font-extrabold tracking-tight text-slate-900">
+                  Split<span className="grad-text">Pe</span>
+                </p>
+                <p className="font-hindi text-sm font-bold text-slate-500">हिसाब भी, दोस्ती भी</p>
+              </div>
+            </div>
+            <h2 className="!mt-7">Welcome back</h2>
             <p className="sub">Sign in to the SplitPe admin console</p>
 
             {notice && <p className="mt-5 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">{notice}</p>}
