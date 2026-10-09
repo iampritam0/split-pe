@@ -13,7 +13,7 @@ export default function Terms() {
         meta={[
           { label: "App", value: "SplitPe (com.raotechnologies.splitpe)" },
           { label: "Last updated", value: "19 September 2026" },
-          { label: "Contact", value: <a href="mailto:support@splitpe.app" className="font-semibold text-splitpe-600 hover:text-splitpe-700">support@splitpe.app</a> },
+          { label: "Contact", value: <a href="mailto:support@splitpe.xyz" className="font-semibold text-splitpe-600 hover:text-splitpe-700">support@splitpe.xyz</a> },
         ]}
       />
 
@@ -139,10 +139,10 @@ export default function Terms() {
             <p className="mt-3 leading-7 text-slate-700">
               Write to{" "}
               <a
-                href="mailto:support@splitpe.app"
+                href="mailto:support@splitpe.xyz"
                 className="font-semibold text-splitpe-700 hover:text-splitpe-800"
               >
-                support@splitpe.app
+                support@splitpe.xyz
               </a>{" "}
               — we respond to every request.
             </p>

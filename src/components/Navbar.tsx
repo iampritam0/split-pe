@@ -16,7 +16,7 @@ const navItems: NavItem[] = [
   { label: "How it works", to: "/#how-it-works" },
   { label: "Upcoming", to: "/#upcoming", badge: "NEW" },
   { label: "FAQ", to: "/#faq" },
-  { label: "Support", href: "mailto:support@splitpe.app" },
+  { label: "Support", href: "mailto:support@splitpe.xyz" },
 ];
 
 function NewBadge({ text }: { text: string }) {

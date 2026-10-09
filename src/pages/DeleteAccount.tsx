@@ -93,10 +93,10 @@ export default function DeleteAccount() {
             <p className="mt-6 leading-8 text-slate-600">
               Can't access the app? Email us at{" "}
               <a
-                href="mailto:support@splitpe.app?subject=Account%20Deletion%20Request"
+                href="mailto:support@splitpe.xyz?subject=Account%20Deletion%20Request"
                 className="font-semibold text-splitpe-600 hover:text-splitpe-700"
               >
-                support@splitpe.app
+                support@splitpe.xyz
               </a>{" "}
               from your registered email address with "Account Deletion
               Request" in the subject line, and we'll process it for you.
@@ -169,10 +169,10 @@ export default function DeleteAccount() {
                 <p className="mt-3 leading-7 text-slate-700">
                   Questions about account deletion? Write to{" "}
                   <a
-                    href="mailto:support@splitpe.app"
+                    href="mailto:support@splitpe.xyz"
                     className="font-semibold text-splitpe-700 hover:text-splitpe-800"
                   >
-                    support@splitpe.app
+                    support@splitpe.xyz
                   </a>
                   . For more on how we handle your data, see our{" "}
                   <Link
