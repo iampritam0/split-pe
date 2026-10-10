@@ -6,6 +6,12 @@ import { functions } from "./firebase";
 // to act on the caller's own account or on another admin.
 export const setUserStatus = httpsCallable<{ uid: string; blocked: boolean; reason?: string }, { blocked: boolean }>(functions, "adminSetUserStatus");
 export const deleteUser = httpsCallable<{ uid: string }, { deleted: boolean }>(functions, "adminDeleteUser");
+export const userActivity = httpsCallable<void, { activity: Record<string, { signIn: number | null; refresh: number | null }> }>(functions, "adminUserActivity");
+export type NotifyAudience = { audience: "all" } | { audience: "uids"; uids: string[] };
+export const sendNotification = httpsCallable<{ title: string; body: string } & NotifyAudience, { recipients: number; pushed: number; pushFailed: number }>(
+  functions,
+  "adminSendNotification"
+);
 
 export type Profile = {
   id: string;
@@ -24,6 +30,14 @@ export type Profile = {
   blocked?: boolean;
   blockedAt?: Timestamp | null;
   blockedReason?: string | null;
+  /** Merged in from Firebase Auth (adminUserActivity), in ms. */
+  lastSignIn?: number | null;
+  /**
+   * Latest sign of use: the app's hourly token refresh, the last OTP login or
+   * lastActiveAt — whichever is newest. Store builds before Oct 2026 never
+   * write lastActiveAt, so Auth's times are what most accounts have.
+   */
+  lastSeen?: number | null;
 };
 
 export const fmtDate = (t?: Timestamp | null) =>
@@ -32,9 +46,12 @@ export const fmtDate = (t?: Timestamp | null) =>
 export const fmtDay = (t?: Timestamp | null) =>
   t ? t.toDate().toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—";
 
-export const ago = (t?: Timestamp | null) => {
-  if (!t) return "Never reported";
-  const mins = Math.round((Date.now() - t.toMillis()) / 60000);
+export const fmtMs = (ms?: number | null) =>
+  ms ? new Date(ms).toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit" }) : "—";
+
+export const ago = (ms?: number | null) => {
+  if (!ms) return "Never";
+  const mins = Math.round((Date.now() - ms) / 60000);
   if (mins < 2) return "Just now";
   if (mins < 60) return `${mins} min ago`;
   const hrs = Math.round(mins / 60);
@@ -57,7 +74,7 @@ export const exportCsv = (rows: Profile[]) => {
     ["Name", "Nickname", "Phone", "Status", "Admin", "Joined", "Last active", "Currency", "Account ID"].map(cell).join(","),
     ...rows.map((p) =>
       [p.name, p.nickname, p.phone ? `+91 ${p.phone}` : "", p.blocked ? "Blocked" : "Active", p.isAdmin ? "Yes" : "No",
-        iso(p.createdAt), iso(p.lastActiveAt), p.defaultCurrency || "INR", p.id].map(cell).join(",")
+        iso(p.createdAt), p.lastSeen ? new Date(p.lastSeen).toISOString() : "", p.defaultCurrency || "INR", p.id].map(cell).join(",")
     ),
   ];
   const url = URL.createObjectURL(new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" }));

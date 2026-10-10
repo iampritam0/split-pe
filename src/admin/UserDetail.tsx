@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { collection, getCountFromServer, query, where } from "firebase/firestore";
-import { Ban, BadgeCheck, CheckCircle2, Copy, Loader2, Phone, Trash2, X } from "lucide-react";
+import { Ban, BadgeCheck, Bell, CheckCircle2, Copy, Loader2, Phone, Trash2, X } from "lucide-react";
 import { auth, db } from "./firebase";
-import { ago, deleteUser, displayName, fmtDate, initials, setUserStatus } from "./users";
+import NotifyComposer from "./NotifyComposer";
+import { ago, deleteUser, displayName, fmtDate, fmtMs, initials, setUserStatus } from "./users";
 import type { Profile } from "./users";
 
 type Activity = { groups: number; expenses: number; settlements: number };
@@ -30,6 +31,7 @@ export default function UserDetail({ profile, onClose, onChange }: {
   const [acting, setActing] = useState<"" | "block" | "unblock" | "delete">("");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [composing, setComposing] = useState(false);
 
   useEffect(() => {
     const n = async (col: string, field: string) =>
@@ -137,7 +139,8 @@ export default function UserDetail({ profile, onClose, onChange }: {
 
         <div className="mt-4 rounded-2xl bg-white p-6 shadow-soft">
           <Row label="Joined">{fmtDate(profile.createdAt)}</Row>
-          <Row label="Last opened the app">{ago(profile.lastActiveAt)}</Row>
+          <Row label="Last active in the app">{profile.lastSeen ? <>{ago(profile.lastSeen)}<br /><span className="text-xs font-normal text-ink-soft">{fmtMs(profile.lastSeen)}</span></> : "Never"}</Row>
+          <Row label="Last OTP login">{fmtMs(profile.lastSignIn)}</Row>
           <Row label="Default currency">{profile.defaultCurrency || "INR"}</Row>
           <Row label="Push notifications">{profile.expoPushToken ? "Device registered" : "No device token"}</Row>
           <Row label="Notification toggles on">{notifOn === null ? "—" : `${notifOn} of ${notifTotal}`}</Row>
@@ -150,6 +153,25 @@ export default function UserDetail({ profile, onClose, onChange }: {
           </Row>
           {profile.blocked && (
             <Row label="Blocked">{profile.blockedAt ? fmtDate(profile.blockedAt) : "Yes"}{profile.blockedReason ? ` — ${profile.blockedReason}` : ""}</Row>
+          )}
+        </div>
+
+        <div className="mt-4 rounded-2xl bg-white p-6 shadow-soft">
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <h3 className="font-heading text-lg font-bold text-ink">Send notification</h3>
+              <p className="text-sm text-ink-soft">{profile.expoPushToken ? "Push + in-app Notifications." : "No device registered — in-app Notifications only."}</p>
+            </div>
+            {!composing && (
+              <button onClick={() => setComposing(true)} disabled={!!profile.blocked} className="flex shrink-0 items-center gap-2 rounded-xl bg-splitpe-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
+                <Bell size={15} /> Write
+              </button>
+            )}
+          </div>
+          {composing && (
+            <div className="mt-4">
+              <NotifyComposer compact target={{ audience: "uids", uids: [profile.id] }} label={displayName(profile)} />
+            </div>
           )}
         </div>
 

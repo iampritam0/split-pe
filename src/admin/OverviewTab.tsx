@@ -4,6 +4,7 @@ import type { Query } from "firebase/firestore";
 import { Activity, ArrowLeftRight, CalendarDays, Receipt, ReceiptText, UserPlus, Users, UsersRound } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { db } from "./firebase";
+import { userActivity } from "./users";
 import BarChart from "./BarChart";
 import type { BarDatum } from "./BarChart";
 
@@ -40,8 +41,9 @@ const dailySeries = (col: string): Promise<BarDatum[]> => {
 /**
  * Headline numbers + two 14-day trends — server-side count queries only, so
  * no profile, expense or amount is ever downloaded here. "Active" comes from
- * users.lastActiveAt, which the app stamps on open (only builds from Oct 2026
- * on report it).
+ * Firebase Auth's last token refresh / sign-in (adminUserActivity), which
+ * every app build reports; if that call fails it falls back to
+ * users.lastActiveAt, which only builds from Oct 2026 on stamp.
  */
 export default function OverviewTab() {
   const [counts, setCounts] = useState<Counts | null>(null);
@@ -64,9 +66,24 @@ export default function OverviewTab() {
       count(query(expenses, where("createdAt", ">=", ts(today)))),
       count(query(collection(db, "settlements"), where("createdAt", ">=", ts(weekAgo)))),
     ])
-      .then(([users, activeToday, active7d, new7d, groups, expensesTotal, expensesToday, settle7d]) =>
-        setCounts({ users, activeToday, active7d, new7d, groups, expenses: expensesTotal, expensesToday, settle7d })
-      )
+      .then(async ([users, activeToday, active7d, new7d, groups, expensesTotal, expensesToday, settle7d]) => {
+        const fromAuth = await userActivity()
+          .then(({ data }) => {
+            const seen = Object.values(data.activity).map((a) => Math.max(a.refresh ?? 0, a.signIn ?? 0));
+            return { activeToday: seen.filter((t) => t >= today.getTime()).length, active7d: seen.filter((t) => t >= weekAgo.getTime()).length };
+          })
+          .catch(() => null);
+        setCounts({
+          users,
+          activeToday: Math.max(activeToday, fromAuth?.activeToday ?? 0),
+          active7d: Math.max(active7d, fromAuth?.active7d ?? 0),
+          new7d,
+          groups,
+          expenses: expensesTotal,
+          expensesToday,
+          settle7d,
+        });
+      })
       .catch((err) => setError(err.message || "Could not load numbers."));
     dailySeries("users").then(setSignups).catch(() => setSignups([]));
     dailySeries("expenses").then(setExpenseTrend).catch(() => setExpenseTrend([]));

@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
-import { collection, getDocs } from "firebase/firestore";
-import { Ban, BadgeCheck, CheckCircle2, ChevronLeft, ChevronRight, Download, Loader2, RefreshCw, Search, Trash2, X } from "lucide-react";
-import { auth, db } from "./firebase";
+import { useMemo, useState } from "react";
+import { Ban, BadgeCheck, Bell, CheckCircle2, ChevronLeft, ChevronRight, Download, Loader2, RefreshCw, Search, Trash2, X } from "lucide-react";
+import { auth } from "./firebase";
+import NotifyComposer from "./NotifyComposer";
 import UserDetail from "./UserDetail";
-import { ago, deleteUser, displayName, exportCsv, fmtDay, initials, setUserStatus } from "./users";
+import useUsers from "./useUsers";
+import { ago, deleteUser, displayName, exportCsv, fmtDay, fmtMs, initials, setUserStatus } from "./users";
 import type { Profile } from "./users";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -16,8 +17,8 @@ const FILTERS: { key: FilterKey; label: string; test: (p: Profile, now: number) 
   { key: "blocked", label: "Blocked", test: (p) => !!p.blocked },
   { key: "admins", label: "Admins", test: (p) => !!p.isAdmin },
   { key: "new7d", label: "New this week", test: (p, now) => !!p.createdAt && now - p.createdAt.toMillis() < 7 * DAY_MS },
-  { key: "seen7d", label: "Opened app (7d)", test: (p, now) => !!p.lastActiveAt && now - p.lastActiveAt.toMillis() < 7 * DAY_MS },
-  { key: "inactive30d", label: "Inactive 30d+", test: (p, now) => !p.lastActiveAt || now - p.lastActiveAt.toMillis() >= 30 * DAY_MS },
+  { key: "seen7d", label: "Active (7d)", test: (p, now) => !!p.lastSeen && now - p.lastSeen < 7 * DAY_MS },
+  { key: "inactive30d", label: "Inactive 30d+", test: (p, now) => !p.lastSeen || now - p.lastSeen >= 30 * DAY_MS },
 ];
 
 type SortKey = "newest" | "oldest" | "name" | "recent";
@@ -26,7 +27,7 @@ const SORTS: Record<SortKey, { label: string; cmp: (a: Profile, b: Profile) => n
   newest: { label: "Newest first", cmp: (a, b) => millis(b.createdAt) - millis(a.createdAt) },
   oldest: { label: "Oldest first", cmp: (a, b) => millis(a.createdAt) - millis(b.createdAt) },
   name: { label: "Name A–Z", cmp: (a, b) => displayName(a).localeCompare(displayName(b), "en", { sensitivity: "base" }) },
-  recent: { label: "Recently active", cmp: (a, b) => millis(b.lastActiveAt) - millis(a.lastActiveAt) },
+  recent: { label: "Recently active", cmp: (a, b) => (b.lastSeen ?? 0) - (a.lastSeen ?? 0) },
 };
 
 /**
@@ -36,14 +37,12 @@ const SORTS: Record<SortKey, { label: string; cmp: (a: Profile, b: Profile) => n
  * the Activity Log). Profiles only: no expense, amount or balance is read.
  *
  * Firestore has no "contains" search, so the whole users collection is
- * loaded once (admins may list it — firestore.rules) and searched here.
+ * loaded once (useUsers) and searched here.
  */
 export default function UsersTab() {
-  const [users, setUsers] = useState<Profile[] | null>(null);
-  // When the list was fetched — the "this week" / "30 days" filters count from here.
-  const [now, setNow] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const { users, setUsers, now, loading, error: loadError, reload } = useUsers();
+  const [actionError, setError] = useState("");
+  const error = loadError || actionError;
   const [notice, setNotice] = useState("");
   const [term, setTerm] = useState("");
   const [filter, setFilter] = useState<FilterKey>("all");
@@ -52,25 +51,12 @@ export default function UsersTab() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [openId, setOpenId] = useState<string | null>(null);
   const [bulk, setBulk] = useState<{ label: string; done: number; total: number } | null>(null);
-
-  const fetchUsers = () =>
-    getDocs(collection(db, "users"))
-      .then((snap) => {
-        setUsers(snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Profile, "id">) })));
-        setNow(Date.now());
-      })
-      .catch((err: Error) => setError(err.message || "Could not load users."))
-      .finally(() => setLoading(false));
+  const [notifying, setNotifying] = useState(false);
 
   const load = () => {
-    setLoading(true);
     setError("");
-    fetchUsers();
+    reload();
   };
-
-  useEffect(() => {
-    fetchUsers();
-  }, []);
 
   // Search / filter / sort changes start again from page 1.
   const changeTerm = (v: string) => { setTerm(v); setPage(0); };
@@ -251,6 +237,7 @@ export default function UsersTab() {
           ) : (
             <>
               <span className="mr-auto font-medium">{selected.size} selected</span>
+              <button onClick={() => setNotifying(true)} className="flex items-center gap-1.5 rounded-lg bg-splitpe-600 px-3 py-1.5 font-semibold"><Bell size={14} /> Notify</button>
               <button onClick={() => bulkStatus(true)} className="flex items-center gap-1.5 rounded-lg bg-amber-500 px-3 py-1.5 font-semibold"><Ban size={14} /> Block</button>
               <button onClick={() => bulkStatus(false)} className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 font-semibold"><CheckCircle2 size={14} /> Activate</button>
               <button onClick={bulkDelete} className="flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 font-semibold"><Trash2 size={14} /> Delete</button>
@@ -314,7 +301,7 @@ export default function UsersTab() {
                     </td>
                     <td className="whitespace-nowrap px-3 py-3 text-ink">+91 {p.phone || "—"}</td>
                     <td className="hidden whitespace-nowrap px-3 py-3 text-ink-soft md:table-cell">{fmtDay(p.createdAt)}</td>
-                    <td className="hidden whitespace-nowrap px-3 py-3 text-ink-soft md:table-cell">{ago(p.lastActiveAt)}</td>
+                    <td className="hidden whitespace-nowrap px-3 py-3 text-ink-soft md:table-cell"><span title={fmtMs(p.lastSeen)}>{ago(p.lastSeen)}</span></td>
                     <td className="px-3 py-3">
                       <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${p.blocked ? "bg-red-100 text-red-700" : "bg-emerald-100 text-emerald-700"}`}>
                         {p.blocked ? "Blocked" : "Active"}
@@ -334,6 +321,21 @@ export default function UsersTab() {
               <span className="px-1">Page {page + 1} / {pages}</span>
               <button onClick={() => setPage((n) => n + 1)} disabled={page >= pages - 1} className="rounded-lg p-1.5 hover:bg-slate-100 disabled:opacity-40" aria-label="Next page"><ChevronRight size={16} /></button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {notifying && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4" onClick={() => setNotifying(false)}>
+          <div className="max-h-full w-full max-w-3xl overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="font-heading text-lg font-bold text-ink">Notify {selectedUsers.length} selected</h3>
+              <button onClick={() => setNotifying(false)} className="rounded-lg p-1.5 text-ink-soft hover:bg-slate-100" aria-label="Close"><X size={18} /></button>
+            </div>
+            <NotifyComposer
+              target={selectedUsers.length ? { audience: "uids", uids: selectedUsers.map((p) => p.id) } : null}
+              label={`${selectedUsers.length} user${selectedUsers.length === 1 ? "" : "s"}`}
+            />
           </div>
         </div>
       )}
