@@ -1,240 +1,356 @@
-import { useState } from "react";
-import type { ReactNode } from "react";
-import { collection, getCountFromServer, getDocs, limit, query, where } from "firebase/firestore";
-import type { Timestamp } from "firebase/firestore";
-import { Ban, BadgeCheck, CheckCircle2, Loader2, Search, Trash2 } from "lucide-react";
-import { httpsCallable } from "firebase/functions";
-import { auth, db, functions } from "./firebase";
+import { useEffect, useMemo, useState } from "react";
+import { collection, getDocs } from "firebase/firestore";
+import { Ban, BadgeCheck, CheckCircle2, ChevronLeft, ChevronRight, Download, Loader2, RefreshCw, Search, Trash2, X } from "lucide-react";
+import { auth, db } from "./firebase";
+import UserDetail from "./UserDetail";
+import { ago, deleteUser, displayName, exportCsv, fmtDay, initials, setUserStatus } from "./users";
+import type { Profile } from "./users";
 
-// Admin-only Cloud Functions (SplitPe repo, functions/index.js).
-const setUserStatus = httpsCallable<{ uid: string; blocked: boolean; reason?: string }, { blocked: boolean }>(functions, "adminSetUserStatus");
-const deleteUser = httpsCallable<{ uid: string }, { deleted: boolean }>(functions, "adminDeleteUser");
+const DAY_MS = 24 * 60 * 60 * 1000;
+const PAGE_SIZE = 25;
 
-type Profile = {
-  id: string;
-  name?: string;
-  nickname?: string | null;
-  phone?: string;
-  avatarUrl?: string | null;
-  createdAt?: Timestamp;
-  lastActiveAt?: Timestamp;
-  defaultCurrency?: string;
-  isAdmin?: boolean;
-  notificationSettings?: Record<string, boolean>;
-  personalGroups?: unknown[];
-  customCategories?: string[];
-  expoPushToken?: string | null;
-  blocked?: boolean;
-  blockedAt?: Timestamp | null;
-  blockedReason?: string | null;
+type FilterKey = "all" | "active" | "blocked" | "admins" | "new7d" | "seen7d" | "inactive30d";
+const FILTERS: { key: FilterKey; label: string; test: (p: Profile, now: number) => boolean }[] = [
+  { key: "all", label: "All", test: () => true },
+  { key: "active", label: "Active", test: (p) => !p.blocked },
+  { key: "blocked", label: "Blocked", test: (p) => !!p.blocked },
+  { key: "admins", label: "Admins", test: (p) => !!p.isAdmin },
+  { key: "new7d", label: "New this week", test: (p, now) => !!p.createdAt && now - p.createdAt.toMillis() < 7 * DAY_MS },
+  { key: "seen7d", label: "Opened app (7d)", test: (p, now) => !!p.lastActiveAt && now - p.lastActiveAt.toMillis() < 7 * DAY_MS },
+  { key: "inactive30d", label: "Inactive 30d+", test: (p, now) => !p.lastActiveAt || now - p.lastActiveAt.toMillis() >= 30 * DAY_MS },
+];
+
+type SortKey = "newest" | "oldest" | "name" | "recent";
+const millis = (t?: { toMillis: () => number }) => t?.toMillis() ?? 0;
+const SORTS: Record<SortKey, { label: string; cmp: (a: Profile, b: Profile) => number }> = {
+  newest: { label: "Newest first", cmp: (a, b) => millis(b.createdAt) - millis(a.createdAt) },
+  oldest: { label: "Oldest first", cmp: (a, b) => millis(a.createdAt) - millis(b.createdAt) },
+  name: { label: "Name A–Z", cmp: (a, b) => displayName(a).localeCompare(displayName(b), "en", { sensitivity: "base" }) },
+  recent: { label: "Recently active", cmp: (a, b) => millis(b.lastActiveAt) - millis(a.lastActiveAt) },
 };
-type Activity = { groups: number; expenses: number; settlements: number };
-
-const fmtDate = (t?: Timestamp) =>
-  t ? t.toDate().toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit" }) : "—";
-
-const ago = (t?: Timestamp) => {
-  if (!t) return "Not reported yet";
-  const mins = Math.round((Date.now() - t.toMillis()) / 60000);
-  if (mins < 2) return "Just now";
-  if (mins < 60) return `${mins} min ago`;
-  const hrs = Math.round(mins / 60);
-  if (hrs < 24) return `${hrs} h ago`;
-  return `${Math.round(hrs / 24)} days ago`;
-};
-
-const Row = ({ label, children }: { label: string; children: ReactNode }) => (
-  <div className="flex items-start justify-between gap-4 border-b border-slate-100 py-2.5 last:border-0">
-    <span className="text-sm text-ink-soft">{label}</span>
-    <span className="text-right text-sm font-medium text-ink">{children}</span>
-  </div>
-);
 
 /**
- * Support lookup — find an account by its mobile number to help someone who
- * writes in. Shows only account basics and how much they use the app
- * (counts), never any expense, amount or balance — plus the account
- * actions: block / re-activate and permanent delete (server-side, admin-only).
+ * Every SplitPe account in one list — search by name, nickname, mobile
+ * number or account ID, filter, sort, export, and block / re-activate /
+ * delete one account or a selection (server-side callables, each recorded in
+ * the Activity Log). Profiles only: no expense, amount or balance is read.
+ *
+ * Firestore has no "contains" search, so the whole users collection is
+ * loaded once (admins may list it — firestore.rules) and searched here.
  */
 export default function UsersTab() {
-  const [phone, setPhone] = useState("");
-  const [busy, setBusy] = useState(false);
+  const [users, setUsers] = useState<Profile[] | null>(null);
+  // When the list was fetched — the "this week" / "30 days" filters count from here.
+  const [now, setNow] = useState(0);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [activity, setActivity] = useState<Activity | null>(null);
-  const [acting, setActing] = useState<"" | "block" | "unblock" | "delete">("");
   const [notice, setNotice] = useState("");
+  const [term, setTerm] = useState("");
+  const [filter, setFilter] = useState<FilterKey>("all");
+  const [sort, setSort] = useState<SortKey>("newest");
+  const [page, setPage] = useState(0);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [bulk, setBulk] = useState<{ label: string; done: number; total: number } | null>(null);
 
-  const digits = phone.replace(/\D/g, "").slice(-10);
+  const fetchUsers = () =>
+    getDocs(collection(db, "users"))
+      .then((snap) => {
+        setUsers(snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Profile, "id">) })));
+        setNow(Date.now());
+      })
+      .catch((err: Error) => setError(err.message || "Could not load users."))
+      .finally(() => setLoading(false));
 
-  const search = async () => {
-    setBusy(true);
+  const load = () => {
+    setLoading(true);
     setError("");
-    setProfile(null);
-    setActivity(null);
-    setNotice("");
-    try {
-      const snap = await getDocs(query(collection(db, "users"), where("phone", "==", digits), limit(1)));
-      if (snap.empty) {
-        setError(`No SplitPe account for +91 ${digits}.`);
-        return;
-      }
-      const found = { id: snap.docs[0].id, ...(snap.docs[0].data() as Omit<Profile, "id">) };
-      setProfile(found);
-      const n = async (col: string, field: string) =>
-        (await getCountFromServer(query(collection(db, col), where(field, "array-contains", found.id)))).data().count;
-      const [groups, expenses, settlements] = await Promise.all([
-        n("groups", "memberIds"),
-        n("expenses", "memberIds"),
-        n("settlements", "participantIds"),
-      ]);
-      setActivity({ groups, expenses, settlements });
-    } catch (err) {
-      setError((err as Error).message || "Lookup failed.");
-    } finally {
-      setBusy(false);
+    fetchUsers();
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  // Search / filter / sort changes start again from page 1.
+  const changeTerm = (v: string) => { setTerm(v); setPage(0); };
+  const changeFilter = (v: FilterKey) => { setFilter(v); setPage(0); };
+  const changeSort = (v: SortKey) => { setSort(v); setPage(0); };
+
+  const counts = useMemo(() => {
+    const c = {} as Record<FilterKey, number>;
+    for (const f of FILTERS) c[f.key] = users?.filter((p) => f.test(p, now)).length ?? 0;
+    return c;
+  }, [users, now]);
+
+  const visible = useMemo(() => {
+    if (!users) return [];
+    const words = term.toLowerCase().trim().split(/\s+/).filter(Boolean);
+    const test = FILTERS.find((f) => f.key === filter)!.test;
+    return users
+      .filter((p) => test(p, now))
+      .filter((p) => {
+        if (!words.length) return true;
+        const hay = `${p.name || ""} ${p.nickname || ""} ${p.phone || ""} 91${p.phone || ""} ${p.id}`.toLowerCase();
+        // "+91 98765 43210" and "98765-43210" should match the stored 10 digits.
+        return words.every((w) => hay.includes(w) || (/\d/.test(w) && !!p.phone?.includes(w.replace(/\D/g, "").slice(-10))));
+      })
+      .sort(SORTS[sort].cmp);
+  }, [users, now, term, filter, sort]);
+
+  const pages = Math.max(1, Math.ceil(visible.length / PAGE_SIZE));
+  const pageRows = visible.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+  const myUid = auth.currentUser?.uid;
+  const actionable = (p: Profile) => p.id !== myUid && !p.isAdmin;
+
+  const selectedUsers = (users || []).filter((p) => selected.has(p.id));
+  const pageSelectable = pageRows.filter(actionable);
+  const allPageSelected = pageSelectable.length > 0 && pageSelectable.every((p) => selected.has(p.id));
+
+  const toggle = (id: string) =>
+    setSelected((s) => {
+      const next = new Set(s);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  const togglePage = () =>
+    setSelected((s) => {
+      const next = new Set(s);
+      pageSelectable.forEach((p) => (allPageSelected ? next.delete(p.id) : next.add(p.id)));
+      return next;
+    });
+
+  const replace = (id: string, p: Profile | null) => {
+    setUsers((list) => (list ? (p ? list.map((u) => (u.id === id ? p : u)) : list.filter((u) => u.id !== id)) : list));
+    if (!p) {
+      setSelected((s) => {
+        const next = new Set(s);
+        next.delete(id);
+        return next;
+      });
     }
   };
 
-  const isSelf = profile?.id === auth.currentUser?.uid;
-  const canAct = !!profile && !isSelf && !profile.isAdmin;
+  /** Runs one callable per selected account, one after another, and reports how many went through. */
+  const runBulk = async (label: string, targets: Profile[], act: (p: Profile) => Promise<Profile | null>) => {
+    setError("");
+    setNotice("");
+    let ok = 0;
+    const failed: string[] = [];
+    setBulk({ label, done: 0, total: targets.length });
+    for (const p of targets) {
+      try {
+        replace(p.id, await act(p));
+        ok++;
+      } catch (err) {
+        failed.push(`${displayName(p)}: ${(err as Error).message}`);
+      }
+      setBulk({ label, done: ok + failed.length, total: targets.length });
+    }
+    setBulk(null);
+    setSelected(new Set());
+    if (ok) setNotice(`${label}: ${ok} account${ok === 1 ? "" : "s"} done.`);
+    if (failed.length) setError(`${failed.length} failed — ${failed.slice(0, 3).join("; ")}${failed.length > 3 ? "…" : ""}`);
+  };
 
-  const changeStatus = async (blocked: boolean) => {
-    if (!profile) return;
+  const bulkStatus = (blocked: boolean) => {
+    const targets = selectedUsers.filter((p) => actionable(p) && !!p.blocked !== blocked);
+    if (!targets.length) {
+      setNotice(blocked ? "All selected accounts are already blocked." : "All selected accounts are already active.");
+      return;
+    }
     let reason = "";
     if (blocked) {
-      const answer = window.prompt(`Block +91 ${profile.phone}? They will be signed out and can't log in until re-activated.\n\nReason (kept in the Activity Log, optional):`);
+      const answer = window.prompt(`Block ${targets.length} account${targets.length === 1 ? "" : "s"}? They will be signed out and can't log in until re-activated.\n\nReason (kept in the Activity Log, optional):`);
       if (answer === null) return;
       reason = answer;
-    } else if (!window.confirm(`Re-activate +91 ${profile.phone}? They'll be able to log in again.`)) {
+    } else if (!window.confirm(`Re-activate ${targets.length} account${targets.length === 1 ? "" : "s"}?`)) {
       return;
     }
-    setActing(blocked ? "block" : "unblock");
-    setError("");
-    try {
-      await setUserStatus({ uid: profile.id, blocked, reason });
-      setProfile({ ...profile, blocked, blockedReason: blocked ? reason || null : null, blockedAt: null });
-      setNotice(blocked ? "Account blocked. Any open session ends within the hour; logging in is refused." : "Account re-activated.");
-    } catch (err) {
-      setError((err as Error).message || "Could not change the account status.");
-    } finally {
-      setActing("");
-    }
+    runBulk(blocked ? "Blocked" : "Re-activated", targets, async (p) => {
+      await setUserStatus({ uid: p.id, blocked, reason });
+      return { ...p, blocked, blockedReason: blocked ? reason || null : null, blockedAt: null };
+    });
   };
 
-  const removeAccount = async () => {
-    if (!profile) return;
+  const bulkDelete = () => {
+    const targets = selectedUsers.filter(actionable);
+    if (!targets.length) return;
     const typed = window.prompt(
-      `Permanently delete the account +91 ${profile.phone}?\n\nThis removes their login, profile, friend links and photo. Shared expenses stay for other members. This can't be undone.\n\nType the 10-digit number to confirm:`
+      `Permanently delete ${targets.length} account${targets.length === 1 ? "" : "s"}?\n\n${targets.slice(0, 8).map((p) => `• ${displayName(p)} (+91 ${p.phone})`).join("\n")}${targets.length > 8 ? `\n…and ${targets.length - 8} more` : ""}\n\nTheir login, profile, friend links and photo are removed. Shared expenses stay for other members. This can't be undone.\n\nType DELETE to confirm:`
     );
     if (typed === null) return;
-    if (typed.replace(/\D/g, "").slice(-10) !== profile.phone) {
-      setError("Number didn't match — nothing was deleted.");
+    if (typed.trim() !== "DELETE") {
+      setError("Confirmation didn't match — nothing was deleted.");
       return;
     }
-    setActing("delete");
-    setError("");
-    try {
-      await deleteUser({ uid: profile.id });
-      setProfile(null);
-      setActivity(null);
-      setNotice(`Account +91 ${profile.phone} deleted.`);
-    } catch (err) {
-      setError((err as Error).message || "Could not delete the account.");
-    } finally {
-      setActing("");
-    }
+    runBulk("Deleted", targets, async (p) => {
+      await deleteUser({ uid: p.id });
+      return null;
+    });
   };
 
-  const notifOn = profile?.notificationSettings ? Object.values(profile.notificationSettings).filter(Boolean).length : null;
-  const notifTotal = profile?.notificationSettings ? Object.keys(profile.notificationSettings).length : null;
-  const initials = (profile?.nickname || profile?.name || "?").split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+  const open = users?.find((p) => p.id === openId) || null;
 
   return (
     <div>
-      <h2 className="mb-1 font-heading text-2xl font-bold text-ink">Users</h2>
-      <p className="mb-6 text-sm text-ink-soft">Look up an account by mobile number to help with a support request. Expenses and amounts are never shown.</p>
-
-      <form className="mb-6 flex gap-2" onSubmit={(e) => { e.preventDefault(); if (digits.length === 10) search(); }}>
-        <div className="flex flex-1 items-center rounded-xl border border-slate-200 bg-white focus-within:border-splitpe-600">
-          <span className="pl-3 text-sm text-ink-soft">+91</span>
-          <input className="w-full rounded-xl px-2 py-2.5 outline-none" inputMode="numeric" placeholder="10-digit mobile number" value={phone} onChange={(e) => setPhone(e.target.value)} />
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 className="mb-1 font-heading text-2xl font-bold text-ink">Users</h2>
+          <p className="text-sm text-ink-soft">
+            {users ? `${users.length.toLocaleString("en-IN")} accounts.` : "Loading accounts…"} Search by name, number or ID. Expenses and amounts are never shown.
+          </p>
         </div>
-        <button type="submit" disabled={digits.length !== 10 || busy} className="flex items-center gap-2 rounded-xl bg-splitpe-600 px-5 font-semibold text-white disabled:opacity-50">
-          {busy ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />} Find
-        </button>
-      </form>
+        <div className="flex gap-2">
+          <button onClick={load} disabled={loading} className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-ink hover:bg-slate-50 disabled:opacity-50">
+            <RefreshCw size={15} className={loading ? "animate-spin" : ""} /> Refresh
+          </button>
+          <button onClick={() => exportCsv(visible)} disabled={!visible.length} className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-ink hover:bg-slate-50 disabled:opacity-50">
+            <Download size={15} /> Export CSV
+          </button>
+        </div>
+      </div>
+
+      <div className="mb-3 flex flex-col gap-2 sm:flex-row">
+        <div className="flex flex-1 items-center rounded-xl border border-slate-200 bg-white focus-within:border-splitpe-600">
+          <Search size={16} className="ml-3 shrink-0 text-ink-soft" />
+          <input
+            className="w-full rounded-xl px-2 py-2.5 outline-none"
+            placeholder="Search name, nickname, mobile number or account ID"
+            value={term}
+            onChange={(e) => changeTerm(e.target.value)}
+            autoFocus
+          />
+          {term && <button onClick={() => changeTerm("")} className="mr-2 p-1 text-ink-soft hover:text-ink" aria-label="Clear search"><X size={15} /></button>}
+        </div>
+        <select value={sort} onChange={(e) => changeSort(e.target.value as SortKey)} className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-ink outline-none">
+          {(Object.keys(SORTS) as SortKey[]).map((k) => <option key={k} value={k}>{SORTS[k].label}</option>)}
+        </select>
+      </div>
+
+      <div className="mb-4 flex gap-1.5 overflow-x-auto pb-1">
+        {FILTERS.map(({ key, label }) => (
+          <button
+            key={key}
+            onClick={() => changeFilter(key)}
+            className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-medium ${filter === key ? "bg-splitpe-600 text-white" : "bg-white text-ink-soft shadow-soft hover:text-ink"}`}
+          >
+            {label} <span className="opacity-70">{users ? counts[key] : ""}</span>
+          </button>
+        ))}
+      </div>
 
       {error && <p className="mb-4 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">{error}</p>}
       {notice && <p className="mb-4 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800">{notice}</p>}
 
-      {profile && (
-        <div className="grid gap-4 md:grid-cols-[1fr_1.2fr]">
-          <div className="rounded-2xl bg-white p-6 text-center shadow-soft">
-            {profile.avatarUrl
-              ? <img src={profile.avatarUrl} alt="" className="mx-auto h-20 w-20 rounded-full object-cover" />
-              : <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-splitpe-50 font-heading text-2xl font-bold text-splitpe-700">{initials}</div>}
-            <p className="mt-3 flex items-center justify-center gap-1.5 font-heading text-xl font-bold text-ink">
-              {profile.name || "No name"} {profile.isAdmin && <BadgeCheck size={18} className="text-splitpe-600" aria-label="Admin" />}
-            </p>
-            {profile.nickname && <p className="text-sm text-ink-soft">Shown to friends as “{profile.nickname}”</p>}
-            <p className="mt-1 text-sm text-ink-soft">+91 {profile.phone}</p>
-            <span className={`mt-2 inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${profile.blocked ? "bg-red-100 text-red-700" : "bg-emerald-100 text-emerald-700"}`}>
-              {profile.blocked ? <Ban size={12} /> : <CheckCircle2 size={12} />} {profile.blocked ? "Blocked" : "Active"}
+      {(selected.size > 0 || bulk) && (
+        <div className="sticky top-24 z-30 mb-3 flex flex-wrap items-center gap-2 rounded-xl bg-ink px-4 py-2.5 text-sm text-white shadow-soft lg:top-4">
+          {bulk ? (
+            <span className="flex items-center gap-2"><Loader2 size={15} className="animate-spin" /> {bulk.label === "Deleted" ? "Deleting" : "Updating"} {bulk.done}/{bulk.total}…</span>
+          ) : (
+            <>
+              <span className="mr-auto font-medium">{selected.size} selected</span>
+              <button onClick={() => bulkStatus(true)} className="flex items-center gap-1.5 rounded-lg bg-amber-500 px-3 py-1.5 font-semibold"><Ban size={14} /> Block</button>
+              <button onClick={() => bulkStatus(false)} className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 font-semibold"><CheckCircle2 size={14} /> Activate</button>
+              <button onClick={bulkDelete} className="flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 font-semibold"><Trash2 size={14} /> Delete</button>
+              <button onClick={() => setSelected(new Set())} className="rounded-lg px-2 py-1.5 text-white/70 hover:text-white">Clear</button>
+            </>
+          )}
+        </div>
+      )}
+
+      {users === null ? (
+        <div className="flex justify-center rounded-2xl bg-white py-16 shadow-soft">
+          {loading ? <Loader2 className="animate-spin text-splitpe-600" /> : <p className="text-ink-soft">Couldn't load users.</p>}
+        </div>
+      ) : visible.length === 0 ? (
+        <div className="rounded-2xl bg-white p-10 text-center text-ink-soft shadow-soft">
+          {term ? `No account matches “${term}”.` : "No accounts in this view."}
+        </div>
+      ) : (
+        <div className="overflow-hidden rounded-2xl bg-white shadow-soft">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="border-b border-slate-100 bg-slate-50 text-xs uppercase tracking-wide text-ink-soft">
+                <tr>
+                  <th className="w-10 px-4 py-3">
+                    <input type="checkbox" checked={allPageSelected} onChange={togglePage} disabled={!pageSelectable.length} aria-label="Select page" className="accent-splitpe-600" />
+                  </th>
+                  <th className="px-2 py-3">User</th>
+                  <th className="px-3 py-3">Mobile</th>
+                  <th className="hidden px-3 py-3 md:table-cell">Joined</th>
+                  <th className="hidden px-3 py-3 md:table-cell">Last active</th>
+                  <th className="px-3 py-3">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pageRows.map((p) => (
+                  <tr key={p.id} onClick={() => setOpenId(p.id)} className="cursor-pointer border-b border-slate-100 last:border-0 hover:bg-slate-50">
+                    <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                      <input
+                        type="checkbox"
+                        checked={selected.has(p.id)}
+                        onChange={() => toggle(p.id)}
+                        disabled={!actionable(p)}
+                        title={actionable(p) ? "" : p.id === myUid ? "Your own account" : "Admin account"}
+                        aria-label={`Select ${displayName(p)}`}
+                        className="accent-splitpe-600"
+                      />
+                    </td>
+                    <td className="px-2 py-3">
+                      <div className="flex items-center gap-3">
+                        {p.avatarUrl
+                          ? <img src={p.avatarUrl} alt="" className="h-9 w-9 shrink-0 rounded-full object-cover" />
+                          : <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-splitpe-50 text-xs font-bold text-splitpe-700">{initials(p)}</div>}
+                        <div className="min-w-0">
+                          <p className="flex items-center gap-1 truncate font-medium text-ink">
+                            {displayName(p)} {p.isAdmin && <BadgeCheck size={14} className="shrink-0 text-splitpe-600" aria-label="Admin" />}
+                            {p.id === myUid && <span className="text-xs font-normal text-ink-soft">(you)</span>}
+                          </p>
+                          {p.nickname && p.name && <p className="truncate text-xs text-ink-soft">“{p.nickname}”</p>}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-3 text-ink">+91 {p.phone || "—"}</td>
+                    <td className="hidden whitespace-nowrap px-3 py-3 text-ink-soft md:table-cell">{fmtDay(p.createdAt)}</td>
+                    <td className="hidden whitespace-nowrap px-3 py-3 text-ink-soft md:table-cell">{ago(p.lastActiveAt)}</td>
+                    <td className="px-3 py-3">
+                      <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${p.blocked ? "bg-red-100 text-red-700" : "bg-emerald-100 text-emerald-700"}`}>
+                        {p.blocked ? "Blocked" : "Active"}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="flex items-center justify-between border-t border-slate-100 px-4 py-3 text-sm text-ink-soft">
+            <span>
+              {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, visible.length)} of {visible.length.toLocaleString("en-IN")}
             </span>
-            <div className="mt-5 grid grid-cols-3 gap-2">
-              {[
-                ["Groups", activity?.groups],
-                ["Expenses", activity?.expenses],
-                ["Settle-ups", activity?.settlements],
-              ].map(([label, value]) => (
-                <div key={label as string} className="rounded-xl bg-slate-50 py-3">
-                  <p className="font-heading text-xl font-bold text-ink">{value ?? "…"}</p>
-                  <p className="text-xs text-ink-soft">{label}</p>
-                </div>
-              ))}
+            <div className="flex items-center gap-1">
+              <button onClick={() => setPage((n) => n - 1)} disabled={page === 0} className="rounded-lg p-1.5 hover:bg-slate-100 disabled:opacity-40" aria-label="Previous page"><ChevronLeft size={16} /></button>
+              <span className="px-1">Page {page + 1} / {pages}</span>
+              <button onClick={() => setPage((n) => n + 1)} disabled={page >= pages - 1} className="rounded-lg p-1.5 hover:bg-slate-100 disabled:opacity-40" aria-label="Next page"><ChevronRight size={16} /></button>
             </div>
           </div>
-
-          <div className="rounded-2xl bg-white p-6 shadow-soft">
-            <Row label="Joined">{fmtDate(profile.createdAt)}</Row>
-            <Row label="Last opened the app">{ago(profile.lastActiveAt)}</Row>
-            <Row label="Default currency">{profile.defaultCurrency || "INR"}</Row>
-            <Row label="Push notifications">{profile.expoPushToken ? "Device registered" : "No device token"}</Row>
-            <Row label="Notification toggles on">{notifOn === null ? "—" : `${notifOn} of ${notifTotal}`}</Row>
-            <Row label="Personal groups">{profile.personalGroups?.length ?? 0}</Row>
-            <Row label="Custom categories">{profile.customCategories?.length ?? 0}</Row>
-            <Row label="Account ID"><code className="text-xs text-ink-soft">{profile.id}</code></Row>
-            {profile.blocked && (
-              <Row label="Blocked">{profile.blockedAt ? fmtDate(profile.blockedAt) : "Yes"}{profile.blockedReason ? ` — ${profile.blockedReason}` : ""}</Row>
-            )}
-          </div>
-
-          <div className="rounded-2xl border border-red-100 bg-white p-6 shadow-soft md:col-span-2">
-            <h3 className="font-heading text-lg font-bold text-ink">Account actions</h3>
-            {canAct ? (
-              <>
-                <p className="mb-4 text-sm text-ink-soft">Every action is recorded in the Activity Log.</p>
-                <div className="flex flex-wrap gap-2">
-                  {profile.blocked ? (
-                    <button onClick={() => changeStatus(false)} disabled={!!acting} className="flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 font-semibold text-white disabled:opacity-50">
-                      {acting === "unblock" ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />} Activate account
-                    </button>
-                  ) : (
-                    <button onClick={() => changeStatus(true)} disabled={!!acting} className="flex items-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 font-semibold text-white disabled:opacity-50">
-                      {acting === "block" ? <Loader2 size={16} className="animate-spin" /> : <Ban size={16} />} Block account
-                    </button>
-                  )}
-                  <button onClick={removeAccount} disabled={!!acting} className="flex items-center gap-2 rounded-xl border border-red-200 px-4 py-2.5 font-semibold text-red-600 hover:bg-red-50 disabled:opacity-50">
-                    {acting === "delete" ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />} Delete account
-                  </button>
-                </div>
-              </>
-            ) : (
-              <p className="text-sm text-ink-soft">{isSelf ? "This is your own account — actions are disabled." : "This is an admin account. Revoke admin rights first (setAdmin.js --revoke)."}</p>
-            )}
-          </div>
         </div>
+      )}
+
+      {open && (
+        <UserDetail
+          key={open.id}
+          profile={open}
+          onClose={() => setOpenId(null)}
+          onChange={(p) => {
+            if (!p) {
+              setNotice(`Account ${displayName(open)} (+91 ${open.phone}) deleted.`);
+              setOpenId(null);
+            }
+            replace(open.id, p);
+          }}
+        />
       )}
     </div>
   );

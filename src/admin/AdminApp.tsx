@@ -127,7 +127,7 @@ export default function AdminApp() {
       </header>
 
       <main className="px-4 py-6 lg:ml-64 lg:px-10 lg:py-10">
-        <div className="mx-auto max-w-4xl">
+        <div className={`mx-auto ${tab === "users" ? "max-w-6xl" : "max-w-4xl"}`}>
           {tab === "overview" && <OverviewTab />}
           {tab === "settings" && <SettingsTab />}
           {tab === "banners" && <BannersTab />}
