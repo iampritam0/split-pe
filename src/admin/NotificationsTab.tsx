@@ -1,33 +1,94 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { collection, limit, onSnapshot, orderBy, query } from "firebase/firestore";
 import type { Timestamp } from "firebase/firestore";
-import { Megaphone } from "lucide-react";
+import { Loader2, Megaphone, Pencil, Send } from "lucide-react";
 import { db } from "./firebase";
 import NotifyComposer from "./NotifyComposer";
+import { AUDIENCES, TEMPLATES } from "./notifyTemplates";
+import type { AudienceKey, Template } from "./notifyTemplates";
 import useUsers from "./useUsers";
+import { sendNotification } from "./users";
 import type { NotifyAudience, Profile } from "./users";
 
-const DAY_MS = 24 * 60 * 60 * 1000;
-
-type AudienceKey = "all" | "seen7d" | "inactive30d" | "new7d";
-const AUDIENCES: { key: AudienceKey; label: string; hint: string; test: (p: Profile, now: number) => boolean }[] = [
-  { key: "all", label: "All users", hint: "Everyone who isn't blocked", test: () => true },
-  { key: "seen7d", label: "Active this week", hint: "Used the app in the last 7 days", test: (p, now) => !!p.lastSeen && now - p.lastSeen < 7 * DAY_MS },
-  { key: "inactive30d", label: "Inactive 30d+", hint: "Haven't opened the app in a month — win them back", test: (p, now) => !p.lastSeen || now - p.lastSeen >= 30 * DAY_MS },
-  { key: "new7d", label: "New this week", hint: "Signed up in the last 7 days", test: (p, now) => !!p.createdAt && now - p.createdAt.toMillis() < 7 * DAY_MS },
-];
-
 type Sent = { id: string; action: string; detail: string; byPhone: string; at?: Timestamp };
+type Segment = { list: Profile[]; withPush: number };
+
+const GROUPS = ["Everyone", "Active", "Not active", "Other"] as const;
+const CATEGORIES = ["All", ...new Set(TEMPLATES.map((t) => t.category))];
+const plural = (n: number) => `${n.toLocaleString("en-IN")} user${n === 1 ? "" : "s"}`;
+
+const toTarget = (key: AudienceKey, seg: Segment): NotifyAudience | null =>
+  !seg.list.length ? null : key === "all" ? { audience: "all" } : { audience: "uids", uids: seg.list.map((p) => p.id) };
+
+/** One ready-made message: pick (or keep) its audience and send in one tap, or open it in the editor. */
+function TemplateCard({ template, segments, ready, onEdit }: {
+  template: Template;
+  segments: Record<AudienceKey, Segment>;
+  ready: boolean;
+  onEdit: (t: Template, audience: AudienceKey) => void;
+}) {
+  const [audience, setAudience] = useState<AudienceKey>(template.audience);
+  const [sending, setSending] = useState(false);
+  const [result, setResult] = useState<{ ok: boolean; text: string } | null>(null);
+  const seg = segments[audience];
+  const target = ready ? toTarget(audience, seg) : null;
+  const audienceLabel = AUDIENCES.find((a) => a.key === audience)!.label;
+
+  const send = async () => {
+    if (!target) return;
+    if (!window.confirm(`Send “${template.title}” to ${audienceLabel} (${plural(seg.list.length)})?\n\n${template.body}\n\nThis can't be recalled.`)) return;
+    setSending(true);
+    setResult(null);
+    try {
+      const { data } = await sendNotification({ title: template.title, body: template.body, ...target });
+      setResult({ ok: true, text: `Sent to ${plural(data.recipients)} · ${data.pushed} push${data.pushed === 1 ? "" : "es"} delivered` });
+    } catch (err) {
+      setResult({ ok: false, text: (err as Error).message || "Could not send." });
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col rounded-2xl bg-white p-4 shadow-soft">
+      <span className="mb-2 self-start rounded-full bg-splitpe-50 px-2 py-0.5 text-xs font-medium text-splitpe-700">{template.category}</span>
+      <p className="font-semibold text-ink">{template.title}</p>
+      <p className="mb-3 flex-1 text-sm text-ink-soft">{template.body}</p>
+      <select
+        value={audience}
+        onChange={(e) => { setAudience(e.target.value as AudienceKey); setResult(null); }}
+        className="mb-2 w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-ink outline-none"
+        aria-label="Send to"
+      >
+        {AUDIENCES.map((a) => (
+          <option key={a.key} value={a.key}>{a.label} ({ready ? segments[a.key].list.length : "…"})</option>
+        ))}
+      </select>
+      {result && <p className={`mb-2 rounded-lg px-2 py-1.5 text-xs ${result.ok ? "bg-emerald-50 text-emerald-800" : "bg-amber-50 text-amber-800"}`}>{result.text}</p>}
+      <div className="flex gap-2">
+        <button onClick={send} disabled={!target || sending} className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-splitpe-600 px-3 py-2 text-sm font-semibold text-white disabled:opacity-50">
+          {sending ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />} Send to {ready ? plural(seg.list.length) : "…"}
+        </button>
+        <button onClick={() => onEdit(template, audience)} className="rounded-lg border border-slate-200 px-3 py-2 text-ink-soft hover:bg-slate-50" aria-label="Edit before sending" title="Edit before sending">
+          <Pencil size={14} />
+        </button>
+      </div>
+    </div>
+  );
+}
 
 /**
- * Announcements to a segment of users (in-app feed + push), and the history
- * of what's been sent — read from adminLog, where adminSendNotification
- * records every send.
+ * Announcements: one-tap templates and a custom message, each to an audience
+ * picked by activity (active / not active in the last N days) or sign-up.
+ * History is read from adminLog, where adminSendNotification records every send.
  */
 export default function NotificationsTab() {
   const { users, now, error: loadError } = useUsers();
   const [audience, setAudience] = useState<AudienceKey>("all");
+  const [category, setCategory] = useState("All");
+  const [draft, setDraft] = useState<{ key: number; title: string; body: string }>({ key: 0, title: "", body: "" });
   const [history, setHistory] = useState<Sent[] | null>(null);
+  const composerRef = useRef<HTMLDivElement>(null);
 
   useEffect(
     () =>
@@ -45,7 +106,7 @@ export default function NotificationsTab() {
   );
 
   const segments = useMemo(() => {
-    const out = {} as Record<AudienceKey, { list: Profile[]; withPush: number }>;
+    const out = {} as Record<AudienceKey, Segment>;
     for (const a of AUDIENCES) {
       const list = (users || []).filter((p) => !p.blocked && a.test(p, now));
       out[a.key] = { list, withPush: list.filter((p) => p.expoPushToken).length };
@@ -53,38 +114,77 @@ export default function NotificationsTab() {
     return out;
   }, [users, now]);
 
+  const ready = !!users;
   const current = segments[audience];
-  const target: NotifyAudience | null = !users || !current.list.length
-    ? null
-    : audience === "all" ? { audience: "all" } : { audience: "uids", uids: current.list.map((p) => p.id) };
-  const count = current.list.length;
+  const editTemplate = (t: Template, a: AudienceKey) => {
+    setAudience(a);
+    setDraft((d) => ({ key: d.key + 1, title: t.title, body: t.body }));
+    composerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+  const templates = TEMPLATES.filter((t) => category === "All" || t.category === category);
 
   return (
     <div>
       <h2 className="mb-1 font-heading text-2xl font-bold text-ink">Notifications</h2>
-      <p className="mb-6 text-sm text-ink-soft">Send an announcement to SplitPe users. It lands in their in-app Notifications and as a push on phones with notifications allowed.</p>
+      <p className="mb-6 text-sm text-ink-soft">Send an announcement to SplitPe users. It lands in their in-app Notifications and as a push on phones with notifications allowed. Blocked accounts are always skipped.</p>
       {loadError && <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{loadError}</p>}
 
-      <div className="mb-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-        {AUDIENCES.map(({ key, label, hint }) => (
+      <h3 className="mb-1 font-heading text-lg font-bold text-ink">Quick send</h3>
+      <p className="mb-3 text-sm text-ink-soft">Ready-made messages. Each suggests an audience — change it from the dropdown, then tap Send. ✏️ opens it in the editor below.</p>
+      <div className="mb-3 flex gap-1.5 overflow-x-auto pb-1">
+        {CATEGORIES.map((c) => (
           <button
-            key={key}
-            onClick={() => setAudience(key)}
-            className={`rounded-2xl border-2 bg-white p-4 text-left shadow-soft ${audience === key ? "border-splitpe-600" : "border-transparent hover:border-slate-200"}`}
+            key={c}
+            onClick={() => setCategory(c)}
+            className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-medium ${category === c ? "bg-splitpe-600 text-white" : "bg-white text-ink-soft shadow-soft hover:text-ink"}`}
           >
-            <p className="font-medium text-ink">{label}</p>
-            <p className="font-heading text-2xl font-bold text-ink">{users ? segments[key].list.length.toLocaleString("en-IN") : "…"}</p>
-            <p className="text-xs text-ink-soft">{hint}</p>
-            {users && <p className="mt-1 text-xs text-splitpe-700">{segments[key].withPush} with push on</p>}
+            {c}
           </button>
         ))}
       </div>
-
-      <div className="rounded-2xl bg-white p-6 shadow-soft">
-        <NotifyComposer target={target} label={`${count.toLocaleString("en-IN")} user${count === 1 ? "" : "s"}`} />
+      <div className="mb-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {templates.map((t) => <TemplateCard key={t.id} template={t} segments={segments} ready={ready} onEdit={editTemplate} />)}
       </div>
 
-      <h3 className="mb-3 mt-8 font-heading text-lg font-bold text-ink">Sent</h3>
+      <div ref={composerRef} className="scroll-mt-28">
+        <h3 className="mb-1 font-heading text-lg font-bold text-ink">Custom message</h3>
+        <p className="mb-3 text-sm text-ink-soft">Choose who gets it, then write your own.</p>
+        <div className="mb-4 space-y-3">
+          {GROUPS.map((g) => (
+            <div key={g}>
+              <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-ink-soft">{g}</p>
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                {AUDIENCES.filter((a) => a.group === g).map(({ key, label, hint }) => (
+                  <button
+                    key={key}
+                    onClick={() => setAudience(key)}
+                    className={`rounded-2xl border-2 bg-white p-3 text-left shadow-soft ${audience === key ? "border-splitpe-600" : "border-transparent hover:border-slate-200"}`}
+                  >
+                    <div className="flex items-baseline justify-between gap-2">
+                      <p className="font-medium text-ink">{label}</p>
+                      <p className="font-heading text-xl font-bold text-ink">{ready ? segments[key].list.length.toLocaleString("en-IN") : "…"}</p>
+                    </div>
+                    <p className="text-xs text-ink-soft">{hint}</p>
+                    {ready && <p className="mt-0.5 text-xs text-splitpe-700">{segments[key].withPush} with push on</p>}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="rounded-2xl bg-white p-6 shadow-soft">
+          <NotifyComposer
+            key={draft.key}
+            initialTitle={draft.title}
+            initialBody={draft.body}
+            target={ready ? toTarget(audience, current) : null}
+            label={`${AUDIENCES.find((a) => a.key === audience)!.label} (${plural(current.list.length)})`}
+          />
+        </div>
+      </div>
+
+      <h3 className="mb-3 mt-10 font-heading text-lg font-bold text-ink">Sent</h3>
       {history === null ? (
         <p className="text-ink-soft">Loading…</p>
       ) : history.length === 0 ? (

@@ -12,7 +12,7 @@ const MAX_BODY = 240;
  * adminSendNotification: an in-app Notifications entry for every recipient
  * plus a push to each registered device.
  */
-export default function NotifyComposer({ target, label, onSent, compact = false }: {
+export default function NotifyComposer({ target, label, onSent, compact = false, initialTitle = "", initialBody = "" }: {
   /** Who gets it; null disables sending (e.g. an empty audience). */
   target: NotifyAudience | null;
   /** "12 users" — shown on the button and in the confirm prompt. */
@@ -20,9 +20,12 @@ export default function NotifyComposer({ target, label, onSent, compact = false 
   onSent?: (summary: string) => void;
   /** Single column, for narrow containers like the account side panel. */
   compact?: boolean;
+  /** Pre-filled text, e.g. from a template — remount (key) to apply a new one. */
+  initialTitle?: string;
+  initialBody?: string;
 }) {
-  const [title, setTitle] = useState("");
-  const [body, setBody] = useState("");
+  const [title, setTitle] = useState(initialTitle);
+  const [body, setBody] = useState(initialBody);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
