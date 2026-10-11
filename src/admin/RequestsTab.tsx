@@ -115,10 +115,10 @@ export default function RequestsTab() {
       ) : (
         <ul className="space-y-3">
           {list.map((r) => (
-            <li key={r.id} className="rounded-2xl bg-white p-5 shadow-soft">
+            <li key={r.id} className="rounded-2xl bg-white p-4 shadow-soft sm:p-5">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <p className="flex items-center gap-2 font-heading text-lg font-bold text-ink">
+                  <p className="flex flex-wrap items-center gap-2 font-heading text-lg font-bold text-ink">
                     {shown.has(r.id) ? `+91 ${r.phone}` : <span className="font-mono text-base">{masked(r.phone)}</span>}
                     {!shown.has(r.id) && (
                       <button onClick={() => showNumber(r)} className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2 py-0.5 text-xs font-medium text-ink-soft hover:bg-slate-50"><Eye size={12} /> Show number</button>

@@ -171,12 +171,12 @@ export default function BannersTab() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between gap-4">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <div>
           <h2 className="mb-1 font-heading text-2xl font-bold text-ink">Banners</h2>
           <p className="text-sm text-ink-soft">Festival offers and announcements — shown once per device as a popup when the app opens.</p>
         </div>
-        <button onClick={() => openEditor()} className="flex shrink-0 items-center gap-2 rounded-xl bg-splitpe-600 px-4 py-2.5 font-semibold text-white">
+        <button onClick={() => openEditor()} className="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-splitpe-600 px-4 py-2.5 font-semibold text-white">
           <Plus size={18} /> New banner
         </button>
       </div>
@@ -216,11 +216,11 @@ export default function BannersTab() {
       )}
 
       {draft && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-900/40 p-4">
-          <div className="my-8 w-full max-w-3xl rounded-2xl bg-white p-6 shadow-card">
-            <div className="mb-4 flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-900/40 sm:p-4">
+          <div className="min-h-full w-full max-w-3xl bg-white p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-card sm:my-8 sm:min-h-0 sm:rounded-2xl sm:p-6">
+            <div className="sticky top-0 z-10 -mx-4 -mt-4 mb-4 flex items-center justify-between border-b border-slate-100 bg-white px-4 py-3 sm:static sm:m-0 sm:mb-4 sm:border-0 sm:p-0">
               <h3 className="font-heading text-xl font-bold text-ink">{draft.id ? "Edit banner" : "New banner"}</h3>
-              <button onClick={() => setDraft(null)} aria-label="Close"><X size={20} /></button>
+              <button onClick={() => setDraft(null)} className="rounded-lg p-1.5 hover:bg-slate-100" aria-label="Close"><X size={20} /></button>
             </div>
 
             <div className="grid gap-6 md:grid-cols-[1fr_250px]">
@@ -236,7 +236,7 @@ export default function BannersTab() {
               <input className={inputClass} placeholder="Title, e.g. Happy Diwali 🪔" maxLength={60} value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} />
               <textarea className={inputClass} rows={2} placeholder="Message (optional)" maxLength={200} value={draft.message} onChange={(e) => setDraft({ ...draft, message: e.target.value })} />
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid gap-3 sm:grid-cols-2">
                 <label className="text-sm text-ink">Starts
                   <input type="datetime-local" className={inputClass} value={draft.startAt} onChange={(e) => setDraft({ ...draft, startAt: e.target.value })} />
                 </label>
@@ -269,9 +269,9 @@ export default function BannersTab() {
 
             {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
 
-            <div className="mt-5 flex justify-end gap-2">
+            <div className="mt-5 grid grid-cols-2 gap-2 sm:flex sm:justify-end">
               <button onClick={() => setDraft(null)} className="rounded-xl border border-slate-200 px-4 py-2 font-medium text-ink">Cancel</button>
-              <button onClick={save} disabled={saving} className="flex items-center gap-2 rounded-xl bg-splitpe-600 px-5 py-2 font-semibold text-white disabled:opacity-50">
+              <button onClick={save} disabled={saving} className="flex items-center justify-center gap-2 rounded-xl bg-splitpe-600 px-5 py-2 font-semibold text-white disabled:opacity-50">
                 {saving && <Loader2 size={16} className="animate-spin" />} {draft.id ? "Save" : "Create"}
               </button>
             </div>

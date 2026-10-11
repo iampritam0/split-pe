@@ -106,14 +106,14 @@ export default function OverviewTab() {
       <p className="mb-6 text-sm text-ink-soft">Live counts from Firestore.</p>
       {error && <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         {cards.map(({ label, value, icon: Icon, hint }) => (
-          <div key={label} className="rounded-2xl bg-white p-5 shadow-soft">
-            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-splitpe-50 text-splitpe-600">
+          <div key={label} className="rounded-2xl bg-white p-4 shadow-soft sm:p-5">
+            <div className="mb-3 flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-splitpe-50 text-splitpe-600">
               <Icon size={20} />
             </div>
             <p className="text-sm text-ink-soft">{label}</p>
-            <p className="font-heading text-3xl font-bold text-ink">{value?.toLocaleString("en-IN") ?? (error ? "—" : "…")}</p>
+            <p className="font-heading text-2xl font-bold text-ink sm:text-3xl">{value?.toLocaleString("en-IN") ?? (error ? "—" : "…")}</p>
             <p className="mt-1 text-xs text-slate-400">{hint}</p>
           </div>
         ))}
@@ -124,7 +124,7 @@ export default function OverviewTab() {
           { title: "New users", sub: `Sign-ups per day · last ${CHART_DAYS} days`, data: signups, unit: "sign-ups" },
           { title: "Expenses added", sub: `Expenses per day · last ${CHART_DAYS} days`, data: expenseTrend, unit: "expenses" },
         ].map(({ title, sub, data, unit }) => (
-          <div key={title} className="rounded-2xl bg-white p-5 shadow-soft">
+          <div key={title} className="rounded-2xl bg-white p-4 shadow-soft sm:p-5">
             <div className="mb-4 flex items-baseline justify-between gap-2">
               <div>
                 <h3 className="font-heading text-lg font-bold text-ink">{title}</h3>

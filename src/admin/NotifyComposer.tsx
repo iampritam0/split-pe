@@ -139,11 +139,11 @@ export default function NotifyComposer({ target, label, onSent, compact = false,
           </div>
         )}
         {scheduleAs && mode === "later" ? (
-          <button onClick={schedule} disabled={!title.trim() || !body.trim() || sending} className="flex items-center gap-2 rounded-xl bg-splitpe-600 px-5 py-2.5 font-semibold text-white disabled:opacity-50">
+          <button onClick={schedule} disabled={!title.trim() || !body.trim() || sending} className="flex w-full items-center justify-center gap-2 rounded-xl bg-splitpe-600 px-5 py-2.5 font-semibold text-white disabled:opacity-50 sm:w-auto">
             {sending ? <Loader2 size={16} className="animate-spin" /> : <CalendarClock size={16} />} Schedule for {label}
           </button>
         ) : (
-          <button onClick={send} disabled={!ready || sending} className="flex items-center gap-2 rounded-xl bg-splitpe-600 px-5 py-2.5 font-semibold text-white disabled:opacity-50">
+          <button onClick={send} disabled={!ready || sending} className="flex w-full items-center justify-center gap-2 rounded-xl bg-splitpe-600 px-5 py-2.5 font-semibold text-white disabled:opacity-50 sm:w-auto">
             {sending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />} Send to {label}
           </button>
         )}

@@ -172,7 +172,7 @@ export default function NotificationsTab() {
 
       <h3 className="mb-1 font-heading text-lg font-bold text-ink">Quick send</h3>
       <p className="mb-3 text-sm text-ink-soft">Ready-made messages. Each suggests an audience — change it from the dropdown, then tap Send. ✏️ opens it in the editor below.</p>
-      <div className="mb-3 flex gap-1.5 overflow-x-auto pb-1">
+      <div className="-mx-4 mb-3 flex gap-1.5 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
         {CATEGORIES.map((c) => (
           <button
             key={c}
@@ -238,14 +238,14 @@ export default function NotificationsTab() {
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-splitpe-50 text-splitpe-600"><CalendarClock size={17} /></div>
               <div className="min-w-0 flex-1">
                 <p className="font-medium text-ink">{c.title}</p>
-                <p className="text-sm text-ink-soft">{c.body}</p>
+                <p className="break-words text-sm text-ink-soft">{c.body}</p>
                 <p className="mt-1 text-xs text-ink-soft">
                   {c.sendAt?.toDate().toLocaleString("en-IN", { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })} · to{" "}
                   {c.audience === "uids" ? `${c.uids?.length ?? 0} selected users` : AUDIENCES.find((a) => a.key === c.audience)?.label || c.audience}
                 </p>
               </div>
               <button onClick={() => cancel(c)} disabled={cancelling === c.id} className="flex shrink-0 items-center gap-1 rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm text-ink-soft hover:bg-red-50 hover:text-red-600 disabled:opacity-50">
-                {cancelling === c.id ? <Loader2 size={14} className="animate-spin" /> : <X size={14} />} Cancel
+                {cancelling === c.id ? <Loader2 size={14} className="animate-spin" /> : <X size={14} />} <span className="hidden sm:inline">Cancel</span>
               </button>
             </li>
           ))}
@@ -259,7 +259,37 @@ export default function NotificationsTab() {
       ) : history.length === 0 ? (
         <div className="rounded-2xl bg-white p-8 text-center text-ink-soft shadow-soft">Nothing sent yet.</div>
       ) : (
-        <div className="overflow-x-auto rounded-2xl bg-white shadow-soft">
+        <>
+        {/* Phones: one card per send instead of the wide table. */}
+        <ul className="space-y-2 md:hidden">
+          {history.map((c) => {
+            const o = opens[c.id];
+            return (
+              <li key={c.id} className="rounded-2xl bg-white p-4 shadow-soft">
+                <p className="flex items-start gap-2 font-medium text-ink"><Megaphone size={14} className="mt-1 shrink-0 text-amber-600" /> <span className="min-w-0 break-words">{c.title}</span></p>
+                <p className="mt-0.5 line-clamp-2 text-xs text-ink-soft">{SOURCE_LABEL[c.source] || c.source} · {c.body}</p>
+                <div className="mt-3 grid grid-cols-3 gap-2 rounded-xl bg-slate-50 p-2.5 text-center">
+                  <div>
+                    <p className="text-[11px] text-ink-soft">Sent to</p>
+                    <p className="font-semibold text-ink">{c.recipients.toLocaleString("en-IN")}</p>
+                  </div>
+                  <div title={pushSummary(c.pushed, c.receipts, c.sendErrors)}>
+                    <p className="text-[11px] text-ink-soft">Delivered</p>
+                    <p className="font-semibold text-ink">{c.receipts ? <>{c.receipts.delivered.toLocaleString("en-IN")}<span className="font-normal text-ink-soft">/{c.pushed}</span></> : <span className="font-normal text-ink-soft">{c.pushed} sent</span>}</p>
+                  </div>
+                  <div>
+                    <p className="text-[11px] text-ink-soft">Opened</p>
+                    <p className="font-semibold text-ink">{o === undefined ? "…" : <>{o.toLocaleString("en-IN")} <span className="text-xs font-normal text-ink-soft">({c.recipients ? Math.round((o / c.recipients) * 100) : 0}%)</span></>}</p>
+                  </div>
+                </div>
+                {c.receipts && c.receipts.failed > 0 && <p className="mt-2 text-xs text-red-600">{c.receipts.failed} failed · {Object.keys(c.receipts.errors).join(", ")}</p>}
+                {c.receipts && c.receipts.pending > 0 && <p className="mt-1 text-xs text-ink-soft">{c.receipts.pending} confirming</p>}
+                <p className="mt-2 text-xs text-ink-soft">{c.sentAt ? c.sentAt.toDate().toLocaleString("en-IN", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" }) : "just now"}</p>
+              </li>
+            );
+          })}
+        </ul>
+        <div className="hidden overflow-x-auto rounded-2xl bg-white shadow-soft md:block">
           <table className="w-full min-w-[640px] text-left text-sm">
             <thead className="border-b border-slate-100 bg-slate-50 text-xs uppercase tracking-wide text-ink-soft">
               <tr><th className="px-4 py-3">Notification</th><th className="px-3 py-3 text-right">Sent to</th><th className="px-3 py-3 text-right">Pushes delivered</th><th className="px-3 py-3 text-right">Opened</th><th className="px-3 py-3">When</th></tr>
@@ -291,6 +321,7 @@ export default function NotificationsTab() {
             </tbody>
           </table>
         </div>
+        </>
       )}
     </div>
   );

@@ -238,7 +238,7 @@ function AutomationCard({ id, initial, onSaved }: { id: Id; initial: Config; onS
 
   return (
     <section className="rounded-2xl bg-white shadow-soft">
-      <div className="flex flex-wrap items-center gap-3 p-5">
+      <div className="flex items-center gap-3 p-4 sm:p-5">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-splitpe-50 text-splitpe-600"><Icon size={20} /></div>
         <button onClick={() => setOpen(!open)} className="min-w-0 flex-1 text-left">
           <h3 className="flex items-center gap-1.5 font-heading text-lg font-bold text-ink">
@@ -340,21 +340,21 @@ function AutomationCard({ id, initial, onSaved }: { id: Id; initial: Config; onS
             )}
           </div>
 
-          <div className="mt-5 flex flex-wrap gap-2">
+          <div className="mt-5 grid gap-2 sm:flex sm:flex-wrap">
             {isSuper && (
-              <button onClick={() => save()} disabled={!dirty || saving} className="flex items-center gap-2 rounded-xl bg-splitpe-600 px-4 py-2.5 font-semibold text-white disabled:opacity-50">
+              <button onClick={() => save()} disabled={!dirty || saving} className="flex items-center justify-center gap-2 rounded-xl bg-splitpe-600 px-4 py-2.5 font-semibold text-white disabled:opacity-50">
                 {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />} {dirty ? "Save changes" : "Saved"}
               </button>
             )}
-            <button onClick={() => run("preview")} disabled={!!busy} className="flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 font-medium text-ink hover:bg-slate-50 disabled:opacity-50">
+            <button onClick={() => run("preview")} disabled={!!busy} className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 font-medium text-ink hover:bg-slate-50 disabled:opacity-50">
               {busy === "preview" ? <Loader2 size={16} className="animate-spin" /> : <Eye size={16} />} Who's due now?
             </button>
             {isSuper && (
               <>
-                <button onClick={() => run("test")} disabled={!!busy} className="flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 font-medium text-ink hover:bg-slate-50 disabled:opacity-50">
+                <button onClick={() => run("test")} disabled={!!busy} className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 font-medium text-ink hover:bg-slate-50 disabled:opacity-50">
                   {busy === "test" ? <Loader2 size={16} className="animate-spin" /> : <FlaskConical size={16} />} Send test to me
                 </button>
-                <button onClick={() => run("now")} disabled={!!busy} className="flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 font-medium text-ink hover:bg-slate-50 disabled:opacity-50">
+                <button onClick={() => run("now")} disabled={!!busy} className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 font-medium text-ink hover:bg-slate-50 disabled:opacity-50">
                   {busy === "now" ? <Loader2 size={16} className="animate-spin" /> : <Play size={16} />} Run now
                 </button>
               </>

@@ -35,9 +35,9 @@ const shade = (ratio: number) => (ratio <= 0 ? "bg-slate-100" : SHADES[Math.min(
 const inkOn = (ratio: number) => (ratio >= 0.625 ? "text-white" : "text-ink");
 
 const Card = ({ title, sub, children, right }: { title: string; sub?: string; children: ReactNode; right?: ReactNode }) => (
-  <section className="rounded-2xl bg-white p-5 shadow-soft">
-    <div className="mb-4 flex items-start justify-between gap-3">
-      <div>
+  <section className="rounded-2xl bg-white p-4 shadow-soft sm:p-5">
+    <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+      <div className="min-w-0">
         <h3 className="font-heading text-lg font-bold text-ink">{title}</h3>
         {sub && <p className="text-xs text-ink-soft">{sub}</p>}
       </div>
@@ -48,9 +48,9 @@ const Card = ({ title, sub, children, right }: { title: string; sub?: string; ch
 );
 
 const Tile = ({ label, value, hint }: { label: string; value: string; hint: string }) => (
-  <div className="rounded-2xl bg-white p-5 shadow-soft">
+  <div className="rounded-2xl bg-white p-4 shadow-soft sm:p-5">
     <p className="text-sm text-ink-soft">{label}</p>
-    <p className="font-heading text-3xl font-bold text-ink">{value}</p>
+    <p className="font-heading text-2xl sm:text-3xl font-bold text-ink">{value}</p>
     <p className="mt-1 text-xs text-slate-400">{hint}</p>
   </div>
 );
@@ -132,7 +132,7 @@ export default function AnalyticsTab() {
       </div>
       {error && <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
 
-      <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <Tile label="Daily active" value={num(active.dau)} hint="Used the app today" />
         <Tile label="Weekly active" value={num(active.wau)} hint="Last 7 days" />
         <Tile label="Monthly active" value={num(active.mau)} hint={`Last 30 days · ${pct(active.mau, totals.users)}% of all users`} />
@@ -281,6 +281,7 @@ export default function AnalyticsTab() {
                   <div
                     key={h}
                     onMouseEnter={() => setHoverCell({ d, h })}
+                    onClick={() => setHoverCell({ d, h })}
                     onMouseLeave={() => setHoverCell(null)}
                     title={`${WEEKDAYS[d]} ${h}:00 — ${v} expenses`}
                     className={`h-6 flex-1 rounded-[4px] ${shade(v / heatMax)} ${hoverCell?.d === d && hoverCell.h === h ? "ring-2 ring-ink" : ""}`}

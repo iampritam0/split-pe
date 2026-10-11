@@ -10,8 +10,8 @@ import type { Revealed, UserRow } from "./users";
 
 const Row = ({ label, children }: { label: string; children: ReactNode }) => (
   <div className="flex items-start justify-between gap-4 border-b border-slate-100 py-2.5 last:border-0">
-    <span className="text-sm text-ink-soft">{label}</span>
-    <span className="text-right text-sm font-medium text-ink">{children}</span>
+    <span className="shrink-0 text-sm text-ink-soft">{label}</span>
+    <span className="min-w-0 break-words text-right text-sm font-medium text-ink">{children}</span>
   </div>
 );
 
@@ -150,16 +150,16 @@ export default function UserDetail({ user, onClose, onChange }: {
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/40" onClick={onClose}>
-      <div className="h-full w-full max-w-lg overflow-y-auto bg-slate-50 p-5 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-        <div className="mb-4 flex items-center justify-between">
+      <div className="h-full w-full max-w-lg overflow-y-auto bg-slate-50 px-4 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-2xl sm:px-5" onClick={(e) => e.stopPropagation()}>
+        <div className="sticky top-0 z-10 -mx-4 mb-4 flex items-center justify-between border-b border-slate-200 bg-slate-50/95 px-4 py-3 backdrop-blur sm:-mx-5 sm:px-5">
           <h3 className="font-heading text-lg font-bold text-ink">Account</h3>
-          <button onClick={onClose} className="rounded-lg p-1.5 text-ink-soft hover:bg-slate-200" aria-label="Close"><X size={18} /></button>
+          <button onClick={onClose} className="rounded-lg p-2 text-ink-soft hover:bg-slate-200" aria-label="Close"><X size={20} /></button>
         </div>
 
         {error && <p className="mb-4 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">{error}</p>}
         {notice && <p className="mb-4 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800">{notice}</p>}
 
-        <div className="rounded-2xl bg-white p-6 text-center shadow-soft">
+        <div className="rounded-2xl bg-white p-4 sm:p-6 text-center shadow-soft">
           {details?.avatarUrl
             ? <img src={details.avatarUrl} alt="" className="mx-auto h-20 w-20 rounded-full object-cover" />
             : <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-splitpe-50 font-heading text-2xl font-bold text-splitpe-700">{user.initials}</div>}
@@ -197,7 +197,7 @@ export default function UserDetail({ user, onClose, onChange }: {
           </div>
         </div>
 
-        <div className="mt-4 rounded-2xl bg-white p-6 shadow-soft">
+        <div className="mt-4 rounded-2xl bg-white p-4 sm:p-6 shadow-soft">
           <Row label="Joined">{fmtDate(user.createdAt)}</Row>
           <Row label="Last active in the app">{user.lastSeen ? <>{ago(user.lastSeen)}<br /><span className="text-xs font-normal text-ink-soft">{fmtDate(user.lastSeen)}</span></> : "Never"}</Row>
           <Row label="Push notifications">{user.hasPush ? "Device registered" : "No device"}</Row>
@@ -212,12 +212,12 @@ export default function UserDetail({ user, onClose, onChange }: {
           )}
           <Row label="Account ID">
             <button onClick={() => copy(user.id, "Account ID")} className="inline-flex items-center gap-1 text-xs text-ink-soft hover:text-ink">
-              <code>{user.id}</code> <Copy size={12} />
+              <code className="break-all">{user.id}</code> <Copy size={12} className="shrink-0" />
             </button>
           </Row>
         </div>
 
-        <div className="mt-4 rounded-2xl bg-white p-6 shadow-soft">
+        <div className="mt-4 rounded-2xl bg-white p-4 sm:p-6 shadow-soft">
           <h3 className="flex items-center gap-2 font-heading text-lg font-bold text-ink"><Tag size={17} /> Team notes</h3>
           <p className="mb-3 text-sm text-ink-soft">Only the admin team sees these — never the user.</p>
           <div className="mb-2 flex flex-wrap gap-1.5">
@@ -249,7 +249,7 @@ export default function UserDetail({ user, onClose, onChange }: {
         </div>
 
         {isSuper && (
-          <div className="mt-4 rounded-2xl bg-white p-6 shadow-soft">
+          <div className="mt-4 rounded-2xl bg-white p-4 sm:p-6 shadow-soft">
             <div className="flex items-center justify-between gap-2">
               <div>
                 <h3 className="font-heading text-lg font-bold text-ink">Send notification</h3>
@@ -274,21 +274,21 @@ export default function UserDetail({ user, onClose, onChange }: {
           {canAct ? (
             <>
               <p className="mb-4 text-sm text-ink-soft">Every action is recorded in the Activity Log.</p>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                 {user.blocked ? (
-                  <button onClick={() => changeStatus(false)} disabled={!!acting} className="flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 font-semibold text-white disabled:opacity-50">
+                  <button onClick={() => changeStatus(false)} disabled={!!acting} className="flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 font-semibold text-white disabled:opacity-50">
                     {acting === "unblock" ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />} Activate account
                   </button>
                 ) : (
-                  <button onClick={() => changeStatus(true)} disabled={!!acting} className="flex items-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 font-semibold text-white disabled:opacity-50">
+                  <button onClick={() => changeStatus(true)} disabled={!!acting} className="flex items-center justify-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 font-semibold text-white disabled:opacity-50">
                     {acting === "block" ? <Loader2 size={16} className="animate-spin" /> : <Ban size={16} />} Block account
                   </button>
                 )}
-                <button onClick={signOutEverywhere} disabled={!!acting} className="flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 font-semibold text-ink hover:bg-slate-50 disabled:opacity-50">
+                <button onClick={signOutEverywhere} disabled={!!acting} className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 font-semibold text-ink hover:bg-slate-50 disabled:opacity-50">
                   {acting === "logout" ? <Loader2 size={16} className="animate-spin" /> : <LogOut size={16} />} Sign out everywhere
                 </button>
                 {isSuper && (
-                  <button onClick={removeAccount} disabled={!!acting} className="flex items-center gap-2 rounded-xl border border-red-200 px-4 py-2.5 font-semibold text-red-600 hover:bg-red-50 disabled:opacity-50">
+                  <button onClick={removeAccount} disabled={!!acting} className="flex items-center justify-center gap-2 rounded-xl border border-red-200 px-4 py-2.5 font-semibold text-red-600 hover:bg-red-50 disabled:opacity-50">
                     {acting === "delete" ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />} Delete account
                   </button>
                 )}

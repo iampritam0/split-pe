@@ -110,13 +110,13 @@ export default function TeamTab() {
                   <p className="text-sm text-ink-soft">+91 {a.phone} · active {ago(a.lastSeen).toLowerCase()}</p>
                 </div>
                 {isSuper && !self ? (
-                  <div className="flex items-center gap-2">
+                  <div className="flex w-full items-center gap-2 sm:w-auto">
                     {busy === a.uid && <Loader2 size={16} className="animate-spin text-splitpe-600" />}
                     <select
                       value={a.role}
                       disabled={!!busy}
                       onChange={(e) => change({ uid: a.uid, label }, e.target.value as Role)}
-                      className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-ink outline-none"
+                      className="flex-1 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-ink outline-none sm:flex-none"
                       aria-label={`Role for ${label}`}
                     >
                       {ROLES.map((r) => <option key={r} value={r}>{ROLE_INFO[r].label}</option>)}

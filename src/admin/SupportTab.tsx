@@ -103,7 +103,7 @@ function Thread({ ticket, onBack }: { ticket: Ticket; onBack: () => void }) {
       <div className="mb-4 rounded-2xl bg-white p-5 shadow-soft">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <h2 className="font-heading text-xl font-bold text-ink">{ticket.subject}</h2>
+            <h2 className="break-words font-heading text-xl font-bold text-ink">{ticket.subject}</h2>
             <p className="text-sm text-ink-soft">{CATEGORY[ticket.category] || ticket.category} · opened {fmtDate(ms(ticket.createdAt))}</p>
             <p className="mt-1 text-sm text-ink-soft">
               {ticket.who || "No name"} · <span className="font-mono text-xs">{ticket.phoneMasked}</span>
@@ -130,11 +130,11 @@ function Thread({ ticket, onBack }: { ticket: Ticket; onBack: () => void }) {
 
       {error && <p className="mb-4 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">{error}</p>}
 
-      <div className="mb-4 space-y-3 rounded-2xl bg-white p-5 shadow-soft">
+      <div className="mb-4 space-y-3 rounded-2xl bg-white p-3 shadow-soft sm:p-5">
         {messages === null ? <p className="text-sm text-ink-soft">Loading…</p> : messages.map((m) => (
           <div key={m.id} className={`flex ${m.from === "support" ? "justify-end" : ""}`}>
-            <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 ${m.from === "support" ? "bg-splitpe-600 text-white" : "bg-slate-100 text-ink"}`}>
-              <p className="whitespace-pre-wrap text-sm">{m.text}</p>
+            <div className={`max-w-[88%] rounded-2xl sm:max-w-[80%] px-4 py-2.5 ${m.from === "support" ? "bg-splitpe-600 text-white" : "bg-slate-100 text-ink"}`}>
+              <p className="whitespace-pre-wrap break-words text-sm">{m.text}</p>
               <p className={`mt-1 text-right text-[11px] ${m.from === "support" ? "text-white/70" : "text-ink-soft"}`}>{m.from === "support" ? "Team · " : ""}{fmtDate(ms(m.at))}</p>
             </div>
           </div>
@@ -143,11 +143,11 @@ function Thread({ ticket, onBack }: { ticket: Ticket; onBack: () => void }) {
       </div>
 
       {canSupport && (
-        <div className="rounded-2xl bg-white p-4 shadow-soft">
-          <textarea value={text} onChange={(e) => setText(e.target.value)} rows={3} maxLength={2000} placeholder="Write a reply — they'll get it as a notification." className="w-full resize-none rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-splitpe-600" />
+        <div className="sticky bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-20 rounded-2xl bg-white p-3 shadow-card ring-1 ring-slate-200 sm:p-4 lg:bottom-4">
+          <textarea value={text} onChange={(e) => setText(e.target.value)} rows={2} maxLength={2000} placeholder="Write a reply — they'll get it as a notification." className="w-full resize-none rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-splitpe-600" />
           <div className="mt-2 flex items-center justify-between gap-2">
-            <p className="text-xs text-ink-soft">Never ask for OTPs, passwords or bank details.</p>
-            <button onClick={() => act("send")} disabled={!text.trim() || !!busy} className="flex items-center gap-2 rounded-xl bg-splitpe-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
+            <p className="min-w-0 text-xs text-ink-soft">Never ask for OTPs, passwords or bank details.</p>
+            <button onClick={() => act("send")} disabled={!text.trim() || !!busy} className="flex shrink-0 items-center gap-2 rounded-xl bg-splitpe-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
               {busy === "send" ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />} Send reply
             </button>
           </div>
@@ -192,9 +192,9 @@ export default function SupportTab() {
       <p className="mb-6 text-sm text-ink-soft">Messages from the app's Help &amp; Support (app 1.1.0 and later). People are masked — open an account to reveal it (logged).</p>
       {error && <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
 
-      <div className="mb-4 flex gap-1.5">
+      <div className="-mx-4 mb-4 flex gap-1.5 overflow-x-auto px-4 sm:mx-0 sm:px-0">
         {(Object.keys(STATUS) as Status[]).map((s) => (
-          <button key={s} onClick={() => setFilter(s)} className={`rounded-full px-3 py-1.5 text-sm font-medium ${filter === s ? "bg-splitpe-600 text-white" : "bg-white text-ink-soft shadow-soft hover:text-ink"}`}>
+          <button key={s} onClick={() => setFilter(s)} className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-medium ${filter === s ? "bg-splitpe-600 text-white" : "bg-white text-ink-soft shadow-soft hover:text-ink"}`}>
             {STATUS[s].label} <span className="opacity-70">{tickets ? count(s) : ""}</span>
           </button>
         ))}

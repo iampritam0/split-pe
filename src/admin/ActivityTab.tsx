@@ -57,8 +57,11 @@ export default function ActivityTab() {
                 <div className="min-w-0 flex-1">
                   <p className="font-medium text-ink">{e.action}</p>
                   {e.detail && <p className="truncate text-sm text-ink-soft">{e.detail}</p>}
+                  <p className="mt-0.5 text-xs text-slate-400 sm:hidden">
+                    {e.at ? e.at.toDate().toLocaleString("en-IN", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" }) : "just now"} · {e.byPhone}
+                  </p>
                 </div>
-                <div className="shrink-0 text-right text-xs text-slate-400">
+                <div className="hidden shrink-0 text-right text-xs text-slate-400 sm:block">
                   <p>{e.at ? e.at.toDate().toLocaleString("en-IN", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" }) : "just now"}</p>
                   <p>{e.byPhone}</p>
                 </div>

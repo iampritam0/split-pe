@@ -125,7 +125,7 @@ export default function SettingsTab() {
   };
 
   return (
-    <div className="pb-24">
+    <div className="pb-20">
       <h2 className="mb-1 font-heading text-2xl font-bold text-ink">App Settings</h2>
       <p className="mb-6 text-sm text-ink-soft">Changes reach users the next time they open the app — no new build needed.</p>
 
@@ -238,13 +238,14 @@ export default function SettingsTab() {
         </Field>
       </Section>
 
-      <div className="fixed inset-x-0 bottom-0 border-t border-slate-200 bg-white/90 px-4 py-3 backdrop-blur lg:left-64">
-        <div className="mx-auto flex max-w-4xl items-center justify-between gap-4">
-          <p className={`text-sm ${status ? (status.ok ? "text-emerald-700" : "text-red-600") : "text-ink-soft"}`}>
+      {/* Phones: sits just above the bottom tab bar. */}
+      <div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 border-t border-slate-200 bg-white/95 px-4 py-2.5 backdrop-blur lg:bottom-0 lg:left-64 lg:py-3">
+        <div className="mx-auto flex max-w-4xl items-center justify-between gap-3">
+          <p className={`min-w-0 text-xs sm:text-sm ${status ? (status.ok ? "text-emerald-700" : "text-red-600") : "text-ink-soft"}`}>
             {status?.text || "Review your changes, then save."}
           </p>
-          <button onClick={save} disabled={saving} className="flex shrink-0 items-center gap-2 rounded-xl bg-splitpe-600 px-5 py-2.5 font-semibold text-white disabled:opacity-50">
-            {saving && <Loader2 size={16} className="animate-spin" />} Save changes
+          <button onClick={save} disabled={saving} className="flex shrink-0 items-center gap-2 rounded-xl bg-splitpe-600 px-4 py-2.5 font-semibold text-white disabled:opacity-50 sm:px-5">
+            {saving && <Loader2 size={16} className="animate-spin" />} Save<span className="hidden sm:inline"> changes</span>
           </button>
         </div>
       </div>
