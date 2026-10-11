@@ -1,17 +1,21 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { collection, limit, onSnapshot, orderBy, query } from "firebase/firestore";
+import { collection, limit, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import type { Timestamp } from "firebase/firestore";
-import { Loader2, Megaphone, Pencil, Send } from "lucide-react";
-import { db } from "./firebase";
+import { httpsCallable } from "firebase/functions";
+import { CalendarClock, Loader2, Megaphone, Pencil, Send, X } from "lucide-react";
+import { db, functions } from "./firebase";
 import NotifyComposer from "./NotifyComposer";
 import { AUDIENCES, TEMPLATES } from "./notifyTemplates";
 import type { AudienceKey, Template } from "./notifyTemplates";
 import useUsers from "./useUsers";
 import { sendNotification } from "./users";
-import type { NotifyAudience, Profile } from "./users";
+import type { NotifyAudience, UserRow } from "./users";
+
+const cancelScheduled = httpsCallable<{ id: string }, { cancelled: boolean }>(functions, "adminCancelScheduled");
 
 type Sent = { id: string; action: string; detail: string; byPhone: string; at?: Timestamp };
-type Segment = { list: Profile[]; withPush: number };
+type Segment = { list: UserRow[]; withPush: number };
+type Scheduled = { id: string; title: string; body: string; audience: string; uids?: string[] | null; sendAt?: Timestamp; status: string; createdByPhone?: string };
 
 const GROUPS = ["Everyone", "Active", "Not active", "Other"] as const;
 const CATEGORIES = ["All", ...new Set(TEMPLATES.map((t) => t.category))];
@@ -89,6 +93,30 @@ export default function NotificationsTab() {
   const [draft, setDraft] = useState<{ key: number; title: string; body: string }>({ key: 0, title: "", body: "" });
   const [history, setHistory] = useState<Sent[] | null>(null);
   const composerRef = useRef<HTMLDivElement>(null);
+  const [scheduled, setScheduled] = useState<Scheduled[] | null>(null);
+  const [cancelling, setCancelling] = useState("");
+
+  useEffect(
+    () =>
+      onSnapshot(
+        query(collection(db, "scheduledNotifications"), where("status", "==", "scheduled")),
+        (snap) => setScheduled(snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Scheduled, "id">) })).sort((a, b) => (a.sendAt?.toMillis() ?? 0) - (b.sendAt?.toMillis() ?? 0))),
+        () => setScheduled([])
+      ),
+    []
+  );
+
+  const cancel = async (c: Scheduled) => {
+    if (!window.confirm(`Cancel “${c.title}”? It won't be sent.`)) return;
+    setCancelling(c.id);
+    try {
+      await cancelScheduled({ id: c.id });
+    } catch (err) {
+      window.alert((err as Error).message || "Could not cancel it.");
+    } finally {
+      setCancelling("");
+    }
+  };
 
   useEffect(
     () =>
@@ -109,7 +137,7 @@ export default function NotificationsTab() {
     const out = {} as Record<AudienceKey, Segment>;
     for (const a of AUDIENCES) {
       const list = (users || []).filter((p) => !p.blocked && a.test(p, now));
-      out[a.key] = { list, withPush: list.filter((p) => p.expoPushToken).length };
+      out[a.key] = { list, withPush: list.filter((p) => p.hasPush).length };
     }
     return out;
   }, [users, now]);
@@ -179,10 +207,37 @@ export default function NotificationsTab() {
             initialTitle={draft.title}
             initialBody={draft.body}
             target={ready ? toTarget(audience, current) : null}
+            scheduleAs={{ audience }}
             label={`${AUDIENCES.find((a) => a.key === audience)!.label} (${plural(current.list.length)})`}
           />
         </div>
       </div>
+
+      <h3 className="mb-3 mt-10 font-heading text-lg font-bold text-ink">Scheduled</h3>
+      {scheduled === null ? (
+        <p className="text-ink-soft">Loading…</p>
+      ) : scheduled.length === 0 ? (
+        <div className="rounded-2xl bg-white p-6 text-center text-sm text-ink-soft shadow-soft">Nothing scheduled. Pick “Schedule” in the custom message above to send later.</div>
+      ) : (
+        <ol className="rounded-2xl bg-white p-2 shadow-soft">
+          {scheduled.map((c) => (
+            <li key={c.id} className="flex items-start gap-3 rounded-xl px-3 py-3 hover:bg-slate-50">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-splitpe-50 text-splitpe-600"><CalendarClock size={17} /></div>
+              <div className="min-w-0 flex-1">
+                <p className="font-medium text-ink">{c.title}</p>
+                <p className="text-sm text-ink-soft">{c.body}</p>
+                <p className="mt-1 text-xs text-ink-soft">
+                  {c.sendAt?.toDate().toLocaleString("en-IN", { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })} · to{" "}
+                  {c.audience === "uids" ? `${c.uids?.length ?? 0} selected users` : AUDIENCES.find((a) => a.key === c.audience)?.label || c.audience}
+                </p>
+              </div>
+              <button onClick={() => cancel(c)} disabled={cancelling === c.id} className="flex shrink-0 items-center gap-1 rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm text-ink-soft hover:bg-red-50 hover:text-red-600 disabled:opacity-50">
+                {cancelling === c.id ? <Loader2 size={14} className="animate-spin" /> : <X size={14} />} Cancel
+              </button>
+            </li>
+          ))}
+        </ol>
+      )}
 
       <h3 className="mb-3 mt-10 font-heading text-lg font-bold text-ink">Sent</h3>
       {history === null ? (

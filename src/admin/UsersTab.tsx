@@ -1,44 +1,42 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Ban, BadgeCheck, Bell, CheckCircle2, ChevronLeft, ChevronRight, Download, Loader2, RefreshCw, Search, Trash2, X } from "lucide-react";
 import { auth } from "./firebase";
 import NotifyComposer from "./NotifyComposer";
 import UserDetail from "./UserDetail";
 import { useRole } from "./role";
 import useUsers from "./useUsers";
-import { ago, deleteUser, displayName, exportCsv, fmtDay, fmtMs, initials, setUserStatus } from "./users";
-import type { Profile } from "./users";
+import { ago, deleteUser, displayName, exportCsv, fmtDate, fmtDay, listUsers, setUserStatus } from "./users";
+import type { UserRow } from "./users";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const PAGE_SIZE = 25;
 
 type FilterKey = "all" | "active" | "blocked" | "admins" | "new7d" | "seen7d" | "inactive30d";
-const FILTERS: { key: FilterKey; label: string; test: (p: Profile, now: number) => boolean }[] = [
+const FILTERS: { key: FilterKey; label: string; test: (p: UserRow, now: number) => boolean }[] = [
   { key: "all", label: "All", test: () => true },
   { key: "active", label: "Active", test: (p) => !p.blocked },
   { key: "blocked", label: "Blocked", test: (p) => !!p.blocked },
   { key: "admins", label: "Admins", test: (p) => !!p.isAdmin },
-  { key: "new7d", label: "New this week", test: (p, now) => !!p.createdAt && now - p.createdAt.toMillis() < 7 * DAY_MS },
+  { key: "new7d", label: "New this week", test: (p, now) => !!p.createdAt && now - p.createdAt < 7 * DAY_MS },
   { key: "seen7d", label: "Active (7d)", test: (p, now) => !!p.lastSeen && now - p.lastSeen < 7 * DAY_MS },
   { key: "inactive30d", label: "Inactive 30d+", test: (p, now) => !p.lastSeen || now - p.lastSeen >= 30 * DAY_MS },
 ];
 
 type SortKey = "newest" | "oldest" | "name" | "recent";
-const millis = (t?: { toMillis: () => number }) => t?.toMillis() ?? 0;
-const SORTS: Record<SortKey, { label: string; cmp: (a: Profile, b: Profile) => number }> = {
-  newest: { label: "Newest first", cmp: (a, b) => millis(b.createdAt) - millis(a.createdAt) },
-  oldest: { label: "Oldest first", cmp: (a, b) => millis(a.createdAt) - millis(b.createdAt) },
+const SORTS: Record<SortKey, { label: string; cmp: (a: UserRow, b: UserRow) => number }> = {
+  newest: { label: "Newest first", cmp: (a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0) },
+  oldest: { label: "Oldest first", cmp: (a, b) => (a.createdAt ?? 0) - (b.createdAt ?? 0) },
   name: { label: "Name A–Z", cmp: (a, b) => displayName(a).localeCompare(displayName(b), "en", { sensitivity: "base" }) },
   recent: { label: "Recently active", cmp: (a, b) => (b.lastSeen ?? 0) - (a.lastSeen ?? 0) },
 };
 
 /**
- * Every SplitPe account in one list — search by name, nickname, mobile
- * number or account ID, filter, sort, export, and block / re-activate /
- * delete one account or a selection (server-side callables, each recorded in
- * the Activity Log). Profiles only: no expense, amount or balance is read.
- *
- * Firestore has no "contains" search, so the whole users collection is
- * loaded once (useUsers) and searched here.
+ * Every SplitPe account in one list — masked by the server, so names and
+ * numbers show as "R**** S*****" / "••••••3210" until someone reveals one
+ * account (logged). Search still matches full names and numbers: it runs
+ * server-side (adminListUsers with a term) and returns matching IDs. Filter,
+ * sort, export, and block / re-activate / delete one account or a selection.
+ * No group, expense or balance is ever shown.
  */
 export default function UsersTab() {
   const { users, setUsers, now, loading, error: loadError, reload } = useUsers();
@@ -55,6 +53,22 @@ export default function UsersTab() {
   const [notifying, setNotifying] = useState(false);
   const [tag, setTag] = useState("");
   const { isSuper, canSupport } = useRole();
+  // IDs matching the search term — null while there's no term.
+  const [matches, setMatches] = useState<Set<string> | null>(null);
+  const [searching, setSearching] = useState(false);
+
+  useEffect(() => {
+    const q = term.trim();
+    if (!q) return undefined;
+    const timer = setTimeout(() => {
+      setSearching(true);
+      listUsers({ term: q })
+        .then(({ data }) => setMatches(new Set(data.users.map((u) => u.id))))
+        .catch((err: Error) => setError(err.message || "Search failed."))
+        .finally(() => setSearching(false));
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [term]);
 
   const load = () => {
     setError("");
@@ -62,7 +76,7 @@ export default function UsersTab() {
   };
 
   // Search / filter / sort changes start again from page 1.
-  const changeTerm = (v: string) => { setTerm(v); setPage(0); };
+  const changeTerm = (v: string) => { setTerm(v); setPage(0); if (!v.trim()) setMatches(null); };
   const changeFilter = (v: FilterKey) => { setFilter(v); setPage(0); };
   const changeSort = (v: SortKey) => { setSort(v); setPage(0); };
   const changeTag = (v: string) => { setTag(v); setPage(0); };
@@ -76,25 +90,19 @@ export default function UsersTab() {
 
   const visible = useMemo(() => {
     if (!users) return [];
-    const words = term.toLowerCase().trim().split(/\s+/).filter(Boolean);
     const test = FILTERS.find((f) => f.key === filter)!.test;
     return users
       .filter((p) => test(p, now))
-      .filter((p) => !tag || !!p.tags?.includes(tag))
-      .filter((p) => {
-        if (!words.length) return true;
-        const hay = `${p.name || ""} ${p.nickname || ""} ${p.phone || ""} 91${p.phone || ""} ${p.id} ${(p.tags || []).join(" ")}`.toLowerCase();
-        // "+91 98765 43210" and "98765-43210" should match the stored 10 digits.
-        return words.every((w) => hay.includes(w) || (/\d/.test(w) && !!p.phone?.includes(w.replace(/\D/g, "").slice(-10))));
-      })
+      .filter((p) => !tag || p.tags.includes(tag))
+      .filter((p) => !matches || matches.has(p.id))
       .sort(SORTS[sort].cmp);
-  }, [users, now, term, filter, sort, tag]);
+  }, [users, now, matches, filter, sort, tag]);
 
   const pages = Math.max(1, Math.ceil(visible.length / PAGE_SIZE));
   const pageRows = visible.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
   const myUid = auth.currentUser?.uid;
   // Viewers can't act, so they get no checkboxes at all.
-  const actionable = (p: Profile) => canSupport && p.id !== myUid && !p.isAdmin;
+  const actionable = (p: UserRow) => canSupport && p.id !== myUid && !p.isAdmin;
 
   const selectedUsers = (users || []).filter((p) => selected.has(p.id));
   const pageSelectable = pageRows.filter(actionable);
@@ -114,7 +122,7 @@ export default function UsersTab() {
       return next;
     });
 
-  const replace = (id: string, p: Profile | null) => {
+  const replace = (id: string, p: UserRow | null) => {
     setUsers((list) => (list ? (p ? list.map((u) => (u.id === id ? p : u)) : list.filter((u) => u.id !== id)) : list));
     if (!p) {
       setSelected((s) => {
@@ -126,7 +134,7 @@ export default function UsersTab() {
   };
 
   /** Runs one callable per selected account, one after another, and reports how many went through. */
-  const runBulk = async (label: string, targets: Profile[], act: (p: Profile) => Promise<Profile | null>) => {
+  const runBulk = async (label: string, targets: UserRow[], act: (p: UserRow) => Promise<UserRow | null>) => {
     setError("");
     setNotice("");
     let ok = 0;
@@ -163,7 +171,7 @@ export default function UsersTab() {
     }
     runBulk(blocked ? "Blocked" : "Re-activated", targets, async (p) => {
       await setUserStatus({ uid: p.id, blocked, reason });
-      return { ...p, blocked, blockedReason: blocked ? reason || null : null, blockedAt: null };
+      return { ...p, blocked };
     });
   };
 
@@ -171,7 +179,7 @@ export default function UsersTab() {
     const targets = selectedUsers.filter(actionable);
     if (!targets.length) return;
     const typed = window.prompt(
-      `Permanently delete ${targets.length} account${targets.length === 1 ? "" : "s"}?\n\n${targets.slice(0, 8).map((p) => `• ${displayName(p)} (+91 ${p.phone})`).join("\n")}${targets.length > 8 ? `\n…and ${targets.length - 8} more` : ""}\n\nTheir login, profile, friend links and photo are removed. Shared expenses stay for other members. This can't be undone.\n\nType DELETE to confirm:`
+      `Permanently delete ${targets.length} account${targets.length === 1 ? "" : "s"}?\n\n${targets.slice(0, 8).map((p) => `• ${displayName(p)} (${p.phone})`).join("\n")}${targets.length > 8 ? `\n…and ${targets.length - 8} more` : ""}\n\nTheir login, profile, friend links and photo are removed. Shared expenses stay for other members. This can't be undone.\n\nType DELETE to confirm:`
     );
     if (typed === null) return;
     if (typed.trim() !== "DELETE") {
@@ -192,7 +200,7 @@ export default function UsersTab() {
         <div>
           <h2 className="mb-1 font-heading text-2xl font-bold text-ink">Users</h2>
           <p className="text-sm text-ink-soft">
-            {users ? `${users.length.toLocaleString("en-IN")} accounts.` : "Loading accounts…"} Search by name, number or ID. Expenses and amounts are never shown.
+            {users ? `${users.length.toLocaleString("en-IN")} accounts.` : "Loading accounts…"} Names and numbers are masked — open an account to reveal one (logged). Groups and expenses are never shown.
           </p>
         </div>
         <div className="flex gap-2">
@@ -215,6 +223,7 @@ export default function UsersTab() {
             onChange={(e) => changeTerm(e.target.value)}
             autoFocus
           />
+          {searching && <Loader2 size={15} className="mr-2 animate-spin text-ink-soft" />}
           {term && <button onClick={() => changeTerm("")} className="mr-2 p-1 text-ink-soft hover:text-ink" aria-label="Clear search"><X size={15} /></button>}
         </div>
         {allTags.length > 0 && (
@@ -300,16 +309,13 @@ export default function UsersTab() {
                     </td>
                     <td className="px-2 py-3">
                       <div className="flex items-center gap-3">
-                        {p.avatarUrl
-                          ? <img src={p.avatarUrl} alt="" className="h-9 w-9 shrink-0 rounded-full object-cover" />
-                          : <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-splitpe-50 text-xs font-bold text-splitpe-700">{initials(p)}</div>}
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-splitpe-50 text-xs font-bold text-splitpe-700">{p.initials}</div>
                         <div className="min-w-0">
                           <p className="flex items-center gap-1 truncate font-medium text-ink">
                             {displayName(p)} {p.isAdmin && <BadgeCheck size={14} className="shrink-0 text-splitpe-600" aria-label="Admin" />}
                             {p.id === myUid && <span className="text-xs font-normal text-ink-soft">(you)</span>}
                           </p>
-                          {p.nickname && p.name && <p className="truncate text-xs text-ink-soft">“{p.nickname}”</p>}
-                          {!!p.tags?.length && (
+                          {!!p.tags.length && (
                             <div className="mt-0.5 flex flex-wrap gap-1">
                               {p.tags.map((t) => <span key={t} className="rounded-full bg-slate-100 px-1.5 py-px text-[11px] font-medium text-slate-600">{t}</span>)}
                             </div>
@@ -317,9 +323,9 @@ export default function UsersTab() {
                         </div>
                       </div>
                     </td>
-                    <td className="whitespace-nowrap px-3 py-3 text-ink">+91 {p.phone || "—"}</td>
+                    <td className="whitespace-nowrap px-3 py-3 font-mono text-xs text-ink">{p.phone || "—"}</td>
                     <td className="hidden whitespace-nowrap px-3 py-3 text-ink-soft md:table-cell">{fmtDay(p.createdAt)}</td>
-                    <td className="hidden whitespace-nowrap px-3 py-3 text-ink-soft md:table-cell"><span title={fmtMs(p.lastSeen)}>{ago(p.lastSeen)}</span></td>
+                    <td className="hidden whitespace-nowrap px-3 py-3 text-ink-soft md:table-cell"><span title={fmtDate(p.lastSeen)}>{ago(p.lastSeen)}</span></td>
                     <td className="px-3 py-3">
                       <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${p.blocked ? "bg-red-100 text-red-700" : "bg-emerald-100 text-emerald-700"}`}>
                         {p.blocked ? "Blocked" : "Active"}
@@ -361,11 +367,11 @@ export default function UsersTab() {
       {open && (
         <UserDetail
           key={open.id}
-          profile={open}
+          user={open}
           onClose={() => setOpenId(null)}
           onChange={(p) => {
             if (!p) {
-              setNotice(`Account ${displayName(open)} (+91 ${open.phone}) deleted.`);
+              setNotice(`Account ${displayName(open)} (${open.phone}) deleted.`);
               setOpenId(null);
             }
             replace(open.id, p);

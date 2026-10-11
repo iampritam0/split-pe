@@ -1,10 +1,22 @@
 import { useState } from "react";
-import { Bell, Loader2, Send } from "lucide-react";
+import { httpsCallable } from "firebase/functions";
+import { Bell, CalendarClock, Loader2, Send } from "lucide-react";
 import logo from "../assets/logo-mark.png";
+import { functions } from "./firebase";
 import { sendNotification } from "./users";
 import type { NotifyAudience } from "./users";
 
+const scheduleNotification = httpsCallable<{ title: string; body: string; sendAt: number; audience: string; uids?: string[] }, { id: string }>(
+  functions,
+  "adminScheduleNotification"
+);
+
 const MAX_TITLE = 65;
+// datetime-local wants "YYYY-MM-DDTHH:mm" in local time.
+const localInput = (ms: number) => {
+  const d = new Date(ms - new Date().getTimezoneOffset() * 60000);
+  return d.toISOString().slice(0, 16);
+};
 const MAX_BODY = 240;
 
 /**
@@ -12,7 +24,7 @@ const MAX_BODY = 240;
  * adminSendNotification: an in-app Notifications entry for every recipient
  * plus a push to each registered device.
  */
-export default function NotifyComposer({ target, label, onSent, compact = false, initialTitle = "", initialBody = "" }: {
+export default function NotifyComposer({ target, label, onSent, compact = false, initialTitle = "", initialBody = "", scheduleAs }: {
   /** Who gets it; null disables sending (e.g. an empty audience). */
   target: NotifyAudience | null;
   /** "12 users" — shown on the button and in the confirm prompt. */
@@ -23,7 +35,14 @@ export default function NotifyComposer({ target, label, onSent, compact = false,
   /** Pre-filled text, e.g. from a template — remount (key) to apply a new one. */
   initialTitle?: string;
   initialBody?: string;
+  /**
+   * Enables "Schedule for later". A segment key is re-evaluated when it
+   * sends (SplitPe repo: AUDIENCE_TESTS); "uids" sends to a fixed list.
+   */
+  scheduleAs?: { audience: string; uids?: string[] } | null;
 }) {
+  const [mode, setMode] = useState<"now" | "later">("now");
+  const [when, setWhen] = useState(() => localInput(Date.now() + 60 * 60 * 1000));
   const [title, setTitle] = useState(initialTitle);
   const [body, setBody] = useState(initialBody);
   const [sending, setSending] = useState(false);
@@ -31,6 +50,32 @@ export default function NotifyComposer({ target, label, onSent, compact = false,
   const [notice, setNotice] = useState("");
 
   const ready = !!target && title.trim().length > 0 && body.trim().length > 0;
+
+  const schedule = async () => {
+    if (!scheduleAs || !title.trim() || !body.trim()) return;
+    const sendAt = new Date(when).getTime();
+    if (!Number.isFinite(sendAt) || sendAt < Date.now() + 2 * 60 * 1000) {
+      setError("Pick a time at least a few minutes from now.");
+      return;
+    }
+    const at = new Date(sendAt).toLocaleString("en-IN", { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
+    if (!window.confirm(`Schedule “${title.trim()}” for ${at} to ${label}?\n\nYou can cancel it until then.`)) return;
+    setSending(true);
+    setError("");
+    setNotice("");
+    try {
+      await scheduleNotification({ title: title.trim(), body: body.trim(), sendAt, ...scheduleAs });
+      const summary = `Scheduled for ${at}. It goes out within 15 minutes of that time.`;
+      setNotice(summary);
+      setTitle("");
+      setBody("");
+      onSent?.(summary);
+    } catch (err) {
+      setError((err as Error).message || "Could not schedule it.");
+    } finally {
+      setSending(false);
+    }
+  };
 
   const send = async () => {
     if (!target || !ready) return;
@@ -78,9 +123,29 @@ export default function NotifyComposer({ target, label, onSent, compact = false,
         </label>
         {error && <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">{error}</p>}
         {notice && <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800">{notice}</p>}
-        <button onClick={send} disabled={!ready || sending} className="flex items-center gap-2 rounded-xl bg-splitpe-600 px-5 py-2.5 font-semibold text-white disabled:opacity-50">
-          {sending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />} Send to {label}
-        </button>
+        {scheduleAs && (
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex rounded-xl bg-slate-100 p-1 text-sm">
+              {(["now", "later"] as const).map((m) => (
+                <button key={m} type="button" onClick={() => setMode(m)} className={`rounded-lg px-3 py-1.5 font-medium ${mode === m ? "bg-white text-ink shadow-sm" : "text-ink-soft"}`}>
+                  {m === "now" ? "Send now" : "Schedule"}
+                </button>
+              ))}
+            </div>
+            {mode === "later" && (
+              <input type="datetime-local" value={when} onChange={(e) => setWhen(e.target.value)} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-splitpe-600" />
+            )}
+          </div>
+        )}
+        {scheduleAs && mode === "later" ? (
+          <button onClick={schedule} disabled={!title.trim() || !body.trim() || sending} className="flex items-center gap-2 rounded-xl bg-splitpe-600 px-5 py-2.5 font-semibold text-white disabled:opacity-50">
+            {sending ? <Loader2 size={16} className="animate-spin" /> : <CalendarClock size={16} />} Schedule for {label}
+          </button>
+        ) : (
+          <button onClick={send} disabled={!ready || sending} className="flex items-center gap-2 rounded-xl bg-splitpe-600 px-5 py-2.5 font-semibold text-white disabled:opacity-50">
+            {sending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />} Send to {label}
+          </button>
+        )}
       </div>
 
       <div className="rounded-2xl bg-slate-900 p-4">

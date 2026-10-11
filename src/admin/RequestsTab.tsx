@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
-import { collection, doc, getDoc, onSnapshot, orderBy, query, serverTimestamp, updateDoc } from "firebase/firestore";
+import { collection, doc, onSnapshot, orderBy, query, serverTimestamp, updateDoc } from "firebase/firestore";
 import type { Timestamp } from "firebase/firestore";
-import { AlertTriangle, Check, ExternalLink, Loader2, RotateCcw, X } from "lucide-react";
+import { AlertTriangle, Check, Eye, ExternalLink, Loader2, RotateCcw, X } from "lucide-react";
 import { auth, db } from "./firebase";
 import { logAdminAction } from "./adminLog";
 import { useRole } from "./role";
 import UserDetail from "./UserDetail";
-import { fmtDate } from "./users";
-import type { Profile } from "./users";
+import { fmtDate, listUsers } from "./users";
+import type { UserRow } from "./users";
+
+const masked = (phone: string) => `••••••${phone.slice(-4)}`;
 
 type Status = "open" | "done" | "rejected";
 type Request = { id: string; phone: string; reason?: string; uid?: string | null; status: Status; createdAt?: Timestamp; handledAt?: Timestamp; note?: string };
@@ -29,7 +31,9 @@ export default function RequestsTab() {
   const [filter, setFilter] = useState<Status>("open");
   const [error, setError] = useState("");
   const [busyId, setBusyId] = useState("");
-  const [account, setAccount] = useState<{ request: Request; profile: Profile } | null>(null);
+  const [account, setAccount] = useState<{ request: Request; user: UserRow } | null>(null);
+  // Numbers stay masked until someone chooses to see one (logged).
+  const [shown, setShown] = useState<Set<string>>(new Set());
   const { canSupport } = useRole();
 
   useEffect(
@@ -47,7 +51,7 @@ export default function RequestsTab() {
     setError("");
     try {
       await updateDoc(doc(db, "deletionRequests", r.id), { status, note, handledBy: auth.currentUser?.uid, handledAt: serverTimestamp() });
-      if (status !== "open") logAdminAction("request", `Deletion request for +91 ${r.phone} marked ${STATUS[status].label.toLowerCase()}`, note);
+      if (status !== "open") logAdminAction("request", `Deletion request for ${masked(r.phone)} marked ${STATUS[status].label.toLowerCase()}`, note);
     } catch (err) {
       setError((err as Error).message || "Could not update the request.");
     } finally {
@@ -56,7 +60,7 @@ export default function RequestsTab() {
   };
 
   const reject = (r: Request) => {
-    const note = window.prompt(`Reject the deletion request for +91 ${r.phone}?\n\nReason (kept with the request):`);
+    const note = window.prompt(`Reject the deletion request for ${masked(r.phone)}?\n\nReason (kept with the request):`);
     if (note !== null) setStatus(r, "rejected", note);
   };
 
@@ -64,19 +68,26 @@ export default function RequestsTab() {
     if (!r.uid) return;
     setBusyId(r.id);
     try {
-      const snap = await getDoc(doc(db, "users", r.uid));
-      if (!snap.exists()) {
+      const { data } = await listUsers({ uids: [r.uid] });
+      if (!data.users.length) {
         setError("That account no longer exists — it may already be deleted. Mark the request as done.");
         return;
       }
-      setAccount({ request: r, profile: { id: snap.id, ...(snap.data() as Omit<Profile, "id">) } });
+      setAccount({ request: r, user: data.users[0] });
+    } catch (err) {
+      setError((err as Error).message || "Could not open the account.");
     } finally {
       setBusyId("");
     }
   };
 
+  const showNumber = (r: Request) => {
+    setShown(new Set(shown).add(r.id));
+    logAdminAction("privacy", `Viewed number on a deletion request (${masked(r.phone)})`, "To verify the requester");
+  };
+
   const counts = (s: Status) => requests?.filter((r) => r.status === s).length ?? 0;
-  const shown = (requests || []).filter((r) => r.status === filter);
+  const list = (requests || []).filter((r) => r.status === filter);
 
   return (
     <div>
@@ -99,22 +110,27 @@ export default function RequestsTab() {
 
       {requests === null ? (
         <p className="text-ink-soft">Loading…</p>
-      ) : shown.length === 0 ? (
+      ) : list.length === 0 ? (
         <div className="rounded-2xl bg-white p-10 text-center text-ink-soft shadow-soft">{filter === "open" ? "No open requests. 🎉" : "Nothing here yet."}</div>
       ) : (
         <ul className="space-y-3">
-          {shown.map((r) => (
+          {list.map((r) => (
             <li key={r.id} className="rounded-2xl bg-white p-5 shadow-soft">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <p className="font-heading text-lg font-bold text-ink">+91 {r.phone}</p>
-                  <p className="text-xs text-ink-soft">Requested {fmtDate(r.createdAt)}</p>
+                  <p className="flex items-center gap-2 font-heading text-lg font-bold text-ink">
+                    {shown.has(r.id) ? `+91 ${r.phone}` : <span className="font-mono text-base">{masked(r.phone)}</span>}
+                    {!shown.has(r.id) && (
+                      <button onClick={() => showNumber(r)} className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2 py-0.5 text-xs font-medium text-ink-soft hover:bg-slate-50"><Eye size={12} /> Show number</button>
+                    )}
+                  </p>
+                  <p className="text-xs text-ink-soft">Requested {fmtDate(r.createdAt?.toMillis())}</p>
                 </div>
                 <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${STATUS[r.status].cls}`}>{STATUS[r.status].label}</span>
               </div>
               <p className="mt-3 rounded-xl bg-slate-50 px-3 py-2 text-sm text-ink">{r.reason || <span className="text-ink-soft">No reason given.</span>}</p>
               <p className="mt-2 text-sm text-ink-soft">{r.uid ? "✔ This number has a SplitPe account." : "✖ No SplitPe account with this number — nothing to delete."}</p>
-              {r.status !== "open" && (r.note || r.handledAt) && <p className="mt-1 text-xs text-ink-soft">Handled {fmtDate(r.handledAt)}{r.note ? ` — ${r.note}` : ""}</p>}
+              {r.status !== "open" && (r.note || r.handledAt) && <p className="mt-1 text-xs text-ink-soft">Handled {fmtDate(r.handledAt?.toMillis())}{r.note ? ` — ${r.note}` : ""}</p>}
               {canSupport && (
                 <div className="mt-4 flex flex-wrap gap-2">
                   {r.status === "open" ? (
@@ -139,11 +155,11 @@ export default function RequestsTab() {
 
       {account && (
         <UserDetail
-          key={account.profile.id}
-          profile={account.profile}
+          key={account.user.id}
+          user={account.user}
           onClose={() => setAccount(null)}
           onChange={(p) => {
-            if (p) setAccount({ ...account, profile: p });
+            if (p) setAccount({ ...account, user: p });
             else {
               // Deleted from the panel — close out the request too.
               setStatus(account.request, "done", "Account deleted from the admin panel");

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import type { User } from "firebase/auth";
-import { BarChart3, Bell, History, Image, Inbox, LayoutDashboard, Loader2, LogOut, Settings, ShieldCheck, Users, UsersRound, Zap } from "lucide-react";
+import { BarChart3, Bell, History, Image, Inbox, LayoutDashboard, Loader2, LogOut, Settings, ShieldCheck, Users, Zap } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import logo from "../assets/logo-s.png";
 import { auth } from "./firebase";
@@ -14,19 +14,17 @@ import ActivityTab from "./ActivityTab";
 import NotificationsTab from "./NotificationsTab";
 import AutomationsTab from "./AutomationsTab";
 import AnalyticsTab from "./AnalyticsTab";
-import GroupsTab from "./GroupsTab";
 import RequestsTab from "./RequestsTab";
 import TeamTab from "./TeamTab";
 import { ROLE_INFO, RoleContext, roleFromClaims } from "./role";
 import type { Role } from "./role";
 
-type TabKey = "overview" | "analytics" | "users" | "groups" | "requests" | "notifications" | "automations" | "settings" | "banners" | "team" | "activity";
+type TabKey = "overview" | "analytics" | "users" | "requests" | "notifications" | "automations" | "settings" | "banners" | "team" | "activity";
 // `superOnly` tabs change the live app (settings, sends) — hidden for support and viewer.
 const TABS: { key: TabKey; label: string; icon: LucideIcon; superOnly?: boolean }[] = [
   { key: "overview", label: "Overview", icon: LayoutDashboard },
   { key: "analytics", label: "Analytics", icon: BarChart3 },
   { key: "users", label: "Users", icon: Users },
-  { key: "groups", label: "Groups", icon: UsersRound },
   { key: "requests", label: "Deletion requests", icon: Inbox },
   { key: "notifications", label: "Notifications", icon: Bell, superOnly: true },
   { key: "automations", label: "Automations", icon: Zap, superOnly: true },
@@ -96,7 +94,7 @@ export default function AdminApp() {
   if (state === "signedOut") return <LoginScreen notice={notice} />;
 
   const tabs = TABS.filter((t) => !t.superOnly || role === "super");
-  const wide = tab === "users" || tab === "groups" || tab === "analytics";
+  const wide = tab === "users" || tab === "analytics";
 
   return (
     <RoleContext.Provider value={role}>
@@ -152,7 +150,6 @@ export default function AdminApp() {
           {tab === "overview" && <OverviewTab />}
           {tab === "analytics" && <AnalyticsTab />}
           {tab === "users" && <UsersTab />}
-          {tab === "groups" && <GroupsTab />}
           {tab === "requests" && <RequestsTab />}
           {tab === "team" && <TeamTab />}
           {tab === "activity" && <ActivityTab />}

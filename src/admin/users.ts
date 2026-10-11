@@ -1,9 +1,8 @@
-import type { Timestamp } from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";
 import { functions } from "./firebase";
 
-// Admin-only Cloud Functions (SplitPe repo, functions/index.js). Both refuse
-// to act on the caller's own account or on another admin.
+// Admin-only Cloud Functions (SplitPe repo, functions/index.js). The account
+// actions refuse to act on the caller's own account or on another admin.
 export const setUserStatus = httpsCallable<{ uid: string; blocked: boolean; reason?: string }, { blocked: boolean }>(functions, "adminSetUserStatus");
 export const deleteUser = httpsCallable<{ uid: string }, { deleted: boolean }>(functions, "adminDeleteUser");
 export const userActivity = httpsCallable<void, { activity: Record<string, { signIn: number | null; refresh: number | null }> }>(functions, "adminUserActivity");
@@ -14,47 +13,50 @@ export const sendNotification = httpsCallable<{ title: string; body: string } & 
   "adminSendNotification"
 );
 
-export type Profile = {
+/**
+ * An account as the panel sees it — masked by the server (adminListUsers):
+ * name like "R**** S*****", number like "••••••3210", no photo, and never
+ * any group, expense or balance. Full details: revealUser, one at a time.
+ */
+export type UserRow = {
   id: string;
-  name?: string;
-  nickname?: string | null;
-  phone?: string;
-  avatarUrl?: string | null;
-  createdAt?: Timestamp;
-  lastActiveAt?: Timestamp;
-  defaultCurrency?: string;
-  isAdmin?: boolean;
-  notificationSettings?: Record<string, boolean>;
-  personalGroups?: unknown[];
-  customCategories?: string[];
-  expoPushToken?: string | null;
-  blocked?: boolean;
-  blockedAt?: Timestamp | null;
-  blockedReason?: string | null;
-  /** Merged in from Firebase Auth (adminUserActivity), in ms. */
-  lastSignIn?: number | null;
-  /**
-   * Latest sign of use: the app's hourly token refresh, the last OTP login or
-   * lastActiveAt — whichever is newest. Store builds before Oct 2026 never
-   * write lastActiveAt, so Auth's times are what most accounts have.
-   */
-  lastSeen?: number | null;
-  /** From adminNotes/{uid} — visible to the admin team only. */
-  tags?: string[];
-  note?: string;
+  name: string;
+  phone: string;
+  initials: string;
+  createdAt: number | null;
+  lastSeen: number | null;
+  blocked: boolean;
+  isAdmin: boolean;
+  hasPush: boolean;
+  /** adminNotes/{uid} — visible to the admin team only. */
+  tags: string[];
+  note: string;
 };
+export const listUsers = httpsCallable<{ term?: string; uids?: string[] }, { users: UserRow[] }>(functions, "adminListUsers");
+
+/** Contact details from adminRevealUser — each reveal is logged with its reason. */
+export type Revealed = {
+  name: string;
+  nickname: string;
+  phone: string;
+  avatarUrl: string | null;
+  defaultCurrency: string;
+  notificationsOn: number;
+  notificationsTotal: number;
+  lastSignIn: number | null;
+  blockedReason: string | null;
+  blockedAt: number | null;
+};
+export const revealUser = httpsCallable<{ uid: string; reason?: string }, Revealed>(functions, "adminRevealUser");
 
 /** Suggested tags for adminNotes — any other text works too. */
 export const TAG_PRESETS = ["VIP", "Complaint", "Beta tester", "Partner", "Watchlist", "Influencer"];
 
-export const fmtDate = (t?: Timestamp | null) =>
-  t ? t.toDate().toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit" }) : "—";
-
-export const fmtDay = (t?: Timestamp | null) =>
-  t ? t.toDate().toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—";
-
-export const fmtMs = (ms?: number | null) =>
+export const fmtDate = (ms?: number | null) =>
   ms ? new Date(ms).toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit" }) : "—";
+
+export const fmtDay = (ms?: number | null) =>
+  ms ? new Date(ms).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—";
 
 export const ago = (ms?: number | null) => {
   if (!ms) return "Never";
@@ -68,20 +70,18 @@ export const ago = (ms?: number | null) => {
   return `${Math.round(days / 30)} months ago`;
 };
 
-export const displayName = (p: Profile) => p.name || p.nickname || "No name";
+export const displayName = (u: UserRow) => u.name || "No name";
 
-export const initials = (p: Profile) =>
-  (p.nickname || p.name || "?").split(/\s+/).filter(Boolean).map((w) => w[0]).join("").slice(0, 2).toUpperCase() || "?";
-
-/** Downloads the given profiles as a CSV (basics only — no expenses or amounts). */
-export const exportCsv = (rows: Profile[]) => {
+/** Downloads the given rows as a CSV — masked, exactly as the list shows them. */
+export const exportCsv = (rows: UserRow[]) => {
   const cell = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
-  const iso = (t?: Timestamp | null) => (t ? t.toDate().toISOString() : "");
+  const iso = (ms: number | null) => (ms ? new Date(ms).toISOString() : "");
   const lines = [
-    ["Name", "Nickname", "Phone", "Status", "Admin", "Joined", "Last active", "Currency", "Account ID"].map(cell).join(","),
-    ...rows.map((p) =>
-      [p.name, p.nickname, p.phone ? `+91 ${p.phone}` : "", p.blocked ? "Blocked" : "Active", p.isAdmin ? "Yes" : "No",
-        iso(p.createdAt), p.lastSeen ? new Date(p.lastSeen).toISOString() : "", p.defaultCurrency || "INR", p.id].map(cell).join(",")
+    ["Name (masked)", "Phone (masked)", "Status", "Admin", "Joined", "Last active", "Push", "Tags", "Account ID"].map(cell).join(","),
+    ...rows.map((u) =>
+      [u.name, u.phone, u.blocked ? "Blocked" : "Active", u.isAdmin ? "Yes" : "No", iso(u.createdAt), iso(u.lastSeen), u.hasPush ? "Yes" : "No", u.tags.join("; "), u.id]
+        .map(cell)
+        .join(",")
     ),
   ];
   const url = URL.createObjectURL(new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" }));

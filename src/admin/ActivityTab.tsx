@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { collection, limit, onSnapshot, orderBy, query } from "firebase/firestore";
 import type { Timestamp } from "firebase/firestore";
-import { Construction, Image, Inbox, Megaphone, Settings, ShieldCheck, UserCog, UsersRound, Zap } from "lucide-react";
+import { Construction, Eye, Image, Inbox, Megaphone, Settings, ShieldCheck, UserCog, UsersRound, Zap } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { db } from "./firebase";
 import type { LogKind } from "./adminLog";
@@ -18,6 +18,7 @@ const ICONS: Record<LogKind, { icon: LucideIcon; cls: string }> = {
   team: { icon: ShieldCheck, cls: "bg-slate-100 text-slate-700" },
   group: { icon: UsersRound, cls: "bg-mint-50 text-mint-600" },
   request: { icon: Inbox, cls: "bg-red-50 text-red-600" },
+  privacy: { icon: Eye, cls: "bg-violet-50 text-violet-600" },
 };
 
 /** The last 50 admin-panel changes (adminLog), newest first, live. */

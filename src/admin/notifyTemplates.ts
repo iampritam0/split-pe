@@ -1,9 +1,9 @@
-import type { Profile } from "./users";
+import type { UserRow } from "./users";
 
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
 
-const seenWithin = (p: Profile, now: number, ms: number) => !!p.lastSeen && now - p.lastSeen < ms;
+const seenWithin = (p: UserRow, now: number, ms: number) => !!p.lastSeen && now - p.lastSeen < ms;
 
 export type AudienceKey =
   | "all" | "active1d" | "active2d" | "active7d"
@@ -12,9 +12,10 @@ export type AudienceKey =
 /**
  * Who a notification can go to. "Active" means the app was used in that
  * window (lastSeen — Auth token refresh / sign-in / lastActiveAt); blocked
- * accounts are always left out.
+ * accounts are always left out. Mirrored server-side for scheduled sends
+ * (SplitPe repo: AUDIENCE_TESTS) — keep the two in sync.
  */
-export const AUDIENCES: { key: AudienceKey; label: string; hint: string; group: "Everyone" | "Active" | "Not active" | "Other"; test: (p: Profile, now: number) => boolean }[] = [
+export const AUDIENCES: { key: AudienceKey; label: string; hint: string; group: "Everyone" | "Active" | "Not active" | "Other"; test: (p: UserRow, now: number) => boolean }[] = [
   { key: "all", group: "Everyone", label: "All users", hint: "Everyone who isn't blocked", test: () => true },
   { key: "active1d", group: "Active", label: "Active today", hint: "Used the app in the last 24 hours", test: (p, now) => seenWithin(p, now, DAY_MS) },
   { key: "active2d", group: "Active", label: "Active last 2 days", hint: "Used the app in the last 48 hours", test: (p, now) => seenWithin(p, now, 2 * DAY_MS) },
@@ -22,7 +23,7 @@ export const AUDIENCES: { key: AudienceKey; label: string; hint: string; group: 
   { key: "inactive2d", group: "Not active", label: "Not active 2+ days", hint: "Haven't opened the app in 2 days", test: (p, now) => !seenWithin(p, now, 2 * DAY_MS) },
   { key: "inactive7d", group: "Not active", label: "Not active 7+ days", hint: "Haven't opened the app in a week", test: (p, now) => !seenWithin(p, now, 7 * DAY_MS) },
   { key: "inactive30d", group: "Not active", label: "Not active 30+ days", hint: "Gone quiet for a month", test: (p, now) => !seenWithin(p, now, 30 * DAY_MS) },
-  { key: "new7d", group: "Other", label: "New this week", hint: "Signed up in the last 7 days", test: (p, now) => !!p.createdAt && now - p.createdAt.toMillis() < 7 * DAY_MS },
+  { key: "new7d", group: "Other", label: "New this week", hint: "Signed up in the last 7 days", test: (p, now) => !!p.createdAt && now - p.createdAt < 7 * DAY_MS },
 ];
 
 export type Template = { id: string; category: string; title: string; body: string; audience: AudienceKey };
