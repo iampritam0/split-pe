@@ -7,6 +7,7 @@ import { functions } from "./firebase";
 export const setUserStatus = httpsCallable<{ uid: string; blocked: boolean; reason?: string }, { blocked: boolean }>(functions, "adminSetUserStatus");
 export const deleteUser = httpsCallable<{ uid: string }, { deleted: boolean }>(functions, "adminDeleteUser");
 export const userActivity = httpsCallable<void, { activity: Record<string, { signIn: number | null; refresh: number | null }> }>(functions, "adminUserActivity");
+export const forceLogout = httpsCallable<{ uid: string }, { done: boolean }>(functions, "adminForceLogout");
 export type NotifyAudience = { audience: "all" } | { audience: "uids"; uids: string[] };
 export const sendNotification = httpsCallable<{ title: string; body: string } & NotifyAudience, { recipients: number; pushed: number; pushFailed: number }>(
   functions,
@@ -38,7 +39,13 @@ export type Profile = {
    * write lastActiveAt, so Auth's times are what most accounts have.
    */
   lastSeen?: number | null;
+  /** From adminNotes/{uid} — visible to the admin team only. */
+  tags?: string[];
+  note?: string;
 };
+
+/** Suggested tags for adminNotes — any other text works too. */
+export const TAG_PRESETS = ["VIP", "Complaint", "Beta tester", "Partner", "Watchlist", "Influencer"];
 
 export const fmtDate = (t?: Timestamp | null) =>
   t ? t.toDate().toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit" }) : "—";

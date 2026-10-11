@@ -3,6 +3,7 @@ import { Ban, BadgeCheck, Bell, CheckCircle2, ChevronLeft, ChevronRight, Downloa
 import { auth } from "./firebase";
 import NotifyComposer from "./NotifyComposer";
 import UserDetail from "./UserDetail";
+import { useRole } from "./role";
 import useUsers from "./useUsers";
 import { ago, deleteUser, displayName, exportCsv, fmtDay, fmtMs, initials, setUserStatus } from "./users";
 import type { Profile } from "./users";
@@ -52,6 +53,8 @@ export default function UsersTab() {
   const [openId, setOpenId] = useState<string | null>(null);
   const [bulk, setBulk] = useState<{ label: string; done: number; total: number } | null>(null);
   const [notifying, setNotifying] = useState(false);
+  const [tag, setTag] = useState("");
+  const { isSuper, canSupport } = useRole();
 
   const load = () => {
     setError("");
@@ -62,6 +65,8 @@ export default function UsersTab() {
   const changeTerm = (v: string) => { setTerm(v); setPage(0); };
   const changeFilter = (v: FilterKey) => { setFilter(v); setPage(0); };
   const changeSort = (v: SortKey) => { setSort(v); setPage(0); };
+  const changeTag = (v: string) => { setTag(v); setPage(0); };
+  const allTags = useMemo(() => [...new Set((users || []).flatMap((p) => p.tags || []))].sort(), [users]);
 
   const counts = useMemo(() => {
     const c = {} as Record<FilterKey, number>;
@@ -75,19 +80,21 @@ export default function UsersTab() {
     const test = FILTERS.find((f) => f.key === filter)!.test;
     return users
       .filter((p) => test(p, now))
+      .filter((p) => !tag || !!p.tags?.includes(tag))
       .filter((p) => {
         if (!words.length) return true;
-        const hay = `${p.name || ""} ${p.nickname || ""} ${p.phone || ""} 91${p.phone || ""} ${p.id}`.toLowerCase();
+        const hay = `${p.name || ""} ${p.nickname || ""} ${p.phone || ""} 91${p.phone || ""} ${p.id} ${(p.tags || []).join(" ")}`.toLowerCase();
         // "+91 98765 43210" and "98765-43210" should match the stored 10 digits.
         return words.every((w) => hay.includes(w) || (/\d/.test(w) && !!p.phone?.includes(w.replace(/\D/g, "").slice(-10))));
       })
       .sort(SORTS[sort].cmp);
-  }, [users, now, term, filter, sort]);
+  }, [users, now, term, filter, sort, tag]);
 
   const pages = Math.max(1, Math.ceil(visible.length / PAGE_SIZE));
   const pageRows = visible.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
   const myUid = auth.currentUser?.uid;
-  const actionable = (p: Profile) => p.id !== myUid && !p.isAdmin;
+  // Viewers can't act, so they get no checkboxes at all.
+  const actionable = (p: Profile) => canSupport && p.id !== myUid && !p.isAdmin;
 
   const selectedUsers = (users || []).filter((p) => selected.has(p.id));
   const pageSelectable = pageRows.filter(actionable);
@@ -203,13 +210,19 @@ export default function UsersTab() {
           <Search size={16} className="ml-3 shrink-0 text-ink-soft" />
           <input
             className="w-full rounded-xl px-2 py-2.5 outline-none"
-            placeholder="Search name, nickname, mobile number or account ID"
+            placeholder="Search name, nickname, mobile, account ID or tag"
             value={term}
             onChange={(e) => changeTerm(e.target.value)}
             autoFocus
           />
           {term && <button onClick={() => changeTerm("")} className="mr-2 p-1 text-ink-soft hover:text-ink" aria-label="Clear search"><X size={15} /></button>}
         </div>
+        {allTags.length > 0 && (
+          <select value={tag} onChange={(e) => changeTag(e.target.value)} className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-ink outline-none" aria-label="Filter by tag">
+            <option value="">All tags</option>
+            {allTags.map((t) => <option key={t} value={t}>{t}</option>)}
+          </select>
+        )}
         <select value={sort} onChange={(e) => changeSort(e.target.value as SortKey)} className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-ink outline-none">
           {(Object.keys(SORTS) as SortKey[]).map((k) => <option key={k} value={k}>{SORTS[k].label}</option>)}
         </select>
@@ -237,10 +250,10 @@ export default function UsersTab() {
           ) : (
             <>
               <span className="mr-auto font-medium">{selected.size} selected</span>
-              <button onClick={() => setNotifying(true)} className="flex items-center gap-1.5 rounded-lg bg-splitpe-600 px-3 py-1.5 font-semibold"><Bell size={14} /> Notify</button>
+              {isSuper && <button onClick={() => setNotifying(true)} className="flex items-center gap-1.5 rounded-lg bg-splitpe-600 px-3 py-1.5 font-semibold"><Bell size={14} /> Notify</button>}
               <button onClick={() => bulkStatus(true)} className="flex items-center gap-1.5 rounded-lg bg-amber-500 px-3 py-1.5 font-semibold"><Ban size={14} /> Block</button>
               <button onClick={() => bulkStatus(false)} className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 font-semibold"><CheckCircle2 size={14} /> Activate</button>
-              <button onClick={bulkDelete} className="flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 font-semibold"><Trash2 size={14} /> Delete</button>
+              {isSuper && <button onClick={bulkDelete} className="flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 font-semibold"><Trash2 size={14} /> Delete</button>}
               <button onClick={() => setSelected(new Set())} className="rounded-lg px-2 py-1.5 text-white/70 hover:text-white">Clear</button>
             </>
           )}
@@ -296,6 +309,11 @@ export default function UsersTab() {
                             {p.id === myUid && <span className="text-xs font-normal text-ink-soft">(you)</span>}
                           </p>
                           {p.nickname && p.name && <p className="truncate text-xs text-ink-soft">“{p.nickname}”</p>}
+                          {!!p.tags?.length && (
+                            <div className="mt-0.5 flex flex-wrap gap-1">
+                              {p.tags.map((t) => <span key={t} className="rounded-full bg-slate-100 px-1.5 py-px text-[11px] font-medium text-slate-600">{t}</span>)}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </td>
