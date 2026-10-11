@@ -7,6 +7,8 @@ import type { LucideIcon } from "lucide-react";
 import { db, functions } from "./firebase";
 import { logAdminAction } from "./adminLog";
 import { useRole } from "./role";
+import { TAGLINE, pushSummary } from "./users";
+import type { Receipts } from "./users";
 
 /*
  * Mirror of AUTOMATION_DEFAULTS in the SplitPe repo (functions/index.js) —
@@ -51,7 +53,7 @@ const SPECS: Record<Id, {
     defaults: {
       enabled: false, hour: 20, cooldownDays: 3, maxReminders: 4, minAmount: 50,
       messages: [
-        { title: "{name}, hisaab baaki hai 💸", body: "You have pending dues with {count} on SplitPe. Settle up in one tap and keep it friendly." },
+        { title: "{name}, you have pending dues 💸", body: "You have pending dues with {count} on SplitPe. Settle up in one tap and keep it friendly." },
         { title: "Settle up reminder ⏰", body: "You still owe {count}. Open SplitPe and clear it in one tap." },
         { title: "Clear your dues today ✅", body: "A quick settle-up keeps friendships smooth. You owe {count} on SplitPe." },
       ],
@@ -69,7 +71,7 @@ const SPECS: Record<Id, {
       messages: [
         { day: 1, title: "Welcome to SplitPe, {name}! 🎉", body: "Start with a group — trip, flat or office lunch — and add your first expense. We'll do the maths." },
         { day: 3, title: "Tip: add friends by number 📱", body: "Friends not on SplitPe yet? Add them by mobile number and split anyway — they can join later." },
-        { day: 7, title: "Settle up in one tap 💸", body: "See who owes whom and record a payment in seconds. Hisaab clear, tension khatam!" },
+        { day: 7, title: "Settle up in one tap 💸", body: "See who owes whom and record a payment in seconds. Clear accounts, zero stress!" },
       ],
     },
   },
@@ -86,11 +88,11 @@ const SPECS: Record<Id, {
     defaults: {
       enabled: false, hour: 19, cooldownDays: 2, maxReminders: 5, maxExpenses: 2, minAccountAgeDays: 1,
       messages: [
-        { title: "{name}, aaj ka kharcha add kiya? 📝", body: "Chai, cab ya dinner — jo bhi share kiya, SplitPe mein 10 second mein add karo." },
-        { title: "Expense add karna mat bhoolna ⏰", body: "Add your shared expenses now so nobody forgets who paid what." },
-        { title: "Hisaab saaf, dosti pakki 🤝", body: "Add your next expense on SplitPe and let us do the maths for you." },
-        { title: "Trip ya dinner plan hai? ✈️", body: "Create a group and add expenses as you go — settling up later is one tap." },
-        { title: "Ek expense, bas 10 second ⚡", body: "{name}, open SplitPe and add today's spend. Your friends will thank you!" },
+        { title: "{name}, did you add your expenses today? 📝", body: "Tea, a cab or dinner — whatever you shared, add it to SplitPe in 10 seconds." },
+        { title: "Remember to add your expenses ⏰", body: "Add your shared expenses now so nobody forgets who paid what." },
+        { title: "Clear accounts, strong friendships 🤝", body: "Add your next expense on SplitPe and let us do the maths for you." },
+        { title: "Planning a trip or a dinner? ✈️", body: "Create a group and add expenses as you go — settling up later is one tap." },
+        { title: "One expense, just 10 seconds ⚡", body: "{name}, open SplitPe and add today's spend. Your friends will thank you!" },
       ],
     },
   },
@@ -104,7 +106,7 @@ const SPECS: Record<Id, {
     defaults: {
       enabled: false, hour: 18,
       messages: [
-        { day: 7, title: "We miss you, {name} 👋", body: "Your friends are still splitting on SplitPe. Open the app — kisi ka hisaab baaki toh nahi?" },
+        { day: 7, title: "We miss you, {name} 👋", body: "Your friends are still splitting on SplitPe. Open the app — does anyone still owe you?" },
         { day: 30, title: "It's been a while 💙", body: "Planning a trip or a dinner? Split it the easy way on SplitPe." },
         { day: 60, title: "Still here when you need us", body: "Rent, trips, groceries — SplitPe keeps every shared expense fair. Come back anytime." },
       ],
@@ -120,7 +122,7 @@ const SPECS: Record<Id, {
       enabled: false, hour: 18, weekday: 0,
       messages: [
         { title: "Your week on SplitPe 📊", body: "{expenses} expenses and {settlements} settle-ups this week. Open the app to see where things stand." },
-        { title: "Weekly hisaab ready ✨", body: "You were part of {expenses} expenses this week. Check your balances before the new week starts." },
+        { title: "Your weekly summary is ready ✨", body: "You were part of {expenses} expenses this week. Check your balances before the new week starts." },
       ],
     },
   },
@@ -129,10 +131,26 @@ const ORDER: Id[] = ["duesReminder", "welcomeSeries", "lowExpenseReminder", "win
 const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 type Preview = { uid: string; name: string; phone: string; detail: string; hasPush: boolean };
-type RunResult = { checked?: number; due?: number; preview?: Preview[]; sent: number; pushed: number; pushFailed: number };
+type RunResult = { checked?: number; due?: number; preview?: Preview[]; sent: number; pushed: number; pushFailed: number; receipts?: Receipts | null; sendErrors?: Record<string, number> };
 const runAutomation = httpsCallable<{ id: Id; mode: "preview" | "test" | "now" }, RunResult>(functions, "adminRunAutomation");
 
 type LogEntry = { id: string; action: string; detail: string; byPhone: string; at?: Timestamp };
+
+// Mirror of LEGACY_TEXT on the server: copies of the first (Hinglish) defaults
+// still saved in appConfig/automations show — and save — in English.
+const LEGACY_TEXT: Record<string, string> = {
+  "{name}, aaj ka kharcha add kiya? 📝": "{name}, did you add your expenses today? 📝",
+  "Chai, cab ya dinner — jo bhi share kiya, SplitPe mein 10 second mein add karo.": "Tea, a cab or dinner — whatever you shared, add it to SplitPe in 10 seconds.",
+  "Expense add karna mat bhoolna ⏰": "Remember to add your expenses ⏰",
+  "Hisaab saaf, dosti pakki 🤝": "Clear accounts, strong friendships 🤝",
+  "Trip ya dinner plan hai? ✈️": "Planning a trip or a dinner? ✈️",
+  "Ek expense, bas 10 second ⚡": "One expense, just 10 seconds ⚡",
+  "Hisaab clear, tension khatam!": "Clear accounts, zero stress!",
+  "kisi ka hisaab baaki toh nahi?": "does anyone still owe you?",
+  "{name}, hisaab baaki hai 💸": "{name}, you have pending dues 💸",
+  "Weekly hisaab ready ✨": "Your weekly summary is ready ✨",
+};
+const englishOf = (text: string) => Object.entries(LEGACY_TEXT).reduce((t, [old, now]) => t.split(old).join(now), text);
 
 const hourLabel = (h: number) => new Date(2000, 0, 1, h).toLocaleTimeString("en-IN", { hour: "numeric", hour12: true });
 
@@ -142,7 +160,7 @@ function merge(id: Id, stored: Partial<Config> | undefined): Config {
   for (const key of Object.keys(d) as (keyof Config)[]) {
     if (key !== "messages" && stored?.[key] !== undefined && typeof stored[key] === typeof d[key]) (out as Record<string, unknown>)[key] = stored[key];
   }
-  out.messages = Array.isArray(stored?.messages) && stored.messages.length ? stored.messages : d.messages;
+  out.messages = (Array.isArray(stored?.messages) && stored.messages.length ? stored.messages : d.messages).map((m) => ({ ...m, title: englishOf(m.title), body: englishOf(m.body) }));
   return out;
 }
 
@@ -202,7 +220,11 @@ function AutomationCard({ id, initial, onSaved }: { id: Id; initial: Config; onS
     try {
       const { data } = await runAutomation({ id, mode });
       if (mode === "preview") setPreview(data);
-      else if (mode === "test") setNotice(data.pushed ? "Test sent to your phone and in-app Notifications." : "Test added to your in-app Notifications — no push (no device registered or notifications off).");
+      else if (mode === "test") {
+        const line = `Test added to your in-app Notifications. Push: ${pushSummary(data.pushed, data.receipts, data.sendErrors)}`;
+        if (data.receipts?.failed || data.pushFailed) setError(line);
+        else setNotice(line);
+      }
       else {
         setNotice(`Sent to ${data.sent} user${data.sent === 1 ? "" : "s"} · ${data.pushed} push${data.pushed === 1 ? "" : "es"} delivered.`);
         setPreview(null);
@@ -284,7 +306,7 @@ function AutomationCard({ id, initial, onSaved }: { id: Id; initial: Config; onS
 
           <p className="mb-1 text-sm font-medium text-ink">Messages</p>
           <p className="mb-3 text-xs text-ink-soft">
-            {spec.dayLabel ? "Each goes out once, on its day." : "Sent in turn — 1st message, then 2nd, … — so nobody sees the same text twice in a row."} Placeholders: {spec.vars}.
+            {spec.dayLabel ? "Each goes out once, on its day." : "Sent in turn — 1st message, then 2nd, … — so nobody sees the same text twice in a row."} Placeholders: {spec.vars}. Every message ends with “{TAGLINE}” on its own line.
           </p>
           <div className="space-y-3">
             {cfg.messages.map((m, i) => (

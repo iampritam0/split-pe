@@ -8,7 +8,12 @@ export const deleteUser = httpsCallable<{ uid: string }, { deleted: boolean }>(f
 export const userActivity = httpsCallable<void, { activity: Record<string, { signIn: number | null; refresh: number | null }> }>(functions, "adminUserActivity");
 export const forceLogout = httpsCallable<{ uid: string }, { done: boolean }>(functions, "adminForceLogout");
 export type NotifyAudience = { audience: "all" } | { audience: "uids"; uids: string[] };
-export const sendNotification = httpsCallable<{ title: string; body: string } & NotifyAudience, { recipients: number; pushed: number; pushFailed: number }>(
+/** Expo push receipts — whether accepted pushes actually reached Google / Apple. */
+export type Receipts = { delivered: number; failed: number; pending: number; errors: Record<string, number> };
+export const sendNotification = httpsCallable<
+  { title: string; body: string } & NotifyAudience,
+  { recipients: number; pushed: number; pushFailed: number; receipts?: Receipts; sendErrors?: Record<string, number> }
+>(
   functions,
   "adminSendNotification"
 );
@@ -50,6 +55,30 @@ export type Revealed = {
   blockedAt: number | null;
 };
 export const revealUser = httpsCallable<{ uid: string; reason?: string }, Revealed>(functions, "adminRevealUser");
+
+// What each Expo push error means, and what to do about it.
+const PUSH_ERRORS: Record<string, string> = {
+  InvalidCredentials: "Android push key (FCM V1) isn't set up for this app on Expo, so no Android phone gets pushes. Fix: in the app folder run `eas credentials` → Android → production → Google Service Account Key for FCM V1 → upload the key from Firebase console (Project settings → Service accounts).",
+  DeviceNotRegistered: "the app was uninstalled or reset on that phone — its push token has been removed.",
+  MismatchSenderId: "the phone's push token belongs to a different Firebase project (usually an old test build).",
+  MessageTooBig: "the message is too long.",
+  MessageRateExceeded: "too many pushes to the same phone too quickly — try again later.",
+};
+
+/** One line on what happened to the pushes, in plain words. */
+export const pushSummary = (pushed: number, receipts?: Receipts | null, sendErrors?: Record<string, number>) => {
+  if (!pushed && !Object.keys(sendErrors || {}).length) return "No push sent (no registered device or notifications off) — it's in their in-app Notifications.";
+  if (!receipts) return `${pushed} push${pushed === 1 ? "" : "es"} accepted by Expo.`;
+  const parts = [`${receipts.delivered} delivered to phone${receipts.delivered === 1 ? "" : "s"}`];
+  if (receipts.pending) parts.push(`${receipts.pending} still confirming`);
+  if (receipts.failed) parts.push(`${receipts.failed} failed`);
+  const errs = { ...(sendErrors || {}), ...receipts.errors };
+  const why = Object.entries(errs).map(([code, n]) => `${n} × ${code}: ${PUSH_ERRORS[code] || "see Expo push error docs."}`);
+  return `${parts.join(", ")}.${why.length ? ` ${why.join(" ")}` : ""}`;
+};
+
+/** Added on its own line under every notification the server sends (SplitPe repo: TAGLINE). */
+export const TAGLINE = "SplitPe hisaab bhi dosti bhi";
 
 /** Suggested tags for adminNotes — any other text works too. */
 export const TAG_PRESETS = ["VIP", "Complaint", "Beta tester", "Partner", "Watchlist", "Influencer"];

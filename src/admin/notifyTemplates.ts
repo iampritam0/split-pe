@@ -32,13 +32,13 @@ export type Template = { id: string; category: string; title: string; body: stri
 export const TEMPLATES: Template[] = [
   // Win-back
   { id: "miss-you", category: "Win back", audience: "inactive7d", title: "We miss you! 👋", body: "Your friends are still splitting bills on SplitPe. Open the app to see if anyone owes you money." },
-  { id: "pending-check", category: "Win back", audience: "inactive2d", title: "Kisi ka hisaab baaki toh nahi? 🤔", body: "2 din ho gaye! Open SplitPe and check your pending balances — settle up in seconds." },
+  { id: "pending-check", category: "Win back", audience: "inactive2d", title: "Any pending balances? 🤔", body: "It has been 2 days! Open SplitPe and check your pending balances — settle up in seconds." },
   { id: "come-back-30", category: "Win back", audience: "inactive30d", title: "It's been a while 💙", body: "SplitPe has new features waiting for you. Split your next trip, dinner or rent the easy way." },
 
   // Reminders
   { id: "add-expenses", category: "Reminder", audience: "active2d", title: "Add today's expenses ✍️", body: "Spent on food, cab or groceries with friends? Add it now so nobody forgets later." },
   { id: "settle-weekend", category: "Reminder", audience: "active7d", title: "Weekend settle-up time 💸", body: "Clear your dues before the weekend. Open SplitPe and settle up with one tap." },
-  { id: "month-end", category: "Reminder", audience: "all", title: "Month-end hisaab 📅", body: "Rent, bills, trips — settle all your shared expenses before the month ends." },
+  { id: "month-end", category: "Reminder", audience: "all", title: "Month-end settle-up 📅", body: "Rent, bills, trips — settle all your shared expenses before the month ends." },
 
   // Onboarding
   { id: "welcome", category: "Onboarding", audience: "new7d", title: "Welcome to SplitPe 🎉", body: "Create your first group, add friends and split bills without the awkward maths." },
@@ -51,6 +51,6 @@ export const TEMPLATES: Template[] = [
 
   // Festive
   { id: "diwali", category: "Festival", audience: "all", title: "Happy Diwali 🪔", body: "Team SplitPe wishes you and your family a bright and joyful Diwali. Celebrate together, split easily!" },
-  { id: "holi", category: "Festival", audience: "all", title: "Happy Holi 🎨", body: "Rang barse, hisaab nahi! Enjoy Holi with friends — SplitPe will handle the bills." },
+  { id: "holi", category: "Festival", audience: "all", title: "Happy Holi 🎨", body: "Let the colours fly, not the bills! Enjoy Holi with friends — SplitPe will handle the bills." },
   { id: "new-year", category: "Festival", audience: "all", title: "Happy New Year 🎆", body: "New year, zero pending dues! Start fresh by settling up with your friends on SplitPe." },
 ];

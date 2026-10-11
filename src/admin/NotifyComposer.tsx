@@ -3,7 +3,7 @@ import { httpsCallable } from "firebase/functions";
 import { Bell, CalendarClock, Loader2, Send } from "lucide-react";
 import logo from "../assets/logo-mark.png";
 import { functions } from "./firebase";
-import { sendNotification } from "./users";
+import { TAGLINE, pushSummary, sendNotification } from "./users";
 import type { NotifyAudience } from "./users";
 
 const scheduleNotification = httpsCallable<{ title: string; body: string; sendAt: number; audience: string; uids?: string[] }, { id: string }>(
@@ -85,8 +85,9 @@ export default function NotifyComposer({ target, label, onSent, compact = false,
     setNotice("");
     try {
       const { data } = await sendNotification({ title: title.trim(), body: body.trim(), ...target });
-      const summary = `Sent to ${data.recipients} user${data.recipients === 1 ? "" : "s"} — ${data.pushed} push${data.pushed === 1 ? "" : "es"} delivered${data.pushFailed ? `, ${data.pushFailed} failed (no longer installed or notifications off)` : ""}.`;
-      setNotice(summary);
+      const summary = `Sent to ${data.recipients} user${data.recipients === 1 ? "" : "s"} (in-app). Push: ${pushSummary(data.pushed, data.receipts, data.sendErrors)}`;
+      if (data.receipts?.failed || data.pushFailed) setError(summary);
+      else setNotice(summary);
       setTitle("");
       setBody("");
       onSent?.(summary);
@@ -156,6 +157,7 @@ export default function NotifyComposer({ target, label, onSent, compact = false,
             <p className="flex justify-between gap-2 text-xs text-slate-500"><span>SplitPe</span><span>now</span></p>
             <p className="truncate text-sm font-semibold text-slate-900">{title || "Notification title"}</p>
             <p className="line-clamp-3 text-sm text-slate-700">{body || "Your message shows here."}</p>
+            <p className="text-sm text-slate-500">{TAGLINE}</p>
           </div>
         </div>
       </div>

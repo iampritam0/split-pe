@@ -8,12 +8,12 @@ import NotifyComposer from "./NotifyComposer";
 import { AUDIENCES, TEMPLATES } from "./notifyTemplates";
 import type { AudienceKey, Template } from "./notifyTemplates";
 import useUsers from "./useUsers";
-import { sendNotification } from "./users";
-import type { NotifyAudience, UserRow } from "./users";
+import { TAGLINE, pushSummary, sendNotification } from "./users";
+import type { NotifyAudience, Receipts, UserRow } from "./users";
 
 const cancelScheduled = httpsCallable<{ id: string }, { cancelled: boolean }>(functions, "adminCancelScheduled");
 
-type Campaign = { id: string; title: string; body: string; source: string; recipients: number; pushed: number; byPhone?: string; sentAt?: Timestamp };
+type Campaign = { id: string; title: string; body: string; source: string; recipients: number; pushed: number; receipts?: Receipts; sendErrors?: Record<string, number>; byPhone?: string; sentAt?: Timestamp };
 const SOURCE_LABEL: Record<string, string> = {
   manual: "Sent from panel",
   scheduled: "Scheduled",
@@ -54,7 +54,7 @@ function TemplateCard({ template, segments, ready, onEdit }: {
     setResult(null);
     try {
       const { data } = await sendNotification({ title: template.title, body: template.body, ...target });
-      setResult({ ok: true, text: `Sent to ${plural(data.recipients)} · ${data.pushed} push${data.pushed === 1 ? "" : "es"} delivered` });
+      setResult({ ok: !data.receipts?.failed && !data.pushFailed, text: `Sent to ${plural(data.recipients)}. Push: ${pushSummary(data.pushed, data.receipts, data.sendErrors)}` });
     } catch (err) {
       setResult({ ok: false, text: (err as Error).message || "Could not send." });
     } finally {
@@ -66,7 +66,7 @@ function TemplateCard({ template, segments, ready, onEdit }: {
     <div className="flex flex-col rounded-2xl bg-white p-4 shadow-soft">
       <span className="mb-2 self-start rounded-full bg-splitpe-50 px-2 py-0.5 text-xs font-medium text-splitpe-700">{template.category}</span>
       <p className="font-semibold text-ink">{template.title}</p>
-      <p className="mb-3 flex-1 text-sm text-ink-soft">{template.body}</p>
+      <p className="mb-3 flex-1 text-sm text-ink-soft">{template.body}<span className="block text-slate-400">{TAGLINE}</span></p>
       <select
         value={audience}
         onChange={(e) => { setAudience(e.target.value as AudienceKey); setResult(null); }}
@@ -262,7 +262,7 @@ export default function NotificationsTab() {
         <div className="overflow-x-auto rounded-2xl bg-white shadow-soft">
           <table className="w-full min-w-[640px] text-left text-sm">
             <thead className="border-b border-slate-100 bg-slate-50 text-xs uppercase tracking-wide text-ink-soft">
-              <tr><th className="px-4 py-3">Notification</th><th className="px-3 py-3 text-right">Sent to</th><th className="px-3 py-3 text-right">Pushes</th><th className="px-3 py-3 text-right">Opened</th><th className="px-3 py-3">When</th></tr>
+              <tr><th className="px-4 py-3">Notification</th><th className="px-3 py-3 text-right">Sent to</th><th className="px-3 py-3 text-right">Pushes delivered</th><th className="px-3 py-3 text-right">Opened</th><th className="px-3 py-3">When</th></tr>
             </thead>
             <tbody>
               {history.map((c) => {
@@ -274,7 +274,15 @@ export default function NotificationsTab() {
                       <p className="truncate text-xs text-ink-soft">{SOURCE_LABEL[c.source] || c.source} · {c.body}</p>
                     </td>
                     <td className="px-3 py-3 text-right text-ink">{c.recipients.toLocaleString("en-IN")}</td>
-                    <td className="px-3 py-3 text-right text-ink">{c.pushed.toLocaleString("en-IN")}</td>
+                    <td className="px-3 py-3 text-right text-ink" title={pushSummary(c.pushed, c.receipts, c.sendErrors)}>
+                      {c.receipts ? (
+                        <>
+                          {c.receipts.delivered.toLocaleString("en-IN")} <span className="text-ink-soft">/ {c.pushed}</span>
+                          {c.receipts.failed > 0 && <span className="block text-xs text-red-600">{c.receipts.failed} failed · {Object.keys(c.receipts.errors).join(", ")}</span>}
+                          {c.receipts.pending > 0 && <span className="block text-xs text-ink-soft">{c.receipts.pending} confirming</span>}
+                        </>
+                      ) : <span className="text-ink-soft">{c.pushed} sent</span>}
+                    </td>
                     <td className="px-3 py-3 text-right text-ink">{o === undefined ? "…" : <>{o.toLocaleString("en-IN")} <span className="text-ink-soft">({c.recipients ? Math.round((o / c.recipients) * 100) : 0}%)</span></>}</td>
                     <td className="whitespace-nowrap px-3 py-3 text-xs text-ink-soft">{c.sentAt ? c.sentAt.toDate().toLocaleString("en-IN", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" }) : "just now"}</td>
                   </tr>
