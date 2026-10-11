@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import type { User } from "firebase/auth";
-import { Bell, History, Image, LayoutDashboard, Loader2, LogOut, Settings, Users } from "lucide-react";
+import { Bell, History, Image, LayoutDashboard, Loader2, LogOut, Settings, Users, Zap } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import logo from "../assets/logo-s.png";
 import { auth } from "./firebase";
@@ -12,12 +12,14 @@ import BannersTab from "./BannersTab";
 import UsersTab from "./UsersTab";
 import ActivityTab from "./ActivityTab";
 import NotificationsTab from "./NotificationsTab";
+import AutomationsTab from "./AutomationsTab";
 
-type TabKey = "overview" | "users" | "notifications" | "settings" | "banners" | "activity";
+type TabKey = "overview" | "users" | "notifications" | "automations" | "settings" | "banners" | "activity";
 const TABS: { key: TabKey; label: string; icon: LucideIcon }[] = [
   { key: "overview", label: "Overview", icon: LayoutDashboard },
   { key: "users", label: "Users", icon: Users },
   { key: "notifications", label: "Notifications", icon: Bell },
+  { key: "automations", label: "Automations", icon: Zap },
   { key: "settings", label: "App Settings", icon: Settings },
   { key: "banners", label: "Banners", icon: Image },
   { key: "activity", label: "Activity Log", icon: History },
@@ -136,6 +138,7 @@ export default function AdminApp() {
           {tab === "users" && <UsersTab />}
           {tab === "activity" && <ActivityTab />}
           {tab === "notifications" && <NotificationsTab />}
+          {tab === "automations" && <AutomationsTab />}
         </div>
       </main>
     </div>
