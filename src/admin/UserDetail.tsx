@@ -201,6 +201,7 @@ export default function UserDetail({ user, onClose, onChange }: {
           <Row label="Joined">{fmtDate(user.createdAt)}</Row>
           <Row label="Last active in the app">{user.lastSeen ? <>{ago(user.lastSeen)}<br /><span className="text-xs font-normal text-ink-soft">{fmtDate(user.lastSeen)}</span></> : "Never"}</Row>
           <Row label="Push notifications">{user.hasPush ? "Device registered" : "No device"}</Row>
+          <Row label="App version">{user.appVersion || "Before 1.1.0"}</Row>
           {details && (
             <>
               <Row label="Last OTP login">{fmtDate(details.lastSignIn)}</Row>

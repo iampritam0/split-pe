@@ -28,6 +28,8 @@ export type UserRow = {
   blocked: boolean;
   isAdmin: boolean;
   hasPush: boolean;
+  /** Reported by app 1.1.0+ on open; empty for older builds. */
+  appVersion: string;
   /** adminNotes/{uid} — visible to the admin team only. */
   tags: string[];
   note: string;

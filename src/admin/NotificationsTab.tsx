@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { collection, limit, onSnapshot, orderBy, query, where } from "firebase/firestore";
+import { collection, getCountFromServer, limit, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import type { Timestamp } from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";
 import { CalendarClock, Loader2, Megaphone, Pencil, Send, X } from "lucide-react";
@@ -13,7 +13,16 @@ import type { NotifyAudience, UserRow } from "./users";
 
 const cancelScheduled = httpsCallable<{ id: string }, { cancelled: boolean }>(functions, "adminCancelScheduled");
 
-type Sent = { id: string; action: string; detail: string; byPhone: string; at?: Timestamp };
+type Campaign = { id: string; title: string; body: string; source: string; recipients: number; pushed: number; byPhone?: string; sentAt?: Timestamp };
+const SOURCE_LABEL: Record<string, string> = {
+  manual: "Sent from panel",
+  scheduled: "Scheduled",
+  duesReminder: "Automation · Dues reminder",
+  welcomeSeries: "Automation · Welcome series",
+  lowExpenseReminder: "Automation · Expense reminder",
+  winBack: "Automation · Win-back",
+  weeklySummary: "Automation · Weekly summary",
+};
 type Segment = { list: UserRow[]; withPush: number };
 type Scheduled = { id: string; title: string; body: string; audience: string; uids?: string[] | null; sendAt?: Timestamp; status: string; createdByPhone?: string };
 
@@ -91,7 +100,8 @@ export default function NotificationsTab() {
   const [audience, setAudience] = useState<AudienceKey>("all");
   const [category, setCategory] = useState("All");
   const [draft, setDraft] = useState<{ key: number; title: string; body: string }>({ key: 0, title: "", body: "" });
-  const [history, setHistory] = useState<Sent[] | null>(null);
+  const [history, setHistory] = useState<Campaign[] | null>(null);
+  const [opens, setOpens] = useState<Record<string, number>>({});
   const composerRef = useRef<HTMLDivElement>(null);
   const [scheduled, setScheduled] = useState<Scheduled[] | null>(null);
   const [cancelling, setCancelling] = useState("");
@@ -121,17 +131,20 @@ export default function NotificationsTab() {
   useEffect(
     () =>
       onSnapshot(
-        query(collection(db, "adminLog"), orderBy("at", "desc"), limit(200)),
-        (snap) =>
-          setHistory(
-            snap.docs
-              .filter((d) => d.data().kind === "notification")
-              .map((d) => ({ id: d.id, ...(d.data() as Omit<Sent, "id">) }))
-          ),
+        query(collection(db, "campaigns"), orderBy("sentAt", "desc"), limit(30)),
+        (snap) => setHistory(snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Campaign, "id">) }))),
         () => setHistory([])
       ),
     []
   );
+
+  // Opens per campaign — counted server-side from notificationOpens (one per person).
+  useEffect(() => {
+    if (!history?.length) return;
+    Promise.all(history.map(async (c) => [c.id, (await getCountFromServer(query(collection(db, "notificationOpens"), where("cid", "==", c.id)))).data().count] as const))
+      .then((pairs) => setOpens(Object.fromEntries(pairs)))
+      .catch(() => {});
+  }, [history]);
 
   const segments = useMemo(() => {
     const out = {} as Record<AudienceKey, Segment>;
@@ -239,27 +252,37 @@ export default function NotificationsTab() {
         </ol>
       )}
 
-      <h3 className="mb-3 mt-10 font-heading text-lg font-bold text-ink">Sent</h3>
+      <h3 className="mb-1 mt-10 font-heading text-lg font-bold text-ink">Sent</h3>
+      <p className="mb-3 text-sm text-ink-soft">Opened = tapped the push or the in-app notification (counted on app 1.1.0 and later). Older sends are in the Activity Log.</p>
       {history === null ? (
         <p className="text-ink-soft">Loading…</p>
       ) : history.length === 0 ? (
         <div className="rounded-2xl bg-white p-8 text-center text-ink-soft shadow-soft">Nothing sent yet.</div>
       ) : (
-        <ol className="rounded-2xl bg-white p-2 shadow-soft">
-          {history.map((h) => (
-            <li key={h.id} className="flex items-start gap-3 rounded-xl px-3 py-3 hover:bg-slate-50">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600"><Megaphone size={17} /></div>
-              <div className="min-w-0 flex-1">
-                <p className="font-medium text-ink">{h.action}</p>
-                {h.detail && <p className="text-sm text-ink-soft">{h.detail}</p>}
-              </div>
-              <div className="shrink-0 text-right text-xs text-slate-400">
-                <p>{h.at ? h.at.toDate().toLocaleString("en-IN", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" }) : "just now"}</p>
-                <p>{h.byPhone}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
+        <div className="overflow-x-auto rounded-2xl bg-white shadow-soft">
+          <table className="w-full min-w-[640px] text-left text-sm">
+            <thead className="border-b border-slate-100 bg-slate-50 text-xs uppercase tracking-wide text-ink-soft">
+              <tr><th className="px-4 py-3">Notification</th><th className="px-3 py-3 text-right">Sent to</th><th className="px-3 py-3 text-right">Pushes</th><th className="px-3 py-3 text-right">Opened</th><th className="px-3 py-3">When</th></tr>
+            </thead>
+            <tbody>
+              {history.map((c) => {
+                const o = opens[c.id];
+                return (
+                  <tr key={c.id} className="border-b border-slate-100 last:border-0">
+                    <td className="px-4 py-3">
+                      <p className="flex items-center gap-2 font-medium text-ink"><Megaphone size={14} className="shrink-0 text-amber-600" /> {c.title}</p>
+                      <p className="truncate text-xs text-ink-soft">{SOURCE_LABEL[c.source] || c.source} · {c.body}</p>
+                    </td>
+                    <td className="px-3 py-3 text-right text-ink">{c.recipients.toLocaleString("en-IN")}</td>
+                    <td className="px-3 py-3 text-right text-ink">{c.pushed.toLocaleString("en-IN")}</td>
+                    <td className="px-3 py-3 text-right text-ink">{o === undefined ? "…" : <>{o.toLocaleString("en-IN")} <span className="text-ink-soft">({c.recipients ? Math.round((o / c.recipients) * 100) : 0}%)</span></>}</td>
+                    <td className="whitespace-nowrap px-3 py-3 text-xs text-ink-soft">{c.sentAt ? c.sentAt.toDate().toLocaleString("en-IN", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" }) : "just now"}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

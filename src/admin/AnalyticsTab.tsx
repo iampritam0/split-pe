@@ -19,6 +19,7 @@ type Analytics = {
   kinds: { group: number; friend: number; personal: number };
   heatmap: number[][];
   buckets: { label: string; count: number }[];
+  versions?: { version: string; count: number }[];
   groups: { active: number; deleted: number; avgMembers: number; usedLast30: number };
 };
 const fetchAnalytics = httpsCallable<{ refresh?: boolean }, Analytics>(functions, "adminAnalytics");
@@ -190,6 +191,14 @@ export default function AnalyticsTab() {
           })()}
         </Card>
 
+        <Card title="App versions" sub="What people active in the last 30 days are running — use it to time a force update">
+          {data.versions?.length ? (
+            <HBars unit="users" rows={data.versions.map((v) => ({ label: v.version, value: v.count, note: `${pct(v.count, active.mau)}%` }))} />
+          ) : <p className="text-sm text-ink-soft">No data yet — refresh analytics.</p>}
+        </Card>
+      </div>
+
+      <div className="mb-6 grid gap-4 lg:grid-cols-2">
         <Card title="How much people use it" sub="Users by number of expenses they've added">
           <HBars unit="users" rows={data.buckets.map((b) => ({ label: `${b.label} expenses`, value: b.count, note: `${pct(b.count, totals.users)}%` }))} />
         </Card>

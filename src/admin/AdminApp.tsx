@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import type { User } from "firebase/auth";
-import { BarChart3, Bell, History, Image, Inbox, LayoutDashboard, Loader2, LogOut, Settings, ShieldCheck, Users, Zap } from "lucide-react";
+import { BarChart3, Bell, History, Image, Inbox, LayoutDashboard, LifeBuoy, Loader2, LogOut, Settings, ShieldCheck, Users, Zap } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import logo from "../assets/logo-s.png";
 import { auth } from "./firebase";
@@ -16,15 +16,19 @@ import AutomationsTab from "./AutomationsTab";
 import AnalyticsTab from "./AnalyticsTab";
 import RequestsTab from "./RequestsTab";
 import TeamTab from "./TeamTab";
+import SupportTab from "./SupportTab";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
+import { db } from "./firebase";
 import { ROLE_INFO, RoleContext, roleFromClaims } from "./role";
 import type { Role } from "./role";
 
-type TabKey = "overview" | "analytics" | "users" | "requests" | "notifications" | "automations" | "settings" | "banners" | "team" | "activity";
+type TabKey = "overview" | "analytics" | "users" | "support" | "requests" | "notifications" | "automations" | "settings" | "banners" | "team" | "activity";
 // `superOnly` tabs change the live app (settings, sends) — hidden for support and viewer.
 const TABS: { key: TabKey; label: string; icon: LucideIcon; superOnly?: boolean }[] = [
   { key: "overview", label: "Overview", icon: LayoutDashboard },
   { key: "analytics", label: "Analytics", icon: BarChart3 },
   { key: "users", label: "Users", icon: Users },
+  { key: "support", label: "Support", icon: LifeBuoy },
   { key: "requests", label: "Deletion requests", icon: Inbox },
   { key: "notifications", label: "Notifications", icon: Bell, superOnly: true },
   { key: "automations", label: "Automations", icon: Zap, superOnly: true },
@@ -47,6 +51,13 @@ export default function AdminApp() {
   const [notice, setNotice] = useState("");
   const [tab, setTab] = useState<TabKey>("overview");
   const [role, setRole] = useState<Role>("viewer");
+  const [unreadSupport, setUnreadSupport] = useState(0);
+
+  // Badge on the Support tab: conversations waiting for the team.
+  useEffect(() => {
+    if (state !== "admin") return undefined;
+    return onSnapshot(query(collection(db, "supportTickets"), where("unreadForSupport", "==", true)), (snap) => setUnreadSupport(snap.size), () => {});
+  }, [state]);
 
   // Keep the admin area out of search results.
   useEffect(() => {
@@ -114,7 +125,8 @@ export default function AdminApp() {
               onClick={() => setTab(key)}
               className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left font-medium ${tab === key ? "bg-splitpe-50 text-splitpe-700" : "text-ink-soft hover:bg-slate-50"}`}
             >
-              <Icon size={18} /> {label}
+              <Icon size={18} /> <span className="flex-1">{label}</span>
+              {key === "support" && unreadSupport > 0 && <span className="rounded-full bg-splitpe-600 px-2 py-0.5 text-xs font-semibold text-white">{unreadSupport}</span>}
             </button>
           ))}
         </nav>
@@ -139,7 +151,7 @@ export default function AdminApp() {
               onClick={() => setTab(key)}
               className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-medium ${tab === key ? "bg-splitpe-600 text-white" : "text-ink-soft"}`}
             >
-              {label}
+              {label}{key === "support" && unreadSupport > 0 ? ` (${unreadSupport})` : ""}
             </button>
           ))}
         </nav>
@@ -150,6 +162,7 @@ export default function AdminApp() {
           {tab === "overview" && <OverviewTab />}
           {tab === "analytics" && <AnalyticsTab />}
           {tab === "users" && <UsersTab />}
+          {tab === "support" && <SupportTab />}
           {tab === "requests" && <RequestsTab />}
           {tab === "team" && <TeamTab />}
           {tab === "activity" && <ActivityTab />}

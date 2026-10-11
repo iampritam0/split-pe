@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { Bell, Construction, Gauge, Loader2, Megaphone, Smartphone } from "lucide-react";
+import { Bell, Construction, Gauge, LifeBuoy, Loader2, Megaphone, Plus, Smartphone, ToggleRight, Trash2 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { db } from "./firebase";
 import { logAdminAction } from "./adminLog";
@@ -79,6 +79,10 @@ export default function SettingsTab() {
 
   const save = async () => {
     if (settings.maintenance.enabled && !window.confirm("Maintenance mode is ON — every user except admins will be locked out of the app the next time they open it. Save anyway?")) return;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(settings.support.email.trim())) {
+      setStatus({ ok: false, text: "Support email doesn't look right" });
+      return;
+    }
     if (version.minVersion && !/^\d+\.\d+\.\d+$/.test(version.minVersion.trim())) {
       setStatus({ ok: false, text: "Minimum version must look like 1.0.0" });
       return;
@@ -86,7 +90,9 @@ export default function SettingsTab() {
     setSaving(true);
     setStatus(null);
     try {
-      await setDoc(doc(db, "appConfig", "settings"), settings);
+      // Half-written FAQs are dropped rather than shown blank in the app.
+      const faqs = settings.support.faqs.filter((f) => f.q.trim() && f.a.trim()).map((f) => ({ q: f.q.trim(), a: f.a.trim() }));
+      await setDoc(doc(db, "appConfig", "settings"), { ...settings, support: { ...settings.support, email: settings.support.email.trim(), faqs: faqs.length ? faqs : DEFAULT_SETTINGS.support.faqs } });
       await setDoc(doc(db, "appConfig", "version"), {
         minVersion: version.minVersion.trim(),
         message: version.message.trim(),
@@ -106,6 +112,8 @@ export default function SettingsTab() {
           `${settings.limits.dailyFreeExpenses} free expenses/day`,
           `${settings.limits.personalGroupsPerUnlock} groups/ad`,
           `Reminder ${settings.dailyReminder.enabled ? `${pad(settings.dailyReminder.hour)}:${pad(settings.dailyReminder.minute)}` : "off"}`,
+          `Off: ${Object.entries(settings.features).filter(([, on]) => !on).map(([k]) => k).join(", ") || "nothing"}`,
+          `${settings.support.faqs.length} FAQs`,
           `Min version ${version.minVersion.trim() || "off"}`,
         ].join(" · ")
       );
@@ -159,6 +167,62 @@ export default function SettingsTab() {
         <Field label="Message" wide>
           <input className={inputClass} maxLength={150} value={settings.dailyReminder.body} onChange={(e) => set("dailyReminder", { body: e.target.value })} />
         </Field>
+      </Section>
+
+      <Section icon={ToggleRight} title="Features" hint="Turn parts of the app off without a new build — off hides the button; nothing saved changes. Works on app 1.1.0 and later.">
+        {([
+          ["upiPay", "Pay via UPI", "UPI app hand-off when settling up"],
+          ["foreignCurrency", "Other currencies", "Currency picker when adding an expense"],
+          ["contactsImport", "Import from Contacts", "On the Add Friend screen"],
+          ["insights", "Insights (charts)", "Profile → Insights and the group chart icon"],
+        ] as const).map(([key, label, hint]) => (
+          <label key={key} className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-slate-200 px-4 py-3">
+            <span>
+              <span className="block font-medium text-ink">{label}</span>
+              <span className="block text-xs text-ink-soft">{hint}</span>
+            </span>
+            <span className={`relative h-6 w-11 shrink-0 rounded-full transition ${settings.features[key] ? "bg-splitpe-600" : "bg-slate-300"}`}>
+              <input type="checkbox" className="sr-only" checked={settings.features[key]} onChange={(e) => set("features", { [key]: e.target.checked })} />
+              <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition ${settings.features[key] ? "left-5" : "left-0.5"}`} />
+            </span>
+          </label>
+        ))}
+      </Section>
+
+      <Section icon={LifeBuoy} title="Help & Support" hint="What the app's Help & Support screen shows. Works on app 1.1.0 and later.">
+        <Field label="Support email">
+          <input className={inputClass} type="email" value={settings.support.email} onChange={(e) => set("support", { email: e.target.value })} />
+        </Field>
+        <label className="flex cursor-pointer items-center justify-between rounded-xl border border-slate-200 px-4 py-3">
+          <span className="font-medium text-ink">“Message support” in the app</span>
+          <span className={`relative h-6 w-11 rounded-full transition ${settings.support.tickets ? "bg-splitpe-600" : "bg-slate-300"}`}>
+            <input type="checkbox" className="sr-only" checked={settings.support.tickets} onChange={(e) => set("support", { tickets: e.target.checked })} />
+            <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition ${settings.support.tickets ? "left-5" : "left-0.5"}`} />
+          </span>
+        </label>
+        <div className="sm:col-span-2">
+          <p className="mb-2 text-sm font-medium text-ink">FAQs</p>
+          <div className="space-y-2">
+            {settings.support.faqs.map((f, i) => (
+              <div key={i} className="flex gap-2 rounded-xl border border-slate-200 p-3">
+                <div className="min-w-0 flex-1 space-y-2">
+                  <input className={inputClass} placeholder="Question" maxLength={120} value={f.q}
+                    onChange={(e) => set("support", { faqs: settings.support.faqs.map((x, j) => (j === i ? { ...x, q: e.target.value } : x)) })} />
+                  <textarea className={inputClass} rows={2} placeholder="Answer" maxLength={600} value={f.a}
+                    onChange={(e) => set("support", { faqs: settings.support.faqs.map((x, j) => (j === i ? { ...x, a: e.target.value } : x)) })} />
+                </div>
+                <button type="button" onClick={() => set("support", { faqs: settings.support.faqs.filter((_, j) => j !== i) })} disabled={settings.support.faqs.length <= 1}
+                  className="self-start rounded-lg p-2 text-ink-soft hover:bg-red-50 hover:text-red-600 disabled:opacity-30" aria-label="Remove FAQ"><Trash2 size={16} /></button>
+              </div>
+            ))}
+            {settings.support.faqs.length < 20 && (
+              <button type="button" onClick={() => set("support", { faqs: [...settings.support.faqs, { q: "", a: "" }] })}
+                className="flex items-center gap-2 rounded-xl border border-dashed border-slate-300 px-4 py-2.5 text-sm font-medium text-ink-soft hover:border-splitpe-600 hover:text-splitpe-700">
+                <Plus size={16} /> Add FAQ
+              </button>
+            )}
+          </div>
+        </div>
       </Section>
 
       <Section icon={Smartphone} title="Force update" hint="Installs below this version are blocked with an Update Required screen. Leave empty to turn off.">
