@@ -6,7 +6,7 @@ export type RemoteSettings = {
   ads: { enabled: boolean; listEvery: number };
   limits: { dailyFreeExpenses: number; personalGroupsPerUnlock: number };
   dailyReminder: { enabled: boolean; hour: number; minute: number; title: string; body: string };
-  features: { upiPay: boolean; foreignCurrency: boolean; contactsImport: boolean; insights: boolean };
+  features: { upiPay: boolean; foreignCurrency: boolean; contactsImport: boolean; insights: boolean; appTour: boolean };
   support: { email: string; tickets: boolean; faqs: { q: string; a: string }[] };
 };
 
@@ -24,7 +24,7 @@ export const DEFAULT_SETTINGS: RemoteSettings = {
     title: "Add today's expenses 📝",
     body: "Took a ride, had chai or paid a bill? Log it in 10 seconds.",
   },
-  features: { upiPay: true, foreignCurrency: true, contactsImport: true, insights: true },
+  features: { upiPay: true, foreignCurrency: true, contactsImport: true, insights: true, appTour: true },
   support: {
     email: "support@splitpe.xyz",
     tickets: true,

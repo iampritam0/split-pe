@@ -175,6 +175,7 @@ export default function SettingsTab() {
           ["foreignCurrency", "Other currencies", "Currency picker when adding an expense"],
           ["contactsImport", "Import from Contacts", "On the Add Friend screen"],
           ["insights", "Insights (charts)", "Profile → Insights and the group chart icon"],
+          ["appTour", "App tour tips", "First-visit spotlight tips on each screen"],
         ] as const).map(([key, label, hint]) => (
           <label key={key} className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-slate-200 px-4 py-3">
             <span>
