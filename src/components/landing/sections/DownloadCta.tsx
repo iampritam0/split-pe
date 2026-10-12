@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { PlayBadge } from "../Brand";
 import Icon from "../Icon";
 
@@ -12,7 +13,13 @@ export default function DownloadCta() {
             <p>Add your first group in under a minute. Free on Android, no bank details needed.</p>
           </div>
           <div className="cta-band-side">
-            <PlayBadge magnetic />
+            <div className="cta-band-actions">
+              <PlayBadge magnetic />
+              <Link className="prereg-btn on-band" to="/register">
+                <Icon name="userplus" className="" />
+                Pre-register
+              </Link>
+            </div>
             <div className="cta-trust">
               <span><Icon name="lock" />No bank data</span>
               <span><Icon name="swap" />UPI or cash, your call</span>

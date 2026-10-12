@@ -26,7 +26,10 @@ const columns: { title: string; links: FooterLink[] }[] = [
   },
   {
     title: "Contact",
-    links: [{ label: SUPPORT_EMAIL, href: `mailto:${SUPPORT_EMAIL}` }],
+    links: [
+      { label: "Help & Support", to: "/support" },
+      { label: SUPPORT_EMAIL, href: `mailto:${SUPPORT_EMAIL}` },
+    ],
   },
 ];
 

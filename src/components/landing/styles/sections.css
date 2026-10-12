@@ -133,6 +133,7 @@
 .cta-band-side .play-badge { padding: 0.8rem 1.7rem 0.8rem 1.3rem; }
 .cta-band-side .play-badge svg { width: 36px; height: 36px; }
 .cta-band-side .play-badge b { font-size: 1.5rem; }
+.cta-band-actions { display: flex; gap: 0.8rem; flex-wrap: wrap; align-items: center; justify-content: flex-end; }
 .cta-trust { display: flex; gap: 0.6rem; flex-wrap: wrap; justify-content: flex-end; }
 .cta-trust span {
     display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.8rem; border-radius: 100px;
@@ -151,7 +152,7 @@
     .steps { grid-template-columns: 1fr; }
     .cta-band { grid-template-columns: 1fr; padding: 2.6rem 1.6rem; text-align: center; }
     .cta-band p { margin-left: auto; margin-right: auto; }
-    .cta-band-side, .cta-band-side .cta-note, .cta-trust { align-items: center; justify-content: center; }
+    .cta-band-side, .cta-band-side .cta-note, .cta-band-actions, .cta-trust { align-items: center; justify-content: center; }
 }
 @media (max-width: 600px) {
     .up-grid, .feat-grid { grid-template-columns: 1fr; }

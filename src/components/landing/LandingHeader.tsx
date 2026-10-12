@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
-import { SUPPORT_EMAIL } from "../../constants";
+import { Link } from "react-router-dom";
 import { Logo, PlayBadge } from "./Brand";
 import Icon from "./Icon";
 import { NAV_LINKS } from "./data";
@@ -75,9 +75,9 @@ export default function LandingHeader() {
               {"badge" in l && <span className="nav-new">{l.badge}</span>}
             </a>
           ))}
-          <a href={`mailto:${SUPPORT_EMAIL}`} className="nav-item">
+          <Link to="/support" className="nav-item">
             Support
-          </a>
+          </Link>
         </nav>
         <PlayBadge className="header-play" magnetic />
         <button
@@ -108,10 +108,10 @@ export default function LandingHeader() {
                   <Icon name="chev" />
                 </a>
               ))}
-              <a href={`mailto:${SUPPORT_EMAIL}`} className="mm-link" onClick={close}>
+              <Link to="/support" className="mm-link" onClick={close}>
                 Support
                 <Icon name="chev" />
-              </a>
+              </Link>
             </nav>
             <PlayBadge className="mm-play" />
           </div>

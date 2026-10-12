@@ -39,7 +39,7 @@ export default function PrivacyPolicy() {
         highlight="Policy."
         meta={[
           { label: "App", value: "SplitPe (com.raotechnologies.splitpe)" },
-          { label: "Last updated", value: "19 September 2026" },
+          { label: "Last updated", value: "12 October 2026" },
           { label: "Contact", value: <a href="mailto:support@splitpe.xyz" className="font-semibold text-splitpe-600 hover:text-splitpe-700">support@splitpe.xyz</a> },
         ]}
       />
@@ -186,6 +186,21 @@ export default function PrivacyPolicy() {
                     <td className="px-4 py-3 text-slate-600">
                       Deliver notifications about new expenses and payments;
                       show ads that keep the app free
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-3 font-semibold text-slate-900">
+                      Website pre-registration (optional)
+                    </td>
+                    <td className="px-4 py-3 text-slate-600">
+                      Your name and mobile number, if you pre-register on
+                      splitpe.xyz/register. We send a one-time OTP by SMS to
+                      confirm the number is yours
+                    </td>
+                    <td className="px-4 py-3 text-slate-600">
+                      To contact you about SplitPe. This doesn't create an
+                      app account. To have it removed, write to
+                      support@splitpe.xyz
                     </td>
                   </tr>
                 </tbody>
