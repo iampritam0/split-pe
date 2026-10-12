@@ -170,12 +170,4 @@ a {
   .container-page {
     @apply mx-auto w-full max-w-8xl px-5 sm:px-6 lg:px-8 xl:px-10;
   }
-
-  .section-padding {
-    @apply py-16 sm:py-20 lg:py-24 xl:py-28;
-  }
-
-  .section-label {
-    @apply mb-3 inline-flex items-center rounded-full bg-splitpe-50 px-3 py-1 text-sm font-semibold text-splitpe-700;
-  }
 }

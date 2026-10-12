@@ -24,7 +24,7 @@ export default function PageHero({ icon: Icon, tag, title, highlight, meta }: Pa
         Back to SplitPe
       </Link>
 
-      <div className="mt-8 flex flex-col items-start gap-5">
+      <div className="mt-7 flex flex-col items-start gap-4">
         <div className="rise flex flex-wrap items-center gap-3" style={{ animationDelay: "0.08s" }}>
           <span className="flex h-14 w-14 items-center justify-center rounded-[18px] bg-gradient-to-br from-splitpe-600 to-mint-500 text-white shadow-[0_14px_30px_-8px_rgba(37,99,235,0.55)]">
             <Icon className="h-7 w-7" />
@@ -36,7 +36,7 @@ export default function PageHero({ icon: Icon, tag, title, highlight, meta }: Pa
         </div>
 
         <h1
-          className="rise font-heading text-[3.1rem] font-black leading-[0.92] tracking-[-0.045em] text-[#0b1530] sm:text-7xl lg:text-8xl"
+          className="rise font-heading text-[2.6rem] font-black leading-[0.95] tracking-[-0.04em] text-[#0b1530] sm:text-6xl lg:text-[4.5rem]"
           style={{ animationDelay: "0.16s" }}
         >
           {title} <span className="grad-text">{highlight}</span>
