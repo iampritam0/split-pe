@@ -12,7 +12,7 @@ import type { UserRow } from "./users";
 const masked = (phone: string) => `••••••${phone.slice(-4)}`;
 
 type Status = "open" | "done" | "rejected";
-type Request = { id: string; phone: string; reason?: string; uid?: string | null; status: Status; createdAt?: Timestamp; handledAt?: Timestamp; note?: string };
+type Request = { id: string; phone: string; reason?: string; uid?: string | null; verified?: boolean; status: Status; createdAt?: Timestamp; handledAt?: Timestamp; note?: string };
 
 const STATUS: Record<Status, { label: string; cls: string }> = {
   open: { label: "Open", cls: "bg-amber-100 text-amber-800" },
@@ -23,8 +23,9 @@ const STATUS: Record<Status, { label: string; cls: string }> = {
 /**
  * Account deletion requests from the website's Delete Account form (for
  * people who can't open the app) — SplitPe repo: requestAccountDeletion.
- * Anyone can type any number there, so the team confirms it's really the
- * owner (call / SMS the number) before deleting.
+ * The requester proves the number with an SMS OTP before the request is
+ * recorded (`verified`). Older requests without it weren't verified — confirm
+ * those with the owner (call / SMS the number) before deleting.
  */
 export default function RequestsTab() {
   const [requests, setRequests] = useState<Request[] | null>(null);
@@ -124,7 +125,10 @@ export default function RequestsTab() {
                       <button onClick={() => showNumber(r)} className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2 py-0.5 text-xs font-medium text-ink-soft hover:bg-slate-50"><Eye size={12} /> Show number</button>
                     )}
                   </p>
-                  <p className="text-xs text-ink-soft">Requested {fmtDate(r.createdAt?.toMillis())}</p>
+                  <p className="text-xs text-ink-soft">
+                    Requested {fmtDate(r.createdAt?.toMillis())} ·{" "}
+                    {r.verified ? <span className="font-semibold text-emerald-700">OTP verified</span> : <span className="font-semibold text-amber-700">Not verified — confirm with the owner</span>}
+                  </p>
                 </div>
                 <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${STATUS[r.status].cls}`}>{STATUS[r.status].label}</span>
               </div>

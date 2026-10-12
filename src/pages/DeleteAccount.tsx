@@ -1,62 +1,135 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import PageHero from "../components/PageHero";
-import { Trash2, Mail, AlertTriangle, Zap, Loader2, CheckCircle2 } from "lucide-react";
+import { Trash2, Mail, AlertTriangle, Zap, Loader2, CheckCircle2, ShieldCheck } from "lucide-react";
 
-// SplitPe repo: functions/index.js requestAccountDeletion — called over the
-// plain callable HTTP protocol so the public site doesn't ship the Firebase SDK.
-const REQUEST_URL = "https://asia-south1-splitpe-b4ca6.cloudfunctions.net/requestAccountDeletion";
+// SplitPe repo: functions/index.js sendOtp / requestAccountDeletion — called
+// over the plain callable HTTP protocol so the public site doesn't ship the
+// Firebase SDK.
+const FUNCTIONS_URL = "https://asia-south1-splitpe-b4ca6.cloudfunctions.net";
 
-/** For people who can't open the app: records a request the SplitPe team verifies and handles. */
+async function callFunction<T>(name: string, data: Record<string, string>): Promise<T> {
+  const res = await fetch(`${FUNCTIONS_URL}/${name}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ data }),
+  });
+  const json = await res.json().catch(() => null);
+  if (!res.ok || json?.error) throw new Error(json?.error?.message || "Something went wrong. Please try again.");
+  return json.result as T;
+}
+
+/**
+ * For people who can't open the app: the number is proven with an SMS OTP,
+ * then a request is recorded for the SplitPe team to handle.
+ */
 function DeletionRequestForm() {
   const [phone, setPhone] = useState("");
   const [reason, setReason] = useState("");
-  const [state, setState] = useState<"idle" | "sending" | "sent">("idle");
+  const [code, setCode] = useState("");
+  const [step, setStep] = useState<"details" | "otp" | "sent">("details");
+  const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [resendIn, setResendIn] = useState(0);
   const digits = phone.replace(/\D/g, "").slice(-10);
 
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setState("sending");
+  useEffect(() => {
+    if (resendIn <= 0) return;
+    const t = setTimeout(() => setResendIn(resendIn - 1), 1000);
+    return () => clearTimeout(t);
+  }, [resendIn]);
+
+  const sendOtp = async () => {
+    setBusy(true);
     setError("");
     try {
-      const res = await fetch(REQUEST_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data: { phone: digits, reason } }),
-      });
-      const json = await res.json().catch(() => null);
-      if (!res.ok || json?.error) throw new Error(json?.error?.message || "Something went wrong. Please try again.");
-      setState("sent");
+      const { resendAfter } = await callFunction<{ resendAfter: number }>("sendOtp", { phone: digits });
+      setStep("otp");
+      setCode("");
+      setResendIn(resendAfter || 60);
     } catch (err) {
       setError((err as Error).message);
-      setState("idle");
+    } finally {
+      setBusy(false);
     }
   };
 
-  if (state === "sent") {
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    setError("");
+    try {
+      await callFunction("requestAccountDeletion", { phone: digits, code: code.trim(), reason });
+      setStep("sent");
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (step === "sent") {
     return (
       <div className="mt-6 flex items-start gap-3 rounded-[22px] border border-mint-200 bg-mint-50/90 p-5">
         <CheckCircle2 className="h-5 w-5 shrink-0 text-mint-700" />
         <p className="text-sm leading-6 text-mint-800 sm:text-base">
-          <strong className="font-semibold">Request received.</strong> We'll confirm it's really you by contacting +91 {digits}, then delete the account — usually within 3 working days.
+          <strong className="font-semibold">Request received.</strong> We've verified +91 {digits} and will delete the account — usually within 3 working days.
         </p>
       </div>
     );
   }
 
+  if (step === "otp") {
+    return (
+      <form onSubmit={submit} className="mt-6 rounded-[22px] border border-slate-200 bg-white/80 p-5 sm:p-6">
+        <h3 className="text-base font-bold text-slate-950">Verify your number</h3>
+        <p className="mt-1 text-sm leading-6 text-slate-600">
+          Enter the 6-digit OTP sent to <strong className="font-semibold text-slate-900">+91 {digits}</strong>.{" "}
+          <button type="button" onClick={() => { setStep("details"); setError(""); }} className="font-semibold text-splitpe-600 hover:text-splitpe-700">
+            Change
+          </button>
+        </p>
+        <input
+          className="mt-4 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-center font-mono text-2xl tracking-[0.5em] outline-none focus:border-splitpe-600"
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          maxLength={6}
+          placeholder="••••••"
+          value={code}
+          onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+          autoFocus
+          required
+        />
+        {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+        <button type="submit" disabled={code.length !== 6 || busy} className="mt-3 inline-flex items-center gap-2 rounded-xl bg-red-600 px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50">
+          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />} Verify &amp; send request
+        </button>
+        <p className="mt-3 text-sm text-slate-500">
+          Didn't get it?{" "}
+          {resendIn > 0 ? (
+            <span>Resend in {resendIn}s</span>
+          ) : (
+            <button type="button" onClick={sendOtp} disabled={busy} className="font-semibold text-splitpe-600 hover:text-splitpe-700 disabled:opacity-50">
+              Resend OTP
+            </button>
+          )}
+        </p>
+      </form>
+    );
+  }
+
   return (
-    <form onSubmit={submit} className="mt-6 rounded-[22px] border border-slate-200 bg-white/80 p-5 sm:p-6">
+    <form onSubmit={(e) => { e.preventDefault(); sendOtp(); }} className="mt-6 rounded-[22px] border border-slate-200 bg-white/80 p-5 sm:p-6">
       <h3 className="text-base font-bold text-slate-950">Request deletion without the app</h3>
-      <p className="mt-1 text-sm leading-6 text-slate-600">Enter the mobile number registered on SplitPe. We'll verify it's you before deleting anything.</p>
+      <p className="mt-1 text-sm leading-6 text-slate-600">Enter the mobile number registered on SplitPe. We'll send an OTP to confirm it's yours.</p>
       <div className="mt-4 flex items-center rounded-xl border border-slate-200 bg-white focus-within:border-splitpe-600">
         <span className="pl-3 text-sm text-slate-500">+91</span>
         <input className="w-full rounded-xl bg-transparent px-2 py-2.5 outline-none" inputMode="numeric" autoComplete="tel-national" placeholder="10-digit mobile number" value={phone} onChange={(e) => setPhone(e.target.value)} required />
       </div>
       <textarea className="mt-3 w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-splitpe-600" rows={3} maxLength={500} placeholder="Why are you leaving? (optional)" value={reason} onChange={(e) => setReason(e.target.value)} />
       {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
-      <button type="submit" disabled={digits.length !== 10 || state === "sending"} className="mt-3 inline-flex items-center gap-2 rounded-xl bg-red-600 px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50">
-        {state === "sending" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />} Send deletion request
+      <button type="submit" disabled={digits.length !== 10 || busy} className="mt-3 inline-flex items-center gap-2 rounded-xl bg-red-600 px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50">
+        {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />} Send OTP
       </button>
     </form>
   );
