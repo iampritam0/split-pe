@@ -13,7 +13,6 @@ import Home from "./pages/Home";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Terms from "./pages/Terms";
 import DeleteAccount from "./pages/DeleteAccount";
-import PreRegister from "./pages/PreRegister";
 import Support from "./pages/Support";
 
 // Loaded only when /admin is opened, so the Firebase SDK and the admin
@@ -68,7 +67,6 @@ function Layout() {
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-and-conditions" element={<Terms />} />
           <Route path="/delete-account" element={<DeleteAccount />} />
-          <Route path="/register" element={<PreRegister />} />
           <Route path="/support" element={<Support />} />
           <Route
             path="/admin/*"

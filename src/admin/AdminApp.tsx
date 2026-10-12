@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import type { User } from "firebase/auth";
-import { BarChart3, Bell, History, Image, Inbox, LayoutDashboard, LifeBuoy, Loader2, LogOut, Menu, MoreHorizontal, Settings, ShieldCheck, UserPlus, Users, X, Zap } from "lucide-react";
+import { BarChart3, Bell, History, Image, Inbox, LayoutDashboard, LifeBuoy, Loader2, LogOut, Menu, MoreHorizontal, Settings, ShieldCheck, Users, X, Zap } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import logo from "../assets/logo-s.png";
 import { auth } from "./firebase";
@@ -15,7 +15,6 @@ import NotificationsTab from "./NotificationsTab";
 import AutomationsTab from "./AutomationsTab";
 import AnalyticsTab from "./AnalyticsTab";
 import RequestsTab from "./RequestsTab";
-import PreRegistrationsTab from "./PreRegistrationsTab";
 import TeamTab from "./TeamTab";
 import SupportTab from "./SupportTab";
 import { collection, onSnapshot, query, where } from "firebase/firestore";
@@ -23,7 +22,7 @@ import { db } from "./firebase";
 import { ROLE_INFO, RoleContext, roleFromClaims } from "./role";
 import type { Role } from "./role";
 
-type TabKey = "overview" | "analytics" | "users" | "support" | "requests" | "preRegistrations" | "notifications" | "automations" | "settings" | "banners" | "team" | "activity";
+type TabKey = "overview" | "analytics" | "users" | "support" | "requests" | "notifications" | "automations" | "settings" | "banners" | "team" | "activity";
 // `superOnly` tabs change the live app (settings, sends) — hidden for support and viewer.
 const TABS: { key: TabKey; label: string; short?: string; icon: LucideIcon; superOnly?: boolean }[] = [
   { key: "overview", label: "Overview", icon: LayoutDashboard },
@@ -31,7 +30,6 @@ const TABS: { key: TabKey; label: string; short?: string; icon: LucideIcon; supe
   { key: "users", label: "Users", icon: Users },
   { key: "support", label: "Support", icon: LifeBuoy },
   { key: "requests", label: "Deletion requests", short: "Requests", icon: Inbox },
-  { key: "preRegistrations", label: "Pre-registrations", short: "Pre-reg", icon: UserPlus },
   { key: "notifications", label: "Notifications", icon: Bell, superOnly: true },
   { key: "automations", label: "Automations", icon: Zap, superOnly: true },
   { key: "settings", label: "App Settings", icon: Settings, superOnly: true },
@@ -233,7 +231,6 @@ export default function AdminApp() {
           {tab === "users" && <UsersTab />}
           {tab === "support" && <SupportTab />}
           {tab === "requests" && <RequestsTab />}
-          {tab === "preRegistrations" && <PreRegistrationsTab />}
           {tab === "team" && <TeamTab />}
           {tab === "activity" && <ActivityTab />}
           {role === "super" && tab === "settings" && <SettingsTab />}

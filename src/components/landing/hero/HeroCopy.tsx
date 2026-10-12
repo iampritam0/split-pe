@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import { PLAY_STORE_URL } from "../../../constants";
 import { PlayBadge } from "../Brand";
 import Icon from "../Icon";
@@ -38,10 +37,6 @@ export default function HeroCopy() {
       </p>
       <div className="cta-group">
         <PlayBadge magnetic />
-        <Link className="prereg-btn magnetic" to="/register">
-          <Icon name="userplus" className="" />
-          Pre-register
-        </Link>
         <span className="cta-note">
           <Icon name="android" className="" />
           Free to download on Android

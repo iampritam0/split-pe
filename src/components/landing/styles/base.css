@@ -112,18 +112,6 @@ html.landing-loading, html.landing-loading body { overflow: hidden !important; }
     0% { transform: translateX(-150%) rotate(20deg); }
     55%, 100% { transform: translateX(350%) rotate(20deg); }
 }
-/* Secondary CTA beside the Play badge → /register (pre-registration form). */
-.prereg-btn {
-    display: inline-flex; align-items: center; gap: 0.5rem;
-    padding: 0.85rem 1.4rem; border-radius: 14px;
-    background: rgba(255,255,255,0.85); border: 1.5px solid var(--brand-blue);
-    color: var(--brand-blue); font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 1.02rem;
-    text-decoration: none; transition: background 0.2s, color 0.2s;
-}
-.prereg-btn svg { width: 18px; height: 18px; }
-.prereg-btn:hover { background: var(--brand-blue); color: #fff; }
-.prereg-btn.on-band { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.85); color: #fff; }
-.prereg-btn.on-band:hover { background: #fff; color: var(--brand-blue); }
 .cta-note { font-size: 0.78rem; color: var(--muted-color); width: 100%; display: flex; align-items: center; gap: 0.4rem; }
 .cta-note svg { width: 14px; height: 14px; color: #3ddc84; }
 
