@@ -77,7 +77,7 @@ function StepsCard({ t, active, onPick }: { t: number; active: number; onPick: (
   const rail = Math.min(1, (Math.max(active, 0) + (active < last ? local : 0)) / last);
 
   return (
-    <div className="flex flex-col gap-6 rounded-3xl border border-white bg-white/70 p-5 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_24px_60px_-30px_rgba(30,64,175,0.35)] ring-1 ring-slate-200/60 backdrop-blur-sm sm:p-6 lg:flex-row lg:items-center lg:gap-8 lg:px-7 lg:py-5">
+    <div className="flex flex-col gap-4 rounded-3xl border border-white bg-white/70 p-4 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_24px_60px_-30px_rgba(30,64,175,0.35)] ring-1 ring-slate-200/60 backdrop-blur-sm sm:p-6 lg:flex-row lg:items-center lg:gap-8 lg:px-7 lg:py-5">
       <div className="flex-none lg:w-[12.5rem]">
         <p className="text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-blue-600">See how simple it is</p>
         <h2 className="mt-1 text-[1.15rem] font-bold leading-snug tracking-[-0.02em] text-[#111827]">
@@ -98,7 +98,7 @@ function StepsCard({ t, active, onPick }: { t: number; active: number; onPick: (
             <li key={s.title} className="relative">
               {/* Vertical rail between nodes (phones) */}
               {i < last && (
-                <span className="absolute bottom-[-0.25rem] left-[1.125rem] top-[2.6rem] w-[2px] -translate-x-1/2 rounded-full bg-slate-200 sm:hidden" aria-hidden>
+                <span className="absolute bottom-[0.15rem] left-[1.125rem] top-[2.6rem] w-[2px] -translate-x-1/2 rounded-full bg-slate-200 sm:hidden" aria-hidden>
                   <span className="block w-full rounded-full bg-brand-gradient" style={{ height: done ? "100%" : on ? `${local * 100}%` : "0%" }} />
                 </span>
               )}
@@ -107,7 +107,7 @@ function StepsCard({ t, active, onPick }: { t: number; active: number; onPick: (
                 onClick={() => onPick(s.start)}
                 aria-current={on ? "step" : undefined}
                 title={s.text}
-                className="group flex w-full items-start gap-4 pb-5 text-left sm:flex-col sm:items-center sm:gap-0 sm:px-1 sm:pb-0 sm:text-center"
+                className="group flex w-full items-start gap-3.5 pb-3.5 text-left sm:flex-col sm:items-center sm:gap-0 sm:px-1 sm:pb-0 sm:text-center"
               >
                 <span
                   className={`relative z-10 grid h-9 w-9 flex-none place-items-center rounded-full transition-all duration-300 motion-reduce:transition-none ${
@@ -125,7 +125,7 @@ function StepsCard({ t, active, onPick }: { t: number; active: number; onPick: (
                     {s.title}
                   </b>
                   {/* Description only on phones; on wider screens it's the tooltip */}
-                  <span className="mt-1 block text-[0.86rem] leading-[1.55] text-[#64748B] sm:hidden">{s.text}</span>
+                  <span className="mt-0.5 block text-[0.82rem] leading-[1.45] text-[#64748B] sm:hidden">{s.text}</span>
                 </span>
               </button>
             </li>
@@ -166,7 +166,7 @@ function Hero() {
   return (
     <section
       id="demo"
-      className="relative z-10 mx-auto grid max-w-[1440px] scroll-mt-20 gap-x-16 gap-y-10 px-5 sm:px-8 lg:grid-cols-[auto_minmax(0,1fr)] lg:grid-rows-[auto_auto] lg:gap-y-8 lg:px-12 pb-16 pt-28 lg:pb-16 lg:pt-[6.5rem]"
+      className="relative z-10 mx-auto grid max-w-[1440px] scroll-mt-20 gap-x-16 gap-y-8 px-5 sm:gap-y-10 sm:px-8 lg:grid-cols-[auto_minmax(0,1fr)] lg:grid-rows-[auto_auto] lg:gap-y-8 lg:px-12 pb-6 pt-24 sm:pb-12 sm:pt-28 lg:pb-16 lg:pt-[6.5rem]"
     >
       {/* Copy — first on mobile, right of the phone on desktop */}
       <div className="lg:col-start-2 lg:row-start-1">
@@ -188,13 +188,13 @@ function Hero() {
             </span>
           </span>
         </h1>
-        <p className="d-rise mt-6 text-[1.08rem] [text-wrap:pretty] leading-[1.7] text-[#475569] [animation-delay:120ms] xl:text-[1.22rem]">
+        <p className="d-rise mt-4 text-[1.05rem] sm:mt-6 sm:text-[1.08rem] [text-wrap:pretty] leading-[1.7] text-[#475569] [animation-delay:120ms] xl:text-[1.22rem]">
           Add a bill in seconds. SplitPe works out who owes what, keeps every balance up to date and shows when everyone is settled —{" "}
           <span className="font-medium text-[#111827]">No awkward reminders.</span>
         </p>
         </div>
-        <div className="mt-7 flex items-center justify-between gap-8">
-          <div className="flex-none">
+        <div className="mt-6 flex items-center justify-between gap-8 sm:mt-7">
+          <div className="w-full sm:w-auto sm:flex-none">
             <div className="d-rise [animation-delay:180ms]">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <a
@@ -217,7 +217,7 @@ function Hero() {
                 See how it works
               </button>
             </div>
-              <span className="mt-5 flex flex-wrap gap-x-5 gap-y-1 text-[0.85rem] text-[#64748B]">
+              <span className="mt-4 flex flex-wrap justify-center gap-x-5 gap-y-1 text-[0.85rem] text-[#64748B] sm:mt-5 sm:justify-start">
                 <span className="flex items-center gap-1.5">
                   <Check className="h-3.5 w-3.5 text-emerald-600" strokeWidth={2.5} /> Free on Android
                 </span>
