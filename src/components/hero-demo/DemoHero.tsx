@@ -35,7 +35,7 @@ function QrCard() {
       aria-label="Scan to download SplitPe on Google Play"
       className="d-rise group hidden flex-none items-center gap-5 rounded-3xl border border-white bg-white/70 p-3.5 pr-6 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_24px_60px_-30px_rgba(30,64,175,0.35)] ring-1 ring-slate-200/60 backdrop-blur-sm transition duration-300 [animation-delay:200ms] hover:-translate-y-1 motion-reduce:transition-none min-[1400px]:flex"
     >
-      <span className="relative block h-36 w-36 flex-none rounded-2xl bg-white p-2">
+      <span className="relative block h-32 w-32 flex-none rounded-2xl bg-white p-2">
         {/* Corner brackets, like a camera viewfinder */}
         {["left-0 top-0 border-l-2 border-t-2 rounded-tl-lg", "right-0 top-0 border-r-2 border-t-2 rounded-tr-lg", "bottom-0 left-0 border-b-2 border-l-2 rounded-bl-lg", "bottom-0 right-0 border-b-2 border-r-2 rounded-br-lg"].map((c) => (
           <span key={c} className={`absolute h-4 w-4 border-blue-500 transition-all duration-300 group-hover:h-5 group-hover:w-5 ${c}`} />
@@ -66,8 +66,9 @@ function QrCard() {
 }
 
 /**
- * "See how simple it is": a connected stepper in one glass card. The rail fills
- * as the demo plays; done steps get a tick, the current one a glowing node.
+ * "See how simple it is": a slim connected stepper in one glass card, so it
+ * fits on the first screen. The rail fills as the demo plays; done steps get a
+ * tick, the current one a glowing node. Phones get a vertical list with text.
  */
 function StepsCard({ t, active, onPick }: { t: number; active: number; onPick: (ms: number) => void }) {
   const last = HERO_STEPS.length - 1;
@@ -76,24 +77,15 @@ function StepsCard({ t, active, onPick }: { t: number; active: number; onPick: (
   const rail = Math.min(1, (Math.max(active, 0) + (active < last ? local : 0)) / last);
 
   return (
-    <div className="rounded-3xl border border-white bg-white/70 p-6 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_24px_60px_-30px_rgba(30,64,175,0.35)] ring-1 ring-slate-200/60 backdrop-blur-sm sm:p-7">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="text-[0.75rem] font-semibold uppercase tracking-[0.16em] text-blue-600">See how simple it is</p>
-          <h2 className="mt-1.5 text-[1.35rem] font-bold tracking-[-0.025em] text-[#111827]">
-            From expense to settled. <span className="text-[#94A3B8]">In seconds.</span>
-          </h2>
-        </div>
-        <span className="flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-[0.75rem] font-semibold text-blue-700 ring-1 ring-blue-100">
-          <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-60 motion-reduce:animate-none" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-600" />
-          </span>
-          Step {Math.max(active, 0) + 1} of {HERO_STEPS.length}
-        </span>
+    <div className="flex flex-col gap-6 rounded-3xl border border-white bg-white/70 p-5 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_24px_60px_-30px_rgba(30,64,175,0.35)] ring-1 ring-slate-200/60 backdrop-blur-sm sm:p-6 lg:flex-row lg:items-center lg:gap-8 lg:px-7 lg:py-5">
+      <div className="flex-none lg:w-[12.5rem]">
+        <p className="text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-blue-600">See how simple it is</p>
+        <h2 className="mt-1 text-[1.15rem] font-bold leading-snug tracking-[-0.02em] text-[#111827]">
+          From expense to settled. <span className="text-[#94A3B8]">In seconds.</span>
+        </h2>
       </div>
 
-      <ol className="relative mt-7 grid gap-1 sm:grid-cols-4 sm:gap-2">
+      <ol className="relative grid min-w-0 flex-1 gap-1 sm:grid-cols-4 sm:gap-2">
         {/* Horizontal rail through the node centres (tablet and up) */}
         <span className="pointer-events-none absolute left-[12.5%] right-[12.5%] top-[1.125rem] hidden h-[2px] -translate-y-1/2 rounded-full bg-slate-200 sm:block" aria-hidden>
           <span className="block h-full rounded-full bg-brand-gradient transition-[width] duration-150 ease-linear" style={{ width: `${rail * 100}%` }} />
@@ -114,7 +106,8 @@ function StepsCard({ t, active, onPick }: { t: number; active: number; onPick: (
                 type="button"
                 onClick={() => onPick(s.start)}
                 aria-current={on ? "step" : undefined}
-                className="group flex w-full items-start gap-4 rounded-2xl pb-5 text-left sm:flex-col sm:items-center sm:gap-0 sm:px-2 sm:pb-1 sm:text-center"
+                title={s.text}
+                className="group flex w-full items-start gap-4 pb-5 text-left sm:flex-col sm:items-center sm:gap-0 sm:px-1 sm:pb-0 sm:text-center"
               >
                 <span
                   className={`relative z-10 grid h-9 w-9 flex-none place-items-center rounded-full transition-all duration-300 motion-reduce:transition-none ${
@@ -127,16 +120,12 @@ function StepsCard({ t, active, onPick }: { t: number; active: number; onPick: (
                 >
                   {done ? <Check className="h-4 w-4" strokeWidth={3} /> : <s.Icon className="h-4 w-4" strokeWidth={2} />}
                 </span>
-                <span className="min-w-0 sm:mt-4">
-                  <span className={`block text-[0.68rem] font-semibold uppercase tracking-[0.14em] transition-colors duration-300 ${on ? "text-blue-600" : "text-[#94A3B8]"}`}>
-                    Step {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <b className={`mt-1 block text-[1rem] font-semibold leading-snug tracking-[-0.01em] transition-colors duration-300 ${on || done ? "text-[#111827]" : "text-[#475569]"}`}>
+                <span className="min-w-0 sm:mt-2.5">
+                  <b className={`block text-[0.95rem] font-semibold leading-snug tracking-[-0.01em] transition-colors duration-300 ${on ? "text-blue-700" : done ? "text-[#111827]" : "text-[#475569]"}`}>
                     {s.title}
                   </b>
-                  <span className={`mt-1 block text-[0.86rem] leading-[1.55] transition-colors duration-300 ${on ? "text-[#475569]" : "text-[#64748B]"}`}>
-                    {s.text}
-                  </span>
+                  {/* Description only on phones; on wider screens it's the tooltip */}
+                  <span className="mt-1 block text-[0.86rem] leading-[1.55] text-[#64748B] sm:hidden">{s.text}</span>
                 </span>
               </button>
             </li>
@@ -177,7 +166,7 @@ function Hero() {
   return (
     <section
       id="demo"
-      className="relative z-10 mx-auto grid max-w-[1440px] scroll-mt-20 gap-x-16 gap-y-10 px-5 sm:px-8 lg:grid-cols-[auto_minmax(0,1fr)] lg:grid-rows-[auto_auto] lg:gap-y-10 lg:px-12 pb-16 pt-28 lg:pb-16 lg:pt-[6.5rem]"
+      className="relative z-10 mx-auto grid max-w-[1440px] scroll-mt-20 gap-x-16 gap-y-10 px-5 sm:px-8 lg:grid-cols-[auto_minmax(0,1fr)] lg:grid-rows-[auto_auto] lg:gap-y-8 lg:px-12 pb-16 pt-28 lg:pb-16 lg:pt-[6.5rem]"
     >
       {/* Copy — first on mobile, right of the phone on desktop */}
       <div className="lg:col-start-2 lg:row-start-1">
@@ -204,7 +193,7 @@ function Hero() {
           <span className="font-medium text-[#111827]">No awkward reminders.</span>
         </p>
         </div>
-        <div className="mt-8 flex items-center justify-between gap-8">
+        <div className="mt-7 flex items-center justify-between gap-8">
           <div className="flex-none">
             <div className="d-rise [animation-delay:180ms]">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
