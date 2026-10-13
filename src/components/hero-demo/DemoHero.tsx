@@ -1,7 +1,7 @@
 // The home-page hero: a scripted phone demo on the left, the pitch, CTAs, a
 // scan-to-download QR and the four steps (synced to the demo) on the right.
 import { useEffect, useState } from "react";
-import { Check, CircleCheck, Play, Receipt, Scale, ScanLine, Users, type LucideIcon } from "lucide-react";
+import { Camera, Check, CircleCheck, Download, Play, Receipt, Scale, ScanLine, Users, type LucideIcon } from "lucide-react";
 import { PlayIcon } from "../Navbar";
 import { PLAY_STORE_URL } from "../../constants";
 import logo from "../../assets/logo-s.png";
@@ -20,6 +20,12 @@ const HERO_STEPS: { title: string; text: string; Icon: LucideIcon; start: number
 ];
 
 /** Scan-to-download card for desktop visitors (on a phone they just tap the button). */
+const SCAN_STEPS: { Icon: LucideIcon; title: string; text: string }[] = [
+  { Icon: Camera, title: "Open your camera", text: "Any phone camera or Google Lens" },
+  { Icon: ScanLine, title: "Point at the code", text: "SplitPe opens on Google Play" },
+  { Icon: Download, title: "Install for free", text: "Add your first group in a minute" },
+];
+
 function QrCard() {
   return (
     <a
@@ -29,25 +35,115 @@ function QrCard() {
       aria-label="Scan to download SplitPe on Google Play"
       className="d-rise group hidden flex-none items-center gap-5 rounded-3xl border border-white bg-white/70 p-3.5 pr-6 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_24px_60px_-30px_rgba(30,64,175,0.35)] ring-1 ring-slate-200/60 backdrop-blur-sm transition duration-300 [animation-delay:200ms] hover:-translate-y-1 motion-reduce:transition-none min-[1400px]:flex"
     >
-      <span className="relative block h-[12.5rem] w-[12.5rem] flex-none rounded-2xl bg-white p-2">
+      <span className="relative block h-36 w-36 flex-none rounded-2xl bg-white p-2">
         {/* Corner brackets, like a camera viewfinder */}
         {["left-0 top-0 border-l-2 border-t-2 rounded-tl-lg", "right-0 top-0 border-r-2 border-t-2 rounded-tr-lg", "bottom-0 left-0 border-b-2 border-l-2 rounded-bl-lg", "bottom-0 right-0 border-b-2 border-r-2 rounded-br-lg"].map((c) => (
           <span key={c} className={`absolute h-4 w-4 border-blue-500 transition-all duration-300 group-hover:h-5 group-hover:w-5 ${c}`} />
         ))}
         <img src={playQr} alt="" className="h-full w-full [image-rendering:pixelated]" />
-        <span className="absolute left-1/2 top-1/2 grid h-11 w-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-lg bg-white p-1.5 shadow-sm ring-1 ring-slate-100">
+        <span className="absolute left-1/2 top-1/2 grid h-9 w-9 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-lg bg-white p-1.5 shadow-sm ring-1 ring-slate-100">
           <img src={logo} alt="" className="h-full w-full" />
         </span>
       </span>
-      <span className="flex w-[9.75rem] flex-col justify-center">
-        <ScanLine className="h-5 w-5 text-blue-600" />
-        <b className="mt-2.5 text-[0.98rem] font-semibold leading-snug tracking-[-0.01em] text-[#111827]">Scan to download</b>
-        <small className="mt-1 text-[0.8rem] leading-5 text-[#64748B]">Point your phone camera at the code.</small>
-        <small className="mt-3 flex items-center gap-1.5 text-[0.78rem] font-medium text-[#111827]">
-          <PlayIcon className="h-3.5 w-3.5" /> Free on Google Play
-        </small>
+      <span className="flex min-w-0 flex-col">
+        <span className="flex items-center gap-2 text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-blue-600">
+          <ScanLine className="h-4 w-4" /> Get the app
+        </span>
+        <b className="mt-1.5 text-[1.12rem] font-bold tracking-[-0.02em] text-[#111827]">Scan to download</b>
+        <span className="mt-2.5 flex flex-col gap-1.5">
+          {SCAN_STEPS.map(({ Icon, title }) => (
+            <span key={title} className="flex items-center gap-2 text-[0.82rem] text-[#475569]">
+              <span className="grid h-6 w-6 flex-none place-items-center rounded-md bg-blue-50 text-blue-600">
+                <Icon className="h-3.5 w-3.5" />
+              </span>
+              {title}
+            </span>
+          ))}
+        </span>
       </span>
     </a>
+  );
+}
+
+/**
+ * "See how simple it is": a connected stepper in one glass card. The rail fills
+ * as the demo plays; done steps get a tick, the current one a glowing node.
+ */
+function StepsCard({ t, active, onPick }: { t: number; active: number; onPick: (ms: number) => void }) {
+  const last = HERO_STEPS.length - 1;
+  const local = active >= 0 ? ramp(t, HERO_STEPS[active].start, HERO_STEPS[active].end) : 0;
+  // Rail runs from the first node to the last; it reaches node i at i / last
+  const rail = Math.min(1, (Math.max(active, 0) + (active < last ? local : 0)) / last);
+
+  return (
+    <div className="rounded-3xl border border-white bg-white/70 p-6 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_24px_60px_-30px_rgba(30,64,175,0.35)] ring-1 ring-slate-200/60 backdrop-blur-sm sm:p-7">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="text-[0.75rem] font-semibold uppercase tracking-[0.16em] text-blue-600">See how simple it is</p>
+          <h2 className="mt-1.5 text-[1.35rem] font-bold tracking-[-0.025em] text-[#111827]">
+            From expense to settled. <span className="text-[#94A3B8]">In seconds.</span>
+          </h2>
+        </div>
+        <span className="flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-[0.75rem] font-semibold text-blue-700 ring-1 ring-blue-100">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-60 motion-reduce:animate-none" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-600" />
+          </span>
+          Step {Math.max(active, 0) + 1} of {HERO_STEPS.length}
+        </span>
+      </div>
+
+      <ol className="relative mt-7 grid gap-1 sm:grid-cols-4 sm:gap-2">
+        {/* Horizontal rail through the node centres (tablet and up) */}
+        <span className="pointer-events-none absolute left-[12.5%] right-[12.5%] top-[1.125rem] hidden h-[2px] -translate-y-1/2 rounded-full bg-slate-200 sm:block" aria-hidden>
+          <span className="block h-full rounded-full bg-brand-gradient transition-[width] duration-150 ease-linear" style={{ width: `${rail * 100}%` }} />
+        </span>
+
+        {HERO_STEPS.map((s, i) => {
+          const on = i === active;
+          const done = i < active;
+          return (
+            <li key={s.title} className="relative">
+              {/* Vertical rail between nodes (phones) */}
+              {i < last && (
+                <span className="absolute bottom-[-0.25rem] left-[1.125rem] top-[2.6rem] w-[2px] -translate-x-1/2 rounded-full bg-slate-200 sm:hidden" aria-hidden>
+                  <span className="block w-full rounded-full bg-brand-gradient" style={{ height: done ? "100%" : on ? `${local * 100}%` : "0%" }} />
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={() => onPick(s.start)}
+                aria-current={on ? "step" : undefined}
+                className="group flex w-full items-start gap-4 rounded-2xl pb-5 text-left sm:flex-col sm:items-center sm:gap-0 sm:px-2 sm:pb-1 sm:text-center"
+              >
+                <span
+                  className={`relative z-10 grid h-9 w-9 flex-none place-items-center rounded-full transition-all duration-300 motion-reduce:transition-none ${
+                    done
+                      ? "bg-brand-gradient text-white shadow-[0_6px_14px_-4px_rgba(37,99,235,0.5)]"
+                      : on
+                        ? "bg-white text-blue-600 shadow-[0_0_0_5px_rgba(37,99,235,0.12),0_8px_18px_-6px_rgba(37,99,235,0.5)] ring-2 ring-blue-600"
+                        : "bg-white text-[#94A3B8] ring-1 ring-slate-200 group-hover:text-[#64748B] group-hover:ring-slate-300"
+                  }`}
+                >
+                  {done ? <Check className="h-4 w-4" strokeWidth={3} /> : <s.Icon className="h-4 w-4" strokeWidth={2} />}
+                </span>
+                <span className="min-w-0 sm:mt-4">
+                  <span className={`block text-[0.68rem] font-semibold uppercase tracking-[0.14em] transition-colors duration-300 ${on ? "text-blue-600" : "text-[#94A3B8]"}`}>
+                    Step {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <b className={`mt-1 block text-[1rem] font-semibold leading-snug tracking-[-0.01em] transition-colors duration-300 ${on || done ? "text-[#111827]" : "text-[#475569]"}`}>
+                    {s.title}
+                  </b>
+                  <span className={`mt-1 block text-[0.86rem] leading-[1.55] transition-colors duration-300 ${on ? "text-[#475569]" : "text-[#64748B]"}`}>
+                    {s.text}
+                  </span>
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ol>
+    </div>
   );
 }
 
@@ -81,24 +177,36 @@ function Hero() {
   return (
     <section
       id="demo"
-      className="relative z-10 mx-auto grid max-w-[1440px] scroll-mt-20 gap-x-16 gap-y-10 px-5 sm:px-8 lg:grid-cols-[auto_minmax(0,1fr)] lg:grid-rows-[auto_auto] lg:content-center lg:gap-y-10 lg:px-12 pb-16 pt-28 lg:min-h-[100svh] lg:pb-6 lg:pt-[6.5rem]"
+      className="relative z-10 mx-auto grid max-w-[1440px] scroll-mt-20 gap-x-16 gap-y-10 px-5 sm:px-8 lg:grid-cols-[auto_minmax(0,1fr)] lg:grid-rows-[auto_auto] lg:gap-y-10 lg:px-12 pb-16 pt-28 lg:pb-16 lg:pt-[6.5rem]"
     >
-      {/* Copy — first on mobile, top-right on desktop */}
-      <div className="lg:col-start-2 lg:row-start-1 lg:self-start">
+      {/* Copy — first on mobile, right of the phone on desktop */}
+      <div className="lg:col-start-2 lg:row-start-1">
         {/* One line from tablets up — sized to the column width; two lines on phones */}
-        <h1 className="d-rise text-[2.45rem] font-bold leading-[1.05] tracking-[-0.045em] text-[#111827] [animation-delay:60ms] min-[380px]:text-[2.7rem] sm:whitespace-nowrap sm:text-[min(3.6rem,calc((100vw-4rem)/15.5))] lg:text-[min(4rem,calc((100vw-31rem)/15.5))]">
-          Split expenses,
-          <br className="sm:hidden" />
-          <span className="hidden sm:inline"> </span>
-          <span className="whitespace-nowrap bg-brand-gradient bg-clip-text text-transparent">Not friendships.</span>
+        {/* w-min: the one-line headline sets the width, so the summary ends where "friendships" ends */}
+        <div className="sm:w-min">
+        <h1
+          aria-label="Split expenses, Not friendships"
+          className="text-[2.45rem] font-bold leading-[1.1] tracking-[-0.045em] text-[#111827] min-[380px]:text-[2.7rem] sm:whitespace-nowrap sm:text-[min(3.6rem,calc((100vw-4rem)/14.5))] lg:text-[min(4.35rem,calc((100vw-31rem)/14.5))]"
+        >
+          <span aria-hidden>
+            <span className="hero-word" style={{ animationDelay: "0ms" }}>Split</span>{" "}
+            <span className="hero-word" style={{ animationDelay: "90ms" }}>expenses,</span>
+            <br className="sm:hidden" />
+            <span className="hidden sm:inline"> </span>
+            <span className="whitespace-nowrap">
+              <span className="hero-word hero-grad" style={{ animationDelay: "180ms" }}>Not</span>{" "}
+              <span className="hero-word hero-grad" style={{ animationDelay: "270ms" }}>friendships</span>
+            </span>
+          </span>
         </h1>
-        <div className="mt-6 flex items-stretch justify-between gap-12">
-          <div className="min-w-0 max-w-[36rem] flex-1">
-            <p className="d-rise max-w-[44rem] text-[1.08rem] [text-wrap:pretty] leading-[1.7] text-[#475569] [animation-delay:120ms] xl:text-[1.22rem]">
-              Add a bill in seconds. SplitPe works out who owes what, keeps every balance up to date and shows when everyone is settled —{" "}
-              <span className="font-medium text-[#111827]">no awkward reminders.</span>
-            </p>
-            <div className="d-rise mt-8 [animation-delay:180ms]">
+        <p className="d-rise mt-6 text-[1.08rem] [text-wrap:pretty] leading-[1.7] text-[#475569] [animation-delay:120ms] xl:text-[1.22rem]">
+          Add a bill in seconds. SplitPe works out who owes what, keeps every balance up to date and shows when everyone is settled —{" "}
+          <span className="font-medium text-[#111827]">No awkward reminders.</span>
+        </p>
+        </div>
+        <div className="mt-8 flex items-center justify-between gap-8">
+          <div className="flex-none">
+            <div className="d-rise [animation-delay:180ms]">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <a
                 href={PLAY_STORE_URL}
@@ -134,10 +242,10 @@ function Hero() {
         </div>
       </div>
 
-      {/* The demo — left column on desktop (sized to fit the screen), between copy and steps on mobile */}
+      {/* The demo — left of the copy and steps on desktop (sized to fit the screen), between them on mobile */}
       <div
         ref={panelRef}
-        className="d-rise relative mx-auto flex w-full max-w-[400px] flex-col items-center gap-4 rounded-3xl border border-white bg-white/70 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_24px_60px_-30px_rgba(30,64,175,0.35)] ring-1 ring-slate-200/60 backdrop-blur-sm px-4 py-6 [animation-delay:120ms] lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:w-auto lg:justify-center lg:self-stretch lg:px-8"
+        className="d-rise relative mx-auto flex w-fit flex-col items-center gap-3 rounded-3xl border border-white bg-white/70 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_24px_60px_-30px_rgba(30,64,175,0.35)] ring-1 ring-slate-200/60 backdrop-blur-sm p-5 [animation-delay:120ms] lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:self-start"
       >
         <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-3xl">
           <div className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-blue-500/10 blur-3xl" />
@@ -155,72 +263,21 @@ function Hero() {
 
       {/* Interactive steps, synced to the demo clock */}
       <div className="d-rise [animation-delay:300ms] lg:col-start-2 lg:row-start-2 lg:self-end">
-        <div className="border-t border-slate-200 pt-8">
-          <p className="text-[0.78rem] font-semibold uppercase tracking-[0.16em] text-blue-600">See how simple it is</p>
-          <h2 className="mt-2 text-[1.4rem] font-bold tracking-[-0.025em] text-[#111827]">
-            From expense to settled. <span className="text-[#94A3B8]">In seconds.</span>
-          </h2>
-        </div>
-        <ol className="-mx-3.5 mt-4 grid grid-cols-2 gap-2 xl:grid-cols-4">
-          {HERO_STEPS.map((s, i) => {
-            const on = i === active;
-            const done = i < active;
-            const progress = on ? ramp(t, s.start, s.end) : done ? 1 : 0;
-            return (
-              <li key={s.title}>
-                <button
-                  type="button"
-                  onClick={() => playFrom(s.start)}
-                  aria-current={on ? "step" : undefined}
-                  className={`flex h-full w-full flex-col rounded-2xl p-3.5 text-left transition-colors duration-300 motion-reduce:transition-none ${
-                    on ? "bg-white shadow-[0_10px_30px_-14px_rgba(15,23,42,0.25)] ring-1 ring-slate-200/80" : "hover:bg-white/70"
-                  }`}
-                >
-                  {/* Progress indicator */}
-                  <span className="block h-[3px] w-full overflow-hidden rounded-full bg-slate-200/80" aria-hidden>
-                    <span className="block h-full rounded-full bg-brand-gradient" style={{ width: `${progress * 100}%` }} />
-                  </span>
-                  <span className="mt-3.5 flex items-center gap-2.5">
-                    <span
-                      className={`grid h-8 w-8 flex-none place-items-center rounded-lg transition-all duration-300 motion-reduce:transition-none ${
-                        on
-                          ? "bg-brand-gradient text-white shadow-[0_6px_14px_-4px_rgba(37,99,235,0.45)]"
-                          : done
-                            ? "bg-white text-blue-600 ring-1 ring-blue-200"
-                            : "bg-white text-[#94A3B8] ring-1 ring-slate-200"
-                      }`}
-                    >
-                      <s.Icon className="h-4 w-4" strokeWidth={2} />
-                    </span>
-                    <span className={`text-[0.72rem] font-semibold tabular-nums tracking-wider transition-colors duration-300 ${on ? "text-blue-600" : "text-[#94A3B8]"}`}>
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                  </span>
-                  <b className={`mt-3 block text-[1.02rem] font-semibold leading-snug tracking-[-0.01em] transition-colors duration-300 ${on ? "text-[#111827]" : "text-[#334155]"}`}>
-                    {s.title}
-                  </b>
-                  <span className={`mt-1 block text-[0.9rem] leading-[1.55] transition-colors duration-300 ${on ? "text-[#475569]" : "text-[#64748B]"}`}>
-                    {s.text}
-                  </span>
-                </button>
-              </li>
-            );
-          })}
-        </ol>
+        <StepsCard t={t} active={active} onPick={playFrom} />
       </div>
     </section>
   );
 }
 
 /**
- * On desktop, shrink the 620px-tall phone so the whole hero fits one screen.
+ * On desktop, shrink the 620px-tall phone so the hero fits one screen.
  * Phones and tablets use a fixed 90% so the mockup doesn't dwarf the copy.
  */
 function usePhoneScale() {
   const calc = () => {
     if (typeof window === "undefined" || window.innerWidth < 1024) return 0.9;
-    // fixed header + section padding (~176) + panel chrome: padding, controls, gap (~100)
-    const room = window.innerHeight - 176 - 100;
+    // fixed header + section padding (~176) + panel chrome: padding, controls, gap (~88)
+    const room = window.innerHeight - 176 - 88;
     return Math.min(0.86, Math.max(0.6, room / 620));
   };
   const [scale, setScale] = useState(calc);
