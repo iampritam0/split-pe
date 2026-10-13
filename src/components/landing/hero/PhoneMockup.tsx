@@ -45,7 +45,7 @@ function DashboardView() {
       <div className="d-greet">
         <div>
           <p>Good evening,</p>
-          <h4>Pritam 👋</h4>
+          <h4>Darsh 👋</h4>
         </div>
         <span className="d-pill">
           <Icon name="check" />
