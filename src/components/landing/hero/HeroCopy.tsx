@@ -1,16 +1,11 @@
-import { PLAY_STORE_URL } from "../../../constants";
 import { PlayBadge } from "../Brand";
 import Icon from "../Icon";
 
-// Left column: live pill, rolling headline, pitch and the Play Store CTA.
+// Left column: tagline pill, rolling headline, pitch and the Play Store CTA.
 export default function HeroCopy() {
   return (
     <div className="hero-left">
       <div className="pill-row">
-        <a className="live-pill" href={PLAY_STORE_URL} target="_blank" rel="noopener">
-          <span className="live-dot"></span>
-          <b>LIVE</b> on Google Play · Android
-        </a>
         <span className="tag-pill">
           <Icon name="check" />
           हिसाब भी, दोस्ती भी

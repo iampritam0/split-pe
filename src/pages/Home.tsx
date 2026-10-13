@@ -4,7 +4,6 @@ import Footer from "../components/Footer";
 import Ambient from "../components/landing/Ambient";
 import IconSprite from "../components/landing/IconSprite";
 import LandingHeader from "../components/landing/LandingHeader";
-import Loader from "../components/landing/Loader";
 import Hero from "../components/landing/hero/Hero";
 import DownloadCta from "../components/landing/sections/DownloadCta";
 import Faq from "../components/landing/sections/Faq";
@@ -41,7 +40,6 @@ export default function Home() {
   return (
     <div className="landing" ref={root}>
       <IconSprite />
-      <Loader />
       <Ambient />
       <LandingHeader />
       <main>

@@ -21,7 +21,7 @@ const ENTRANCE =
   ".header > *, .line > span, .pill-row > *, .description, .cta-group > *, .award-badge, .card, .nav-arrow";
 
 /**
- * Drives everything that moves on the landing page: the intro loader, the 3D
+ * Drives everything that moves on the landing page: the intro entrance, the 3D
  * phone, the floating tokens, the हिसाब/दोस्ती theme switch, the live
  * notifications and the scroll reveals. The markup lives in the components;
  * this hook only animates it. Everything is torn down on unmount.
@@ -40,8 +40,6 @@ export default function useLandingAnimations(rootRef: RefObject<HTMLDivElement |
     const berriesFG = $(".berries-container");
     const berriesBG = $(".berries-container-bg");
     const leavesBG = $(".leaves-container");
-    const glow = $("#cursor-glow");
-    const loader = $("#loader");
     const berries = $$(".berry");
     const leaves = $$(".leaf");
     const cards = $$<HTMLButtonElement>(".card");
@@ -59,7 +57,6 @@ export default function useLandingAnimations(rootRef: RefObject<HTMLDivElement |
 
     let isSwitching = false;
     let switchSpin = 0;
-    const introSpin = { val: 0 };
 
     const ctx = gsap.context(() => {
       // Per-token state for the float/repel loop
@@ -169,15 +166,13 @@ export default function useLandingAnimations(rootRef: RefObject<HTMLDivElement |
         const target = flavor === "dosti" ? { mid: "#e0f8ec", outer: "#b3ebd0" } : { mid: "#e4eeff", outer: "#bcd3fb" };
         gsap.to(root, { "--bg-mid": target.mid, "--bg-outer": target.outer, duration: 1.5, ease: "power2.inOut" });
 
-        // Phone spin (360 + blur, swap screen at peak, settle to 720)
-        const spin = { val: 0, blur: 0 };
+        // Phone spin (swap screen at peak, settle to 720)
+        const spin = { val: 0 };
         const paint = () => {
           switchSpin = spin.val;
-          phoneStage.style.filter = `blur(${spin.blur}px)`;
         };
         gsap.to(spin, {
           val: 360,
-          blur: 15,
           duration: 0.6,
           ease: "power2.in",
           onUpdate: paint,
@@ -186,13 +181,11 @@ export default function useLandingAnimations(rootRef: RefObject<HTMLDivElement |
             showSplash();
             gsap.to(spin, {
               val: 720,
-              blur: 0,
               duration: 1.5,
               ease: "back.out(0.7)",
               onUpdate: paint,
               onComplete: () => {
                 switchSpin = 0;
-                phoneStage.style.filter = "none";
                 bootPhone(0.9);
               },
             });
@@ -249,7 +242,7 @@ export default function useLandingAnimations(rootRef: RefObject<HTMLDivElement |
       };
 
       // Auto-play between flavors until the visitor picks one themselves
-      const AUTO_MS = 8000;
+      const AUTO_MS = 12000;
       let autoTimer = 0;
       let userPicked = false;
       cleanups.push(() => clearTimeout(autoTimer));
@@ -282,10 +275,9 @@ export default function useLandingAnimations(rootRef: RefObject<HTMLDivElement |
       cards.forEach((card) => card.addEventListener("click", () => activate(card), { signal }));
       $$(".nav-arrow").forEach((btn) => btn.addEventListener("click", () => step(Number(btn.dataset.dir)), { signal }));
 
-      // ---------- Pointer parallax, token repel, cursor glow ----------
+      // ---------- Gentle pointer parallax + token repel ----------
       const mouse = { x: 0, y: 0, px: -9999, py: -9999 };
       const smooth = { x: 0, y: 0 };
-      const glowPos = { x: innerWidth / 2, y: innerHeight / 2 };
       listen("pointermove", (e) => {
         mouse.x = e.clientX / window.innerWidth - 0.5;
         mouse.y = e.clientY / window.innerHeight - 0.5;
@@ -300,19 +292,13 @@ export default function useLandingAnimations(rootRef: RefObject<HTMLDivElement |
         smooth.x += (mouse.x - smooth.x) * 0.05;
         smooth.y += (mouse.y - smooth.y) * 0.05;
 
-        if (mouse.px > -9999) {
-          glowPos.x += (mouse.px - glowPos.x) * 0.12;
-          glowPos.y += (mouse.py - glowPos.y) * 0.12;
-        }
-        glow.style.transform = `translate(${glowPos.x}px, ${glowPos.y}px)`;
-
         // Nothing below is visible once the hero has scrolled away
         if (window.scrollY > window.innerHeight * 1.2) return;
 
-        phone.style.transform = `rotateY(${smooth.x * 40 + switchSpin + introSpin.val}deg) rotateX(${-smooth.y * 20}deg)`;
-        berriesFG.style.transform = `translate(${smooth.x * 20}px, ${smooth.y * 20}px)`;
-        berriesBG.style.transform = `translate(${smooth.x * -12}px, ${smooth.y * -12}px)`;
-        leavesBG.style.transform = `translate(${smooth.x * -8}px, ${smooth.y * -8}px)`;
+        phone.style.transform = `rotateY(${smooth.x * 14 + switchSpin}deg) rotateX(${-smooth.y * 7}deg)`;
+        berriesFG.style.transform = `translate(${smooth.x * 8}px, ${smooth.y * 8}px)`;
+        berriesBG.style.transform = `translate(${smooth.x * -5}px, ${smooth.y * -5}px)`;
+        leavesBG.style.transform = `translate(${smooth.x * -3}px, ${smooth.y * -3}px)`;
 
         if (!isSwitching) {
           berries.forEach((berry, i) => {
@@ -324,15 +310,15 @@ export default function useLandingAnimations(rootRef: RefObject<HTMLDivElement |
             let tx = 0;
             let ty = 0;
             let speed = 1;
-            if (dist < 400 && dist > 0) {
-              const force = (400 - dist) / 400;
-              tx = (dx / dist) * force * -50;
-              ty = (dy / dist) * force * -50;
-              speed = 1 + force * 5;
+            if (dist < 250 && dist > 0) {
+              const force = (250 - dist) / 250;
+              tx = (dx / dist) * force * -20;
+              ty = (dy / dist) * force * -20;
+              speed = 1 + force * 1.5;
             }
             s.rx += (tx - s.rx) * 0.1;
             s.ry += (ty - s.ry) * 0.1;
-            s.angle += 0.2 * speed;
+            s.angle += 0.08 * speed;
 
             const dur = [5, 7, 6, 8, 5.5, 6.5, 9, 11, 10][i % 9];
             const phase = (time + i * 0.7) * ((Math.PI * 2) / dur);
@@ -402,28 +388,6 @@ export default function useLandingAnimations(rootRef: RefObject<HTMLDivElement |
         });
       };
 
-      // ---------- Magnetic buttons ----------
-      // Uses the CSS `translate` property so it never fights GSAP's `transform` tweens
-      $$(".magnetic").forEach((el) => {
-        const pos = { x: 0, y: 0 };
-        const move = (x: number, y: number) =>
-          gsap.to(pos, {
-            x,
-            y,
-            duration: 0.5,
-            ease: "power3.out",
-            overwrite: true,
-            onUpdate: () => {
-              el.style.translate = `${pos.x}px ${pos.y}px`;
-            },
-          });
-        el.addEventListener("pointermove", (e) => {
-          const r = el.getBoundingClientRect();
-          move((e.clientX - r.left - r.width / 2) * 0.3, (e.clientY - r.top - r.height / 2) * 0.4);
-        }, { signal });
-        el.addEventListener("pointerleave", () => move(0, 0), { signal });
-      });
-
       // "Split bills" rolls to "Keep friendship" and back, forever
       const startRoller = () => {
         const rolls = $$(".main-title .roll");
@@ -439,12 +403,12 @@ export default function useLandingAnimations(rootRef: RefObject<HTMLDivElement |
 
       // Sections below the hero rise in as they scroll into view
       const startReveals = () => {
-        gsap.set(".reveal", { y: 50, opacity: 0 });
+        gsap.set(".reveal", { y: 20, opacity: 0 });
         ScrollTrigger.batch(".reveal", {
           start: "top 88%",
           once: true,
           onEnter: (els) =>
-            gsap.to(els, { y: 0, opacity: 1, stagger: 0.08, duration: 0.85, ease: "power3.out", clearProps: "transform" }),
+            gsap.to(els, { y: 0, opacity: 1, stagger: 0.06, duration: 0.6, ease: "power2.out", clearProps: "transform" }),
         });
       };
 
@@ -454,14 +418,9 @@ export default function useLandingAnimations(rootRef: RefObject<HTMLDivElement |
         target?.scrollIntoView({ behavior: "smooth" });
       };
 
-      // ---------- Intro: splash loader → staggered entrance ----------
-      const finishLoading = () => {
-        loader.style.display = "none";
-        document.documentElement.classList.remove("landing-loading");
-      };
+      // ---------- Intro: quick staggered entrance ----------
 
       if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        finishLoading();
         phone.dataset.screen = "dash";
         startLoops();
         jumpToHash();
@@ -469,50 +428,27 @@ export default function useLandingAnimations(rootRef: RefObject<HTMLDivElement |
       }
 
       startReveals();
-      loader.style.display = "";
-      document.documentElement.classList.add("landing-loading");
-      window.scrollTo(0, 0);
 
       const intro = () => {
         const compact = isCompact();
         const tl = gsap
           .timeline({ defaults: { ease: "power3.out" } })
-          .from("#loader img", { scale: 0, rotation: -200, duration: 0.9, ease: "back.out(1.6)" })
-          .from("#loader h2, #loader .hi, #loader p", { y: 24, opacity: 0, stagger: 0.08, duration: 0.6 }, "-=0.45")
-          .to(".ld-bar i", { scaleX: 1, duration: 1.0, ease: "power2.inOut" }, "-=0.3")
-          .to("#loader > *", { y: -30, opacity: 0, stagger: 0.04, duration: 0.4, ease: "power2.in" })
-          .to(loader, { clipPath: "circle(0% at 50% 50%)", duration: 0.9, ease: "power4.inOut" }, "-=0.15")
-          .add(finishLoading)
-          .addLabel("in", "-=0.55");
+          .from(phoneStage, { y: 40, opacity: 0, duration: 0.8 })
+          .addLabel("copy", 0);
 
-        if (compact) {
-          // Mobile/tablet: the phone takes centre stage first, then glides down
-          // into its slot below the copy while the text reveals above it.
-          const r = phoneStage.getBoundingClientRect();
-          const dy = innerHeight / 2 - (r.top + r.height / 2);
-          tl.fromTo(phoneStage, { y: dy + 200, opacity: 0, scale: 0.8 }, { y: dy, opacity: 1, scale: 1.04, duration: 1.2, ease: "expo.out" }, "in")
-            .from(introSpin, { val: -360, duration: 1.6, ease: "expo.out" }, "in")
-            .to(phoneStage, { y: 0, scale: 1, duration: 1.1, ease: "power3.inOut" }, "in+=1.7")
-            .addLabel("copy", "in+=2.05");
-        } else {
-          tl.from(phoneStage, { y: 220, opacity: 0, scale: 0.8, duration: 1.4, ease: "expo.out" }, "in+=0.15")
-            .from(introSpin, { val: -360, duration: 1.8, ease: "expo.out" }, "in+=0.15")
-            .addLabel("copy", "in");
-        }
-
-        tl.from(".header > *", { y: -40, opacity: 0, stagger: 0.08, duration: 0.8 }, "copy")
-          .from(".hero .line > span", { yPercent: 115, rotation: 4, duration: 1.1, stagger: 0.09, ease: "power4.out" }, "copy+=0.1")
-          .from(".pill-row > *, .description, .cta-group > *, .award-badge", { y: 30, opacity: 0, stagger: 0.07, duration: 0.8 }, "copy+=0.3")
-          .from(".card", { x: 80, opacity: 0, stagger: 0.12, duration: 1, ease: "back.out(1.4)" }, "copy+=0.4")
-          .from(".nav-arrow", { scale: 0, stagger: 0.08, duration: 0.6, ease: "back.out(2)" }, "copy+=0.7")
-          .from(".token", { scale: 0, duration: 0.9, stagger: 0.06, ease: "back.out(2.2)" }, "copy+=0.6")
-          .from(".leaf", { opacity: 0, duration: 1.2, stagger: 0.1 }, "copy+=0.4")
-          .from(".float-toast", { scale: 0.5, opacity: 0, duration: 0.8, stagger: 0.25, ease: "back.out(1.8)" }, "copy+=1.1")
+        tl.from(".header > *", { y: -12, opacity: 0, stagger: 0.05, duration: 0.5 }, "copy")
+          .from(".hero .line > span", { yPercent: 100, duration: 0.7, stagger: 0.08 }, "copy+=0.1")
+          .from(".pill-row > *, .description, .cta-group > *, .award-badge", { y: 16, opacity: 0, stagger: 0.05, duration: 0.5 }, "copy+=0.2")
+          .from(".card", { x: 24, opacity: 0, stagger: 0.08, duration: 0.6 }, "copy+=0.3")
+          .from(".nav-arrow", { opacity: 0, duration: 0.4 }, "copy+=0.5")
+          .from(".token", { scale: 0, duration: 0.6, stagger: 0.04 }, "copy+=0.4")
+          .from(".leaf", { opacity: 0, duration: 0.8, stagger: 0.06 }, "copy+=0.3")
+          .from(".float-toast", { y: 10, opacity: 0, duration: 0.5, stagger: 0.15 }, "copy+=0.6")
           .add(() => {
-            bootPhone(compact ? 0.4 : 1.2);
+            bootPhone(compact ? 0.3 : 0.6);
             startLoops();
             armAutoplay();
-          }, "copy+=0.9")
+          }, "copy+=0.5")
           .add(() => {
             gsap.set(ENTRANCE, { clearProps: "opacity,transform" });
           })
@@ -534,7 +470,6 @@ export default function useLandingAnimations(rootRef: RefObject<HTMLDivElement |
     return () => {
       cleanups.forEach((fn) => fn());
       ctx.revert();
-      document.documentElement.classList.remove("landing-loading");
     };
   }, [rootRef]);
 }
