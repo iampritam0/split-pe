@@ -165,7 +165,7 @@ export default function DeleteAccount() {
     <div>
       <PageHero
         icon={Trash2}
-        tag="एक टैप में डिलीट"
+        tag="Delete in one tap"
         title="Delete your"
         highlight="account."
         meta={[{ label: "Last updated", value: "12 October 2026" }]}

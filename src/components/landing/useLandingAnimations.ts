@@ -34,6 +34,26 @@ export default function useLandingAnimations(rootRef: RefObject<HTMLDivElement |
     const $ = <T extends Element = HTMLElement>(sel: string) => root.querySelector(sel) as T;
     const $$ = <T extends Element = HTMLElement>(sel: string) => [...root.querySelectorAll<T>(sel)];
 
+    // Without the 3D-phone hero (the home page now uses the demo hero) only the
+    // scroll reveals and the deep-link jump are needed.
+    if (!root.querySelector("#phone")) {
+      const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const ctx = gsap.context(() => {
+        if (!reduced) {
+          gsap.set(".reveal", { y: 20, opacity: 0 });
+          ScrollTrigger.batch(".reveal", {
+            start: "top 88%",
+            once: true,
+            onEnter: (els) =>
+              gsap.to(els, { y: 0, opacity: 1, stagger: 0.06, duration: 0.6, ease: "power2.out", clearProps: "transform" }),
+          });
+        }
+        const target = location.hash.length > 1 ? root.querySelector(location.hash) : null;
+        target?.scrollIntoView({ behavior: "smooth" });
+      }, root);
+      return () => ctx.revert();
+    }
+
     const phone = $("#phone");
     const phoneStage = $("#phone-stage");
     const heroCenter = $(".hero-center");

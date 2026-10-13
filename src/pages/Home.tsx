@@ -4,13 +4,13 @@ import Footer from "../components/Footer";
 import Ambient from "../components/landing/Ambient";
 import IconSprite from "../components/landing/IconSprite";
 import LandingHeader from "../components/landing/LandingHeader";
-import Hero from "../components/landing/hero/Hero";
 import DownloadCta from "../components/landing/sections/DownloadCta";
 import Faq from "../components/landing/sections/Faq";
 import Features from "../components/landing/sections/Features";
 import HowItWorks from "../components/landing/sections/HowItWorks";
 import Upcoming from "../components/landing/sections/Upcoming";
 import useLandingAnimations from "../components/landing/useLandingAnimations";
+import DemoHero from "../components/hero-demo/DemoHero";
 import "../components/landing/styles/index.css";
 
 export default function Home() {
@@ -43,7 +43,9 @@ export default function Home() {
       <Ambient />
       <LandingHeader />
       <main>
-        <Hero />
+        <div id="top">
+          <DemoHero />
+        </div>
         <Features />
         <HowItWorks />
         <Upcoming />

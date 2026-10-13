@@ -48,7 +48,7 @@ export const TOASTS: Record<"t1" | "t2", [string, string, string][]> = {
   t1: [
     ["settle", "Aman paid you ₹500", "Marked settled · UPI · just now"],
     ["food", "Pizza night", "₹1,240 · split 4 ways"],
-    ["group", "All settled with Neha", "No dues left · दोस्ती intact"],
+    ["group", "All settled with Neha", "No dues left"],
   ],
   t2: [
     ["travel", "Goa Trip", "₹18,400 · split 4 ways"],
@@ -76,7 +76,7 @@ export const FEATURES: { icon: IconName; title: string; text: string }[] = [
   {
     icon: "camera",
     title: "Receipt photos",
-    text: "Attach the bill to the expense so nobody has to ask “kitna tha?” again. Proof stays with the हिसाब.",
+    text: "Attach the bill to the expense so nobody has to ask “kitna tha?” again. Proof stays with the expense.",
   },
   {
     icon: "chart",
@@ -105,7 +105,7 @@ export const STEPS: { title: string; text: string; chip: string; icon: IconName 
   },
   {
     title: "Settle up",
-    text: "Pay your friend however you like — UPI or cash — then mark it settled in SplitPe. The balance clears — हिसाब done, दोस्ती intact.",
+    text: "Pay your friend however you like — UPI or cash — then mark it settled in SplitPe. The balance clears for everyone.",
     chip: "Aman paid you ₹500",
     icon: "swap",
   },
@@ -130,6 +130,6 @@ export const UPCOMING: { tag: string; emoji: string; icon?: IconName; title: str
   { tag: "Automation", emoji: "🔁", title: "Recurring splits", text: "Rent, Wi-Fi, maid, OTT — set it once and it is added for the whole flat every month." },
   { tag: "Planning", emoji: "🎯", title: "Trip budgets", text: "Set a budget for the Goa trip, watch spend per head live and get alerts before you overshoot." },
   { tag: "Payments", emoji: "📲", title: "Auto-detect UPI spends", text: "With your permission, spot UPI payments you made and turn them into expenses in one tap." },
-  { tag: "Language", emoji: "🗣️", title: "हिंदी & regional", text: "Use SplitPe fully in हिंदी, मराठी, தமிழ், বাংলা and more — हिसाब in your own language." },
-  { tag: "Platform", emoji: "", icon: "apple", title: "SplitPe for iOS", text: "Same हिसाब, same दोस्ती — the iPhone app, synced with your Android groups and friends." },
+  { tag: "Language", emoji: "🗣️", title: "Hindi & regional languages", text: "Use SplitPe fully in Hindi, Marathi, Tamil, Bengali and more." },
+  { tag: "Platform", emoji: "", icon: "apple", title: "SplitPe for iOS", text: "The same groups and balances — the iPhone app, synced with your Android groups and friends." },
 ];

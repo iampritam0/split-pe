@@ -11,14 +11,14 @@ const FAQS: { q: string; a: ReactNode }[] = [
   },
   {
     q: "Does SplitPe hold or move my money?",
-    a: "No. SplitPe does not make or process any payment. It only keeps the हिसाब — you pay your friend outside the app, by UPI or cash, and then mark it settled in SplitPe.",
+    a: "No. SplitPe does not make or process any payment. It only keeps track — you pay your friend outside the app, by UPI or cash, and then mark it settled in SplitPe.",
   },
   {
-    q: "Is my bank data safe?",
+    q: "Who can see my expenses?",
     a: (
       <>
-        We never see, store or process your bank account or card numbers. Expenses are visible only to the friends and
-        group members you share them with. Read the full <Link to="/privacy-policy">Privacy Policy</Link>.
+        Only the friends and group members you share them with. Read the full{" "}
+        <Link to="/privacy-policy">Privacy Policy</Link>.
       </>
     ),
   },
@@ -45,7 +45,7 @@ export default function Faq() {
   return (
     <section className="l-section" id="faq">
       <div className="l-wrap">
-        <SectionHead pill="सवाल-जवाब" title={<>Questions, <span className="grad-text">answered</span></>}>
+        <SectionHead pill="FAQ" title={<>Questions, <span className="grad-text">answered</span></>}>
           Everything you might want to know before your first split.
         </SectionHead>
         <div className="faq">

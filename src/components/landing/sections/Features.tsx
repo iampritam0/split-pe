@@ -6,7 +6,7 @@ export default function Features() {
   return (
     <section className="l-section" id="features">
       <div className="l-wrap">
-        <SectionHead pill="सब कुछ, एक जगह" title={<>Everything a <span className="grad-text">group needs</span></>}>
+        <SectionHead pill="Features" title={<>Everything a <span className="grad-text">group needs</span></>}>
           Every core feature is free — no premium tier, no locked splits.
         </SectionHead>
         <div className="feat-grid">

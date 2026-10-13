@@ -19,6 +19,7 @@ import Support from "./pages/Support";
 // screens never ship with the public site.
 const AdminApp = lazy(() => import("./admin/AdminApp"));
 
+
 function RedirectHandler() {
   const navigate = useNavigate();
 

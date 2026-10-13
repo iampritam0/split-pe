@@ -21,8 +21,8 @@ export default function HowItWorks() {
   return (
     <section className="l-section" id="how-it-works">
       <div className="l-wrap">
-        <SectionHead pill="तीन आसान कदम" title={<>Split in <span className="grad-text">three taps</span></>}>
-          From the first chai to the final settle-up — here is how SplitPe keeps the हिसाब clean.
+        <SectionHead pill="How it works" title={<>Split in <span className="grad-text">three taps</span></>}>
+          From the first chai to the final settle-up — here is how SplitPe keeps every balance clear.
         </SectionHead>
         <div className="steps">
           {STEPS.map((s, i) => (

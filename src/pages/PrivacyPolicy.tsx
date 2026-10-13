@@ -71,7 +71,7 @@ export default function PrivacyPolicy() {
     <div>
       <PageHero
         icon={ShieldCheck}
-        tag="आपका डेटा, आपका हक़"
+        tag="Your data, your choice"
         title="Privacy"
         highlight="Policy."
         meta={[

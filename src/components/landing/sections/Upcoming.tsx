@@ -7,9 +7,9 @@ export default function Upcoming() {
   return (
     <section className="l-section" id="upcoming">
       <div className="l-wrap">
-        <SectionHead pill="जल्द आ रहा है" title={<>Upcoming <span className="grad-text">features</span></>}>
-          We are just getting started. Here is what we are building next to make हिसाब even easier — and दोस्ती even
-          stronger.
+        <SectionHead pill="Coming soon" title={<>Upcoming <span className="grad-text">features</span></>}>
+          We are just getting started. Here is what we are building next to make splitting
+          even easier.
         </SectionHead>
         <div className="up-grid">
           {UPCOMING.map((u) => (

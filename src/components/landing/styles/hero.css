@@ -35,8 +35,8 @@
 .tag-pill {
     display: inline-flex; align-items: center; gap: 0.5rem; width: fit-content;
     background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0;
-    padding: 0.4rem 1rem 0.3rem; border-radius: 100px;
-    font-family: var(--font-hindi); font-weight: 700; font-size: 1rem;
+    padding: 0.35rem 0.95rem; border-radius: 100px;
+    font-family: var(--font-main); font-weight: 600; font-size: 0.88rem;
 }
 .tag-pill svg { width: 18px; height: 18px; margin-top: -2px; }
 .description { color: var(--muted-color); font-size: 1.08rem; line-height: 1.65; max-width: 410px; }

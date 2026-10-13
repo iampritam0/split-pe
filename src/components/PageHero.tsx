@@ -29,8 +29,8 @@ export default function PageHero({ icon: Icon, tag, title, highlight, meta }: Pa
           <span className="flex h-14 w-14 items-center justify-center rounded-[18px] bg-gradient-to-br from-splitpe-600 to-mint-500 text-white shadow-[0_14px_30px_-8px_rgba(37,99,235,0.55)]">
             <Icon className="h-7 w-7" />
           </span>
-          <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-100 px-4 pb-1 pt-1.5 font-hindi text-base font-bold text-emerald-700">
-            <CheckCircle2 className="-mt-0.5 h-[18px] w-[18px]" />
+          <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-100 px-4 py-1.5 text-sm font-semibold text-emerald-700">
+            <CheckCircle2 className="h-[18px] w-[18px]" />
             {tag}
           </span>
         </div>

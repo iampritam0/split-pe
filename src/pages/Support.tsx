@@ -46,7 +46,7 @@ export default function Support() {
 
   return (
     <div>
-      <PageHero icon={LifeBuoy} tag="हम मदद के लिए हैं" title="Help &" highlight="Support." />
+      <PageHero icon={LifeBuoy} tag="We are here to help" title="Help &" highlight="Support." />
 
       <section className="container-page max-w-5xl pb-16 sm:pb-20">
         <div className="glass-card rise p-6 sm:p-10" style={{ animationDelay: "0.3s" }}>

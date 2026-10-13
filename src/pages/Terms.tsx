@@ -7,7 +7,7 @@ export default function Terms() {
     <div>
       <PageHero
         icon={FileText}
-        tag="साफ़ नियम, साफ़ हिसाब"
+        tag="Clear and simple terms"
         title="Terms of"
         highlight="Service."
         meta={[
