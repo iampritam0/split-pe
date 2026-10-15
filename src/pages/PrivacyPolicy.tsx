@@ -11,8 +11,8 @@ const usps = [
   },
   {
     icon: Trash2,
-    title: "Delete everything, one tap",
-    description: "Account deletion is permanent and instant from Settings — no ticket, no 30-day wait.",
+    title: "Delete everything, on request",
+    description: "Request deletion from the app and your account is permanently deleted within 24–48 hours — no 30-day wait.",
   },
   {
     icon: UsersRound,
@@ -178,8 +178,8 @@ export default function PrivacyPolicy() {
                 title: "Delete your account",
                 text: (
                   <>
-                    anytime from Profile → Privacy &amp; Security → Delete Account. This permanently removes your profile,
-                    groups and expense history.{" "}
+                    anytime from Profile → Privacy &amp; Security → Delete Account. Within 24–48 hours we permanently remove
+                    your profile, groups and expense history.{" "}
                     <Link to="/delete-account" className={linkClass}>
                       How deletion works
                     </Link>

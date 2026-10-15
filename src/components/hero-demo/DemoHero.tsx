@@ -33,7 +33,7 @@ function QrCard() {
       target="_blank"
       rel="noopener"
       aria-label="Scan to download SplitPe on Google Play"
-      className="d-rise group hidden flex-none items-center gap-5 rounded-3xl border border-white bg-white/70 p-3.5 pr-6 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_24px_60px_-30px_rgba(30,64,175,0.35)] ring-1 ring-slate-200/60 backdrop-blur-sm transition duration-300 [animation-delay:200ms] hover:-translate-y-1 motion-reduce:transition-none min-[1400px]:flex"
+      className="d-rise group hidden flex-none items-center gap-5 rounded-3xl border border-white bg-white/70 p-3.5 min-[1400px]:pr-6 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_24px_60px_-30px_rgba(30,64,175,0.35)] ring-1 ring-slate-200/60 backdrop-blur-sm transition duration-300 [animation-delay:200ms] hover:-translate-y-1 motion-reduce:transition-none md:flex"
     >
       <span className="relative block h-32 w-32 flex-none rounded-2xl bg-white p-2">
         {/* Corner brackets, like a camera viewfinder */}
@@ -45,7 +45,8 @@ function QrCard() {
           <img src={logo} alt="" className="h-full w-full" />
         </span>
       </span>
-      <span className="flex min-w-0 flex-col">
+      {/* Steps beside the code only where there's room; tablets get the code alone */}
+      <span className="hidden min-w-0 flex-col min-[1400px]:flex">
         <span className="flex items-center gap-2 text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-blue-600">
           <ScanLine className="h-4 w-4" /> Get the app
         </span>

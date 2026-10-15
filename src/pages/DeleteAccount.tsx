@@ -139,7 +139,7 @@ function DeletionRequestForm() {
 const steps = [
   { title: "Open your Profile", description: "In the SplitPe app, tap the Profile tab, then Privacy & Security." },
   { title: "Go to Danger Zone", description: "Scroll down to Danger Zone and tap \"Delete Account\"." },
-  { title: "Confirm deletion", description: "Confirm in the dialog. Your account is deleted immediately — no waiting period." },
+  { title: "Request deletion", description: "Tap \"Request Deletion\" to confirm. Your account is permanently deleted within 24–48 hours — you can cancel the request from the same screen until then." },
 ];
 
 const dataDeleted = [
@@ -165,16 +165,16 @@ export default function DeleteAccount() {
     <div>
       <PageHero
         icon={Trash2}
-        tag="Delete in one tap"
+        tag="Delete anytime"
         title="Delete your"
         highlight="account."
-        meta={[{ label: "Last updated", value: "12 October 2026" }]}
+        meta={[{ label: "Last updated", value: "15 October 2026" }]}
       />
 
       <LegalShell toc={toc}>
         <Lead>
-          You can permanently delete your SplitPe account and its personal data at any time, right from the app. This
-          page explains how, and exactly what happens to your data.
+          You can ask for your SplitPe account and its personal data to be permanently deleted at any time, right from the
+          app. We delete it within 24–48 hours. This page explains how, and exactly what happens to your data.
         </Lead>
 
         <LegalSection id="in-app" n={1} title="Delete from the app">

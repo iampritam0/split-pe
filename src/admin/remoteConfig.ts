@@ -8,6 +8,7 @@ export type RemoteSettings = {
   dailyReminder: { enabled: boolean; hour: number; minute: number; title: string; body: string };
   features: { upiPay: boolean; foreignCurrency: boolean; contactsImport: boolean; insights: boolean; appTour: boolean };
   support: { email: string; tickets: boolean; faqs: { q: string; a: string }[] };
+  invite: { link: string };
 };
 
 export const DEFAULT_SETTINGS: RemoteSettings = {
@@ -34,6 +35,7 @@ export const DEFAULT_SETTINGS: RemoteSettings = {
       { q: "Can I edit or delete an expense?", a: "Yes — open the expense details and use the edit icon or the delete option at the bottom of the screen." },
     ],
   },
+  invite: { link: "https://play.google.com/store/apps/details?id=com.raotechnologies.splitpe" },
 };
 
 /** Per-section merge of a stored doc over the defaults, same as the app does. */

@@ -83,6 +83,10 @@ export default function SettingsTab() {
       setStatus({ ok: false, text: "Support email doesn't look right" });
       return;
     }
+    if (!/^https:\/\/\S+$/.test(settings.invite.link.trim())) {
+      setStatus({ ok: false, text: "Invite link must start with https://" });
+      return;
+    }
     if (version.minVersion && !/^\d+\.\d+\.\d+$/.test(version.minVersion.trim())) {
       setStatus({ ok: false, text: "Minimum version must look like 1.0.0" });
       return;
@@ -92,7 +96,7 @@ export default function SettingsTab() {
     try {
       // Half-written FAQs are dropped rather than shown blank in the app.
       const faqs = settings.support.faqs.filter((f) => f.q.trim() && f.a.trim()).map((f) => ({ q: f.q.trim(), a: f.a.trim() }));
-      await setDoc(doc(db, "appConfig", "settings"), { ...settings, support: { ...settings.support, email: settings.support.email.trim(), faqs: faqs.length ? faqs : DEFAULT_SETTINGS.support.faqs } });
+      await setDoc(doc(db, "appConfig", "settings"), { ...settings, support: { ...settings.support, email: settings.support.email.trim(), faqs: faqs.length ? faqs : DEFAULT_SETTINGS.support.faqs }, invite: { link: settings.invite.link.trim() } });
       await setDoc(doc(db, "appConfig", "version"), {
         minVersion: version.minVersion.trim(),
         message: version.message.trim(),
@@ -191,6 +195,9 @@ export default function SettingsTab() {
       </Section>
 
       <Section icon={LifeBuoy} title="Help & Support" hint="What the app's Help & Support screen shows. Works on app 1.1.0 and later.">
+        <Field label="Invite link (sent in every “Invite to SplitPe” message)" wide>
+          <input className={inputClass} type="url" value={settings.invite.link} onChange={(e) => set("invite", { link: e.target.value })} />
+        </Field>
         <Field label="Support email">
           <input className={inputClass} type="email" value={settings.support.email} onChange={(e) => set("support", { email: e.target.value })} />
         </Field>

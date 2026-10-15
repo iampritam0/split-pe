@@ -12,7 +12,7 @@ import type { UserRow } from "./users";
 const masked = (phone: string) => `••••••${phone.slice(-4)}`;
 
 type Status = "open" | "done" | "rejected";
-type Request = { id: string; phone: string; reason?: string; uid?: string | null; verified?: boolean; status: Status; createdAt?: Timestamp; handledAt?: Timestamp; note?: string };
+type Request = { id: string; phone: string; reason?: string; uid?: string | null; verified?: boolean; source?: "app"; status: Status; createdAt?: Timestamp; handledAt?: Timestamp; note?: string };
 
 const STATUS: Record<Status, { label: string; cls: string }> = {
   open: { label: "Open", cls: "bg-amber-100 text-amber-800" },
@@ -21,8 +21,11 @@ const STATUS: Record<Status, { label: string; cls: string }> = {
 };
 
 /**
- * Account deletion requests from the website's Delete Account form (for
- * people who can't open the app) — SplitPe repo: requestAccountDeletion.
+ * Account deletion requests — from the app's Delete Account button
+ * (requestMyAccountDeletion, `source: "app"`, made while signed in) and from
+ * the website's form for people who can't open the app (requestAccountDeletion).
+ * Users are told it happens within 24–48 hours; deleting the account from its
+ * detail panel (adminDeleteUser) marks the request done.
  * The requester proves the number with an SMS OTP before the request is
  * recorded (`verified`). Older requests without it weren't verified — confirm
  * those with the owner (call / SMS the number) before deleting.
@@ -93,10 +96,10 @@ export default function RequestsTab() {
   return (
     <div>
       <h2 className="mb-1 font-heading text-2xl font-bold text-ink">Deletion requests</h2>
-      <p className="mb-4 text-sm text-ink-soft">Sent from the website's Delete Account page by people who can't open the app.</p>
+      <p className="mb-4 text-sm text-ink-soft">From the app's Delete Account button and the website's Delete Account page. Users are told it's done within 24–48 hours.</p>
       <div className="mb-6 flex gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
         <AlertTriangle size={18} className="mt-0.5 shrink-0" />
-        <p>Anyone can type any number on that form. <b>Confirm it's really the owner</b> — call or message the number — before deleting the account.</p>
+        <p>Requests marked <b>From the app</b> were made by the signed-in owner. For website requests, anyone can type any number — <b>confirm it's really the owner</b> (call or message the number) before deleting.</p>
       </div>
 
       <div className="mb-4 flex gap-1.5">
@@ -127,7 +130,7 @@ export default function RequestsTab() {
                   </p>
                   <p className="text-xs text-ink-soft">
                     Requested {fmtDate(r.createdAt?.toMillis())} ·{" "}
-                    {r.verified ? <span className="font-semibold text-emerald-700">OTP verified</span> : <span className="font-semibold text-amber-700">Not verified — confirm with the owner</span>}
+                    {r.source === "app" ? <span className="font-semibold text-emerald-700">From the app (signed in)</span> : r.verified ? <span className="font-semibold text-emerald-700">OTP verified</span> : <span className="font-semibold text-amber-700">Not verified — confirm with the owner</span>}
                   </p>
                 </div>
                 <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${STATUS[r.status].cls}`}>{STATUS[r.status].label}</span>
