@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { collection, doc, getDoc, limit, onSnapshot, orderBy, query, setDoc } from "firebase/firestore";
 import type { Timestamp } from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";
-import { ChevronDown, Eye, FlaskConical, HandCoins, Heart, Loader2, PenLine, Play, Plus, Save, Sparkles, Trash2, TrendingUp } from "lucide-react";
+import { BellRing, ChevronDown, Eye, FlaskConical, HandCoins, Heart, Loader2, PenLine, Play, Plus, Save, Sparkles, Trash2, TrendingUp } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { db, functions } from "./firebase";
 import { logAdminAction } from "./adminLog";
@@ -27,7 +27,7 @@ type Config = {
   minAmount?: number;
   weekday?: number;
 };
-type Id = "duesReminder" | "welcomeSeries" | "lowExpenseReminder" | "winBack" | "weeklySummary";
+type Id = "duesReminder" | "welcomeSeries" | "lowExpenseReminder" | "winBack" | "weeklySummary" | "dailyReminder";
 type NumField = { key: keyof Config; label: string; hint: string; min: number; max: number };
 
 const COMMON_LIMITS: NumField[] = [
@@ -67,11 +67,15 @@ const SPECS: Record<Id, {
     vars: "{name} first name",
     dayLabel: "Day after sign-up",
     defaults: {
-      enabled: false, hour: 11,
+      enabled: false, hour: 19,
       messages: [
-        { day: 1, title: "Welcome to SplitPe, {name}! 🎉", body: "Start with a group — trip, flat or office lunch — and add your first expense. We'll do the maths." },
-        { day: 3, title: "Tip: add friends by number 📱", body: "Friends not on SplitPe yet? Add them by mobile number and split anyway — they can join later." },
-        { day: 7, title: "Settle up in one tap 💸", body: "See who owes whom and record a payment in seconds. Clear accounts, zero stress!" },
+        { day: 0, title: "Welcome to SplitPe, {name}! 🎉", body: "Start by creating a group — trip, flat or office lunch. It takes 10 seconds." },
+        { day: 1, title: "Add your first expense 📝", body: "Paid for something shared? Add it to SplitPe and we'll work out who owes what." },
+        { day: 2, title: "Tip: add friends by number 📱", body: "Friends not on SplitPe yet? Add them by mobile number and split anyway — they can join later." },
+        { day: 3, title: "Invite your friends 🤝", body: "Splitting is easier when everyone's on SplitPe. Invite your group in one tap." },
+        { day: 4, title: "Who owes whom? 👀", body: "Open SplitPe to see your balances with every friend and group — always up to date." },
+        { day: 5, title: "Settle up in one tap 💸", body: "See who owes whom and record a payment in seconds. Clear accounts, zero stress!" },
+        { day: 6, title: "See where your money goes 📊", body: "Check your insights on SplitPe — a quick look at what you spent this week." },
       ],
     },
   },
@@ -126,8 +130,27 @@ const SPECS: Record<Id, {
       ],
     },
   },
+  dailyReminder: {
+    title: "Daily reminder",
+    icon: BellRing,
+    what: (c) => `Every signed-in user gets one nudge a day at ${hourLabel(c.hour)} — add today's expenses, create a group, invite friends, settle up. No cap. It's the catch-all: anyone who already got (or will get later today) another automation is skipped that day, and so is anyone who turned off “Daily reminder”.`,
+    fields: [],
+    vars: "{name} first name",
+    defaults: {
+      enabled: false, hour: 19,
+      messages: [
+        { title: "{name}, did you add today's expenses? 📝", body: "Tea, a cab or dinner — whatever you shared today, add it to SplitPe in 10 seconds." },
+        { title: "Daily check-in ⏰", body: "Spent anything with friends today? Add it now so nobody forgets who paid." },
+        { title: "Clear accounts, strong friendships 🤝", body: "Add today's shared expenses and let SplitPe do the maths." },
+        { title: "Planning something? ✈️", body: "Trip, party or flat rent — create a group and add expenses as you go." },
+        { title: "One expense, just 10 seconds ⚡", body: "{name}, open SplitPe and add today's spend. Your friends will thank you!" },
+        { title: "Anyone owe you? 💸", body: "Check your balances on SplitPe and settle up in one tap." },
+        { title: "Bring your friends along 👋", body: "Invite friends to SplitPe and split every bill without the awkward reminders." },
+      ],
+    },
+  },
 };
-const ORDER: Id[] = ["duesReminder", "welcomeSeries", "lowExpenseReminder", "winBack", "weeklySummary"];
+const ORDER: Id[] = ["duesReminder", "welcomeSeries", "lowExpenseReminder", "winBack", "weeklySummary", "dailyReminder"];
 const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 type Preview = { uid: string; name: string; phone: string; detail: string; hasPush: boolean };

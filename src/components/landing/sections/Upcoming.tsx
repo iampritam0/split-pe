@@ -13,7 +13,7 @@ export default function Upcoming() {
         </SectionHead>
         <div className="up-grid">
           {UPCOMING.map((u) => (
-            <article key={u.title} className="l-card glass-tile reveal">
+            <article key={u.title} className="l-card glass-tile" data-scrub="rise">
               <span className="up-tag">{u.tag}</span>
               <span className={`l-ic ${u.icon ? `l-ic-${u.icon}` : ""}`}>{u.icon ? <Icon name={u.icon} className="" /> : u.emoji}</span>
               <h3>{u.title}</h3>
@@ -24,7 +24,7 @@ export default function Upcoming() {
             </article>
           ))}
         </div>
-        <div className="up-foot reveal">
+        <div className="up-foot" data-scrub="rise">
           <p>Have an idea that would make splitting easier?</p>
           <a className="primary-btn magnetic" href={`mailto:${SUPPORT_EMAIL}?subject=SplitPe%20feature%20idea`}>
             Suggest a feature

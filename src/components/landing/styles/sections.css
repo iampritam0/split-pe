@@ -32,10 +32,11 @@
 .l-card {
     position: relative; display: flex; flex-direction: column; gap: 0.75rem;
     padding: 1.5rem 1.4rem 1.4rem;
-    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s, background 0.3s;
+    /* The lift uses `translate` so it stacks on the scroll animation's inline `transform` */
+    transition: translate 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s, background 0.3s;
 }
 .l-card:hover {
-    transform: translateY(-6px); background: rgba(255,255,255,0.9);
+    translate: 0 -6px; background: rgba(255,255,255,0.9);
     box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.35), 0 24px 44px -14px rgba(30, 64, 175, 0.4);
 }
 .l-card:hover .l-ic { transform: rotate(-10deg) scale(1.12); }
@@ -56,7 +57,10 @@
 
 /* ---------- How it works ---------- */
 .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.1rem; counter-reset: step; position: relative; }
-.step { padding: 1.8rem 1.6rem; display: flex; flex-direction: column; gap: 0.8rem; }
+.step { position: relative; overflow: hidden; padding: 1.8rem 1.6rem; display: flex; flex-direction: column; gap: 0.8rem; }
+/* Progress along the top of each step, filled by the scroll timeline (full when motion is off) */
+.step-bar { position: absolute; inset: 0 0 auto; height: 4px; background: rgba(37, 99, 235, 0.1); }
+.step-bar > span { display: block; height: 100%; background: var(--brand-gradient); transform-origin: left; }
 .step-num {
     font-family: var(--font-heading); font-weight: 900; font-size: 4.2rem; line-height: 0.9; letter-spacing: -0.05em;
 }

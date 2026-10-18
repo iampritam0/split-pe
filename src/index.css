@@ -52,6 +52,17 @@ a {
   );
 }
 
+/* Soft colour blobs behind the page, moved by scroll (data-depth) for a sense of depth */
+.depth-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  will-change: transform;
+}
+.depth-blob-1 { width: 38rem; height: 38rem; left: -12rem; top: 60vh; background: rgba(59, 130, 246, 0.18); }
+.depth-blob-2 { width: 30rem; height: 30rem; right: -10rem; top: 110vh; background: rgba(16, 185, 129, 0.16); }
+.depth-blob-3 { width: 24rem; height: 24rem; left: 35%; top: 120vh; background: rgba(139, 92, 246, 0.12); }
+
 .site-bubble {
   position: absolute;
   bottom: -50px;

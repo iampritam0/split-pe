@@ -17,6 +17,8 @@ const bubbles = [
 export default function SiteBackground() {
   return (
     <div className="site-bg" aria-hidden="true">
+      <span className="depth-blob depth-blob-1" data-depth="0.5" />
+      <span className="depth-blob depth-blob-2" data-depth="1.1" />
       {bubbles.map((b) => (
         <span
           key={b.left}

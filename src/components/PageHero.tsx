@@ -15,7 +15,7 @@ interface PageHeroProps {
 // Shared hero for the legal pages, styled like the landing page hero.
 export default function PageHero({ icon: Icon, tag, title, highlight, meta }: PageHeroProps) {
   return (
-    <section className="container-page pb-8 pt-6 sm:pt-10 lg:pt-12">
+    <section className="container-page pb-8 pt-6 sm:pt-10 lg:pt-12" data-scrub="exit">
       <Link
         to="/"
         className="rise inline-flex items-center gap-2 rounded-full border border-white bg-white/70 px-4 py-2 text-sm font-semibold text-[#0b1530] shadow-[0_6px_18px_rgba(30,64,175,0.08)] transition hover:bg-white"

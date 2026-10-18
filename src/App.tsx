@@ -5,7 +5,7 @@ import {
   useLocation,
   useNavigate,
 } from "react-router-dom";
-import { Suspense, lazy, useEffect } from "react";
+import { Suspense, lazy, useEffect, useRef } from "react";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import SiteBackground from "./components/SiteBackground";
@@ -14,6 +14,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Terms from "./pages/Terms";
 import DeleteAccount from "./pages/DeleteAccount";
 import Support from "./pages/Support";
+import useScrollFx from "./hooks/useScrollFx";
 
 // Loaded only when /admin is opened, so the Firebase SDK and the admin
 // screens never ship with the public site.
@@ -53,9 +54,12 @@ function Layout() {
   // The admin panel brings its own full-screen layout.
   const isAdmin = pathname === "/admin" || pathname.startsWith("/admin/");
   const bareLayout = isLanding || isAdmin;
+  // Scroll-linked motion for every public page (the admin panel stays still)
+  const shell = useRef<HTMLDivElement>(null);
+  useScrollFx(shell, pathname, !isAdmin);
 
   return (
-    <div className="flex min-h-screen flex-col text-slate-900">
+    <div ref={shell} className="flex min-h-screen flex-col text-slate-900">
       {!bareLayout && <SiteBackground />}
       {!bareLayout && <Navbar />}
 

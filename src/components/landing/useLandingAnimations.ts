@@ -35,23 +35,42 @@ export default function useLandingAnimations(rootRef: RefObject<HTMLDivElement |
     const $$ = <T extends Element = HTMLElement>(sel: string) => [...root.querySelectorAll<T>(sel)];
 
     // Without the 3D-phone hero (the home page now uses the demo hero) only the
-    // scroll reveals and the deep-link jump are needed.
+    // How-it-works scroll story and the deep-link jump are needed; the other
+    // scroll effects come from data-* attributes (useScrollFx, in App).
     if (!root.querySelector("#phone")) {
-      const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const ctx = gsap.context(() => {
-        if (!reduced) {
-          gsap.set(".reveal", { y: 20, opacity: 0 });
-          ScrollTrigger.batch(".reveal", {
-            start: "top 88%",
-            once: true,
-            onEnter: (els) =>
-              gsap.to(els, { y: 0, opacity: 1, stagger: 0.06, duration: 0.6, ease: "power2.out", clearProps: "transform" }),
-          });
-        }
-        const target = location.hash.length > 1 ? root.querySelector(location.hash) : null;
-        target?.scrollIntoView({ behavior: "smooth" });
-      }, root);
-      return () => ctx.revert();
+      const mm = gsap.matchMedia(root);
+      mm.add(
+        { motion: "(prefers-reduced-motion: no-preference)", roomy: "(min-width: 901px) and (min-height: 720px)" },
+        (c) => {
+          const { motion, roomy } = c.conditions!;
+          if (!motion) return;
+          const steps = $$(".step");
+          const bars = steps.map((s) => s.querySelector(".step-bar > span"));
+          const dim = { opacity: 0.35, y: 30, scale: 0.94 };
+          const lit = { opacity: 1, y: 0, scale: 1, duration: 0.5 };
+          if (roomy) {
+            // Side by side: hold the section on screen and light the steps up one by one
+            const tl = gsap.timeline({
+              defaults: { ease: "none" },
+              scrollTrigger: { trigger: "#how-it-works .l-wrap", start: "center center", end: "+=140%", pin: true, scrub: 0.6 },
+            });
+            steps.forEach((s, i) => {
+              tl.fromTo(s, dim, lit, i).fromTo(bars[i], { scaleX: 0 }, { scaleX: 1, duration: 1 }, i + 0.2);
+            });
+          } else {
+            // Stacked: each step lights up as it passes through the middle of the screen
+            steps.forEach((s, i) =>
+              gsap
+                .timeline({ defaults: { ease: "none" }, scrollTrigger: { trigger: s, start: "top 85%", end: "top 40%", scrub: 0.6 } })
+                .fromTo(s, dim, lit)
+                .fromTo(bars[i], { scaleX: 0 }, { scaleX: 1, duration: 1 }, 0.2),
+            );
+          }
+        },
+      );
+      const target = location.hash.length > 1 ? root.querySelector(location.hash) : null;
+      target?.scrollIntoView({ behavior: "smooth" });
+      return () => mm.revert();
     }
 
     const phone = $("#phone");

@@ -26,7 +26,9 @@ export default function HowItWorks() {
         </SectionHead>
         <div className="steps">
           {STEPS.map((s, i) => (
-            <article key={s.title} className="step glass-tile reveal">
+            <article key={s.title} className="step glass-tile">
+              {/* Fills as the visitor scrolls through the steps */}
+              <span className="step-bar" aria-hidden><span /></span>
               <span className="step-num grad-text">0{i + 1}</span>
               <h3>{s.title}</h3>
               <p>{s.text}</p>
@@ -39,11 +41,14 @@ export default function HowItWorks() {
         </div>
       </div>
       {/* Doubled list so the marquee loops without a gap */}
-      <div className="uses reveal" style={{ marginTop: "2.6rem" }} aria-label="What people split with SplitPe">
-        <div className="uses-track">
-          {[...USE_CASES, ...USE_CASES].map((u, i) => (
-            <UseChip key={i} {...u} />
-          ))}
+      <div className="uses" data-scrub="rise" style={{ marginTop: "2.6rem" }} aria-label="What people split with SplitPe">
+        {/* The marquee runs on its own; scrolling nudges the whole strip sideways too */}
+        <div data-drift="-220">
+          <div className="uses-track">
+            {[...USE_CASES, ...USE_CASES].map((u, i) => (
+              <UseChip key={i} {...u} />
+            ))}
+          </div>
         </div>
       </div>
     </section>

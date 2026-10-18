@@ -11,7 +11,7 @@ export default function Features() {
         </SectionHead>
         <div className="feat-grid">
           {FEATURES.map((f) => (
-            <article key={f.title} className="l-card glass-tile reveal">
+            <article key={f.title} className="l-card glass-tile" data-scrub="tilt">
               <span className="l-ic"><Icon name={f.icon} /></span>
               <h3>{f.title}</h3>
               <p>{f.text}</p>

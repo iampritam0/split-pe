@@ -78,7 +78,7 @@ export default function Support() {
             SplitPe will never ask for your OTP, password or bank details. Please don't share them with anyone.
           </p>
 
-          <div className="mt-8 grid gap-4 sm:grid-cols-3">
+          <div className="mt-8 grid gap-4 sm:grid-cols-3" data-scrub="rise">
             {helpLinks.map(({ icon: Icon, title, description, to }) => {
               const body = (
                 <>

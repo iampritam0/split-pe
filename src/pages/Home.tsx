@@ -43,7 +43,7 @@ export default function Home() {
       <Ambient />
       <LandingHeader />
       <main>
-        <div id="top">
+        <div id="top" data-scrub="exit">
           <DemoHero />
         </div>
         <Features />

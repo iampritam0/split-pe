@@ -18,7 +18,7 @@ export default function Terms() {
       />
 
       <article className="container-page max-w-5xl pb-16 sm:pb-20">
-        <div className="legal glass-card rise p-6 sm:p-10 lg:p-12" style={{ animationDelay: "0.3s" }}>
+        <div className="legal glass-card rise p-6 sm:p-10 lg:p-12" style={{ animationDelay: "0.3s" }} data-scrub-children="rise">
           <p className="text-base leading-8 text-slate-600 sm:text-lg">
             By creating an account or using SplitPe, you agree to these
             terms.

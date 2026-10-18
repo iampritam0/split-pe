@@ -8,13 +8,13 @@ export default function DownloadCta() {
   return (
     <section className="l-section" id="download">
       <div className="l-wrap">
-        <div className="cta-band reveal">
+        <div className="cta-band" data-scrub="zoom">
           <div style={{ position: "relative", zIndex: 1 }}>
             <h2>Next trip, split it the easy way</h2>
             <p>Add your first group in under a minute. Free on Android.</p>
           </div>
           {/* One white card: scan the QR, or tap the Play badge */}
-          <div className="cta-band-side">
+          <div className="cta-band-side" data-parallax="0.12">
             <div className="cta-card">
               <a className="cta-qr" href={PLAY_STORE_URL} target="_blank" rel="noopener" aria-label="Scan to download SplitPe on Google Play">
                 <img src={playQr} alt="" />

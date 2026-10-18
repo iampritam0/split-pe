@@ -22,6 +22,7 @@ const SOURCE_LABEL: Record<string, string> = {
   lowExpenseReminder: "Automation · Expense reminder",
   winBack: "Automation · Win-back",
   weeklySummary: "Automation · Weekly summary",
+  dailyReminder: "Automation · Daily reminder",
 };
 type Segment = { list: UserRow[]; withPush: number };
 type Scheduled = { id: string; title: string; body: string; audience: string; uids?: string[] | null; sendAt?: Timestamp; status: string; createdByPhone?: string };

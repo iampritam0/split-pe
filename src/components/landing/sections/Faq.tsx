@@ -50,7 +50,7 @@ export default function Faq() {
         </SectionHead>
         <div className="faq">
           {FAQS.map((f, i) => (
-            <details key={f.q} className="faq-item glass-tile reveal" open={i === 0}>
+            <details key={f.q} className="faq-item glass-tile" data-scrub="rise" open={i === 0}>
               <summary>
                 {f.q}
                 <span className="faq-plus"><Icon name="plus" /></span>

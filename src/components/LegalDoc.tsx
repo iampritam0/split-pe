@@ -65,7 +65,7 @@ export function LegalShell({ toc, children }: { toc: TocItem[]; children: ReactN
         </aside>
 
         <div className="glass-card rise px-5 py-8 sm:px-10 sm:py-12" style={{ animationDelay: "0.3s" }}>
-          <div className="mx-auto max-w-[42rem]">{children}</div>
+          <div className="mx-auto max-w-[42rem]" data-scrub-children="rise">{children}</div>
         </div>
       </div>
     </article>
