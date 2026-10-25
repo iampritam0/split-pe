@@ -11,7 +11,7 @@ export type NotifyAudience = { audience: "all" } | { audience: "uids"; uids: str
 /** Expo push receipts — whether accepted pushes actually reached Google / Apple. */
 export type Receipts = { delivered: number; failed: number; pending: number; errors: Record<string, number> };
 export const sendNotification = httpsCallable<
-  { title: string; body: string } & NotifyAudience,
+  { title: string; body: string; image?: string } & NotifyAudience,
   { recipients: number; pushed: number; pushFailed: number; receipts?: Receipts; sendErrors?: Record<string, number> }
 >(
   functions,
