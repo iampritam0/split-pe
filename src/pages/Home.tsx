@@ -19,7 +19,7 @@ export default function Home() {
 
   useEffect(() => {
     const previousTitle = document.title;
-    document.title = "SplitPe | हिसाब भी, दोस्ती भी";
+    document.title = "SplitPe – Free Bill Splitting App | हिसाब भी, दोस्ती भी";
     return () => {
       document.title = previousTitle;
     };
